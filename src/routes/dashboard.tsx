@@ -143,7 +143,7 @@ function Dashboard() {
                         borderRadius: 12,
                         fontSize: 12,
                       }}
-                      formatter={(v: number) => [fmtMoney(v, { sign: true }), "Equity"]}
+                      formatter={(v) => [fmtMoney(Number(v), { sign: true }), "Equity"]}
                       labelFormatter={(l) => `Trade #${l}`}
                     />
                     <Area
