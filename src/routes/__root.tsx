@@ -33,20 +33,26 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Aegis — Trading Journal for Smarter Traders" },
+      { title: "Vesper_journal" },
       {
         name: "description",
         content:
           "Track trades, log psychology, and unlock smart insights. A premium trading journal built for traders who want to improve, not just record.",
       },
       { name: "author", content: "Aegis" },
-      { property: "og:title", content: "Aegis — Trading Journal for Smarter Traders" },
+      { property: "og:title", content: "Vesper_journal" },
       {
         property: "og:description",
         content: "Track trades, log psychology, and unlock smart insights.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Vesper_journal" },
+      { name: "description", content: "First trading journal designed to build consistency, Improve execution, Fast and easy to ues" },
+      { property: "og:description", content: "First trading journal designed to build consistency, Improve execution, Fast and easy to ues" },
+      { name: "twitter:description", content: "First trading journal designed to build consistency, Improve execution, Fast and easy to ues" },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5dd8447b-25db-46d3-a186-33b5e0703172/id-preview-1ff50515--f4fdb9b6-ff4e-483d-9e9a-f3d7300991ff.lovable.app-1777237903542.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5dd8447b-25db-46d3-a186-33b5e0703172/id-preview-1ff50515--f4fdb9b6-ff4e-483d-9e9a-f3d7300991ff.lovable.app-1777237903542.png" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
