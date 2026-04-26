@@ -216,11 +216,12 @@ export function computeStats(trades: Trade[]) {
   let streak = 0;
   let streakType: "win" | "loss" | null = null;
   for (const t of byDate) {
-    if (t.result === "breakeven" || t.result == null) continue;
+    const r = t.result;
+    if (r !== "win" && r !== "loss") continue;
     if (streakType == null) {
-      streakType = t.result;
+      streakType = r;
       streak = 1;
-    } else if (t.result === streakType) {
+    } else if (r === streakType) {
       streak += 1;
     } else break;
   }
