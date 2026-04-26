@@ -14,7 +14,102 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      trades: {
+        Row: {
+          close_price: number | null
+          created_at: string
+          direction: string
+          emotion_after: string | null
+          emotion_before: string | null
+          entry_price: number
+          id: string
+          lot_size: number
+          mistakes: string[] | null
+          notes: string | null
+          pair: string
+          pnl: number | null
+          result: string | null
+          rr: number | null
+          screenshot_url: string | null
+          session: string | null
+          stop_loss: number | null
+          strategy: string | null
+          take_profit: number | null
+          trade_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          close_price?: number | null
+          created_at?: string
+          direction: string
+          emotion_after?: string | null
+          emotion_before?: string | null
+          entry_price: number
+          id?: string
+          lot_size: number
+          mistakes?: string[] | null
+          notes?: string | null
+          pair: string
+          pnl?: number | null
+          result?: string | null
+          rr?: number | null
+          screenshot_url?: string | null
+          session?: string | null
+          stop_loss?: number | null
+          strategy?: string | null
+          take_profit?: number | null
+          trade_date?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          close_price?: number | null
+          created_at?: string
+          direction?: string
+          emotion_after?: string | null
+          emotion_before?: string | null
+          entry_price?: number
+          id?: string
+          lot_size?: number
+          mistakes?: string[] | null
+          notes?: string | null
+          pair?: string
+          pnl?: number | null
+          result?: string | null
+          rr?: number | null
+          screenshot_url?: string | null
+          session?: string | null
+          stop_loss?: number | null
+          strategy?: string | null
+          take_profit?: number | null
+          trade_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
