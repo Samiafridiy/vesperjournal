@@ -19,6 +19,9 @@ import {
   Cell,
 } from "recharts";
 import { useMemo } from "react";
+import { motion } from "framer-motion";
+import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
+import { CalendarHeatmap } from "@/components/CalendarHeatmap";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -50,7 +53,12 @@ function Dashboard() {
   const empty = !loading && trades.length === 0;
 
   return (
-    <div className="px-5 md:px-10 py-8 md:py-10 max-w-[1400px] mx-auto">
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      className="px-5 md:px-10 py-8 md:py-10 max-w-[1400px] mx-auto"
+    >
       {/* Header */}
       <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 border-b border-border pb-6 mb-8">
         <div>
@@ -65,7 +73,7 @@ function Dashboard() {
           </h1>
         </div>
         <Link to="/trade/new">
-          <Button className="bg-champagne text-primary-foreground hover:bg-champagne/90 gap-2 h-11">
+          <Button className="bg-champagne text-primary-foreground hover:bg-champagne/90 gap-2 h-11 shadow-[0_0_30px_-8px_color-mix(in_oklab,var(--champagne)_50%,transparent)] hover:shadow-[0_0_40px_-4px_color-mix(in_oklab,var(--champagne)_60%,transparent)] transition-shadow">
             <PlusCircle className="size-4" /> Log a trade
           </Button>
         </Link>
@@ -74,21 +82,30 @@ function Dashboard() {
       {empty ? <EmptyState /> : (
         <>
           {/* Stats */}
-          <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             <StatCard
               label="Net P&L"
               tone={stats.totalPnl >= 0 ? "pos" : "neg"}
-              value={fmtMoney(stats.totalPnl, { sign: true })}
+              value={
+                <AnimatedNumber
+                  value={stats.totalPnl}
+                  format={(n) => fmtMoney(n, { sign: true })}
+                />
+              }
               sub={`${stats.closed} closed trades`}
             />
             <StatCard
               label="Win Rate"
-              value={fmtPct(stats.winRate)}
+              value={
+                <AnimatedNumber value={stats.winRate} format={(n) => fmtPct(n)} />
+              }
               sub={`${stats.wins}W · ${stats.losses}L`}
             />
             <StatCard
               label="Avg R:R"
-              value={stats.avgRR.toFixed(2)}
+              value={
+                <AnimatedNumber value={stats.avgRR} format={(n) => n.toFixed(2)} />
+              }
               sub="Risk multiple per trade"
             />
             <StatCard
@@ -102,6 +119,60 @@ function Dashboard() {
                   {stats.streakType ? `${stats.streakType} streak` : "No active streak"}
                 </span>
               }
+            />
+          </section>
+
+          {/* Secondary stats */}
+          <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <StatCard
+              label="Profit Factor"
+              tone={stats.profitFactor >= 1 ? "pos" : "neg"}
+              value={
+                <AnimatedNumber
+                  value={Number.isFinite(stats.profitFactor) ? stats.profitFactor : 0}
+                  format={(n) =>
+                    !Number.isFinite(stats.profitFactor) ? "∞" : n.toFixed(2)
+                  }
+                />
+              }
+              sub="Gross profit / loss"
+            />
+            <StatCard
+              label="Expectancy"
+              tone={stats.expectancy >= 0 ? "pos" : "neg"}
+              value={
+                <AnimatedNumber
+                  value={stats.expectancy}
+                  format={(n) => fmtMoney(n, { sign: true })}
+                />
+              }
+              sub="Avg per trade"
+            />
+            <StatCard
+              label="Max Drawdown"
+              tone={stats.maxDrawdown > 0 ? "neg" : "neutral"}
+              value={
+                <AnimatedNumber
+                  value={-stats.maxDrawdown}
+                  format={(n) => fmtMoney(n, { sign: true })}
+                />
+              }
+              sub="Peak-to-trough"
+            />
+            <StatCard
+              label="Best / Worst"
+              value={
+                <span className="flex items-baseline gap-2 text-2xl">
+                  <span className="text-pos">
+                    {fmtMoney(stats.bestTrade?.pnl ?? null, { sign: true })}
+                  </span>
+                  <span className="text-faint text-base">/</span>
+                  <span className="text-neg">
+                    {fmtMoney(stats.worstTrade?.pnl ?? null, { sign: true })}
+                  </span>
+                </span>
+              }
+              sub="Single trade"
             />
           </section>
 
@@ -167,8 +238,11 @@ function Dashboard() {
               </div>
               <div className="flex flex-col gap-3 flex-1">
                 {insights.map((ins, i) => (
-                  <div
+                  <motion.div
                     key={i}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: i * 0.07 }}
                     className={
                       "rounded-lg p-4 border " +
                       (ins.tone === "warn"
@@ -180,10 +254,33 @@ function Dashboard() {
                   >
                     <div className="text-sm font-medium">{ins.title}</div>
                     <div className="text-xs text-soft mt-1 leading-relaxed">{ins.detail}</div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
+          </section>
+
+          {/* Calendar heatmap */}
+          <section className="surface-card p-6 mb-6">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <div className="text-[11px] uppercase tracking-[0.18em] text-faint font-medium">
+                  Activity heatmap
+                </div>
+                <div className="text-sm text-soft mt-0.5">Daily P&L over the last 16 weeks</div>
+              </div>
+              <div className="flex items-center gap-3 text-[10px] text-faint">
+                <span>Less</span>
+                <div className="flex gap-1">
+                  <span className="size-2.5 rounded-sm border border-border/40 bg-surface-2" />
+                  <span className="size-2.5 rounded-sm" style={{ background: "color-mix(in oklab, var(--pos) 30%, transparent)" }} />
+                  <span className="size-2.5 rounded-sm" style={{ background: "color-mix(in oklab, var(--pos) 60%, transparent)" }} />
+                  <span className="size-2.5 rounded-sm" style={{ background: "color-mix(in oklab, var(--pos) 90%, transparent)" }} />
+                </div>
+                <span>More</span>
+              </div>
+            </div>
+            <CalendarHeatmap trades={trades} />
           </section>
 
           {/* Win/Loss + recent */}
@@ -274,7 +371,7 @@ function Dashboard() {
           </section>
         </>
       )}
-    </div>
+    </motion.div>
   );
 }
 
