@@ -39,7 +39,7 @@ export const Route = createRootRoute({
         content:
           "Track trades, log psychology, and unlock smart insights. A premium trading journal built for traders who want to improve, not just record.",
       },
-      { name: "author", content: "Aegis" },
+      { name: "author", content: "Vesper Journal" },
       { property: "og:title", content: "Vesper_journal" },
       {
         property: "og:description",

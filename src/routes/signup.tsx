@@ -11,8 +11,8 @@ import { AuthShell, Field } from "./login";
 export const Route = createFileRoute("/signup")({
   head: () => ({
     meta: [
-      { title: "Create account — Aegis" },
-      { name: "description", content: "Create your free Aegis trading journal account." },
+      { title: "Create account — Vesper Journal" },
+      { name: "description", content: "Create your free Vesper Journal trading journal account." },
     ],
   }),
   component: SignupPage,

@@ -19,7 +19,7 @@ import { Sparkles } from "lucide-react";
 export const Route = createFileRoute("/analytics")({
   head: () => ({
     meta: [
-      { title: "Analytics — Aegis" },
+      { title: "Analytics — Vesper Journal" },
       { name: "description", content: "Smart insights into your trading performance." },
     ],
   }),
