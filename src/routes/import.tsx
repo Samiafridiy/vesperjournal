@@ -250,9 +250,18 @@ function MetaApiSetup() {
     }
     setSyncing(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please sign in again.");
+        setSyncing(false);
+        return;
+      }
       const res = await fetch("/api/metaapi-sync", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify({ token, accountId }),
       });
       const json = await res.json();
