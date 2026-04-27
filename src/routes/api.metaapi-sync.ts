@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
-import { authMiddleware } from "@/integrations/supabase/auth-middleware";
 import { calcRR, calcResult, type TradeInsert } from "@/lib/trade-utils";
 
 /**
@@ -12,16 +11,30 @@ import { calcRR, calcResult, type TradeInsert } from "@/lib/trade-utils";
  */
 export const Route = createFileRoute("/api/metaapi-sync")({
   server: {
-    middleware: [authMiddleware],
     handlers: {
-      POST: async ({ request, context }) => {
-        const { user, accessToken } = context as {
-          user: { id: string } | null;
-          accessToken: string | null;
-        };
-        if (!user || !accessToken) {
+      POST: async ({ request }) => {
+        const authHeader = request.headers.get("authorization") ?? "";
+        const accessToken = authHeader.replace(/^Bearer\s+/i, "");
+        if (!accessToken) {
           return Response.json({ error: "Unauthorized" }, { status: 401 });
         }
+
+        const SUPABASE_URL = process.env.SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
+        const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+        if (!SUPABASE_URL || !SUPABASE_KEY) {
+          return Response.json({ error: "Server misconfigured" }, { status: 500 });
+        }
+
+        // Verify the caller's identity
+        const userClient = createClient(SUPABASE_URL, SUPABASE_KEY, {
+          global: { headers: { Authorization: `Bearer ${accessToken}` } },
+          auth: { persistSession: false, autoRefreshToken: false },
+        });
+        const { data: claimsData, error: claimsErr } = await userClient.auth.getClaims(accessToken);
+        if (claimsErr || !claimsData?.claims?.sub) {
+          return Response.json({ error: "Invalid token" }, { status: 401 });
+        }
+        const userId = claimsData.claims.sub;
 
         let body: { token?: string; accountId?: string; days?: number };
         try {
@@ -101,13 +114,7 @@ export const Route = createFileRoute("/api/metaapi-sync")({
           return Response.json({ imported: 0 });
         }
 
-        const supabase = createClient(
-          import.meta.env.VITE_SUPABASE_URL!,
-          import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY!,
-          { global: { headers: { Authorization: `Bearer ${accessToken}` } } },
-        );
-
-        const { error, count } = await supabase
+        const { error, count } = await userClient
           .from("trades")
           .insert(trades, { count: "exact" });
 
