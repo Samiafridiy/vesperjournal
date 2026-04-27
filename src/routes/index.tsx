@@ -279,6 +279,66 @@ function Landing() {
         </StaggerGroup>
       </section>
 
+      {/* WHAT YOU GET — checklist highlights */}
+      <section className="relative z-10 max-w-6xl mx-auto px-6 pb-8">
+        <div className="grid lg:grid-cols-[1.05fr_1fr] gap-10 items-center">
+          <Reveal>
+            <div className="text-[11px] uppercase tracking-[0.22em] text-champagne mb-4">What you get</div>
+            <h2 className="text-3xl md:text-5xl font-semibold tracking-tight leading-[1.05]">
+              Everything serious traders<br />
+              <span className="text-soft">actually need.</span>
+            </h2>
+            <p className="mt-5 text-soft text-pretty leading-relaxed text-lg max-w-xl">
+              One subscription unlocks the full toolkit — from AI-driven trade insights to
+              live news and automatic broker syncing. No add-ons. No upsells.
+            </p>
+            <Link to="/signup" className="inline-block mt-8">
+              <Button
+                size="lg"
+                className="bg-champagne text-primary-foreground hover:bg-champagne/90 gap-2 h-12 px-6"
+              >
+                Try it free <ArrowRight className="size-4" />
+              </Button>
+            </Link>
+          </Reveal>
+
+          <Reveal delay={0.15}>
+            <div className="surface-card-elevated top-accent p-7 md:p-9 relative overflow-hidden">
+              <div className="absolute -top-24 -right-24 size-64 bg-champagne/[0.07] rounded-full blur-3xl pointer-events-none" />
+              <ul className="relative space-y-4">
+                {[
+                  { icon: Brain, label: "AI Trade insights", detail: "Smart pattern detection across every entry." },
+                  { icon: FileText, label: "Full trading reports", detail: "Exportable monthly & quarterly performance reports." },
+                  { icon: Newspaper, label: "Complete news data", detail: "Live macro & forex news beside your equity curve." },
+                  { icon: Cpu, label: "3 MT4 / MT5 auto-journal", detail: "Connect up to 3 broker accounts — trades sync automatically." },
+                  { icon: BarChart3, label: "Advanced analytics", detail: "Profit factor, expectancy, drawdown, R-multiple curves." },
+                ].map((row, i) => (
+                  <motion.li
+                    key={row.label}
+                    initial={{ opacity: 0, x: -16 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.45, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+                    className="flex items-start gap-4 group"
+                  >
+                    <div className="mt-0.5 size-7 rounded-md bg-pos/15 ring-1 ring-pos/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                      <Check className="size-4 text-pos" strokeWidth={3} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <row.icon className="size-4 text-champagne shrink-0" />
+                        <span className="text-[15px] font-medium tracking-tight">{row.label}</span>
+                      </div>
+                      <p className="mt-1 text-xs text-soft leading-relaxed">{row.detail}</p>
+                    </div>
+                  </motion.li>
+                ))}
+              </ul>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
       {/* ANALYTICS PREVIEW */}
       <section id="analytics" className="relative z-10 max-w-6xl mx-auto px-6 py-24">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
