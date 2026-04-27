@@ -91,7 +91,7 @@ export const Route = createFileRoute("/api/metaapi-sync")({
           const pnl = arr.reduce((sum, d) => sum + (Number(d.profit) || 0), 0);
 
           trades.push({
-            user_id: user.id,
+            user_id: userId,
             pair: String(open.symbol ?? "").toUpperCase().replace(/[^A-Z0-9]/g, ""),
             direction,
             lot_size: Number(open.volume) || 0,
