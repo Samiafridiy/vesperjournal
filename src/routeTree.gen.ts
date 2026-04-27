@@ -17,6 +17,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TradeNewRouteImport } from './routes/trade.new'
+import { Route as ApiMetaapiSyncRouteImport } from './routes/api.metaapi-sync'
 
 const TradesRoute = TradesRouteImport.update({
   id: '/trades',
@@ -58,6 +59,11 @@ const TradeNewRoute = TradeNewRouteImport.update({
   path: '/trade/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMetaapiSyncRoute = ApiMetaapiSyncRouteImport.update({
+  id: '/api/metaapi-sync',
+  path: '/api/metaapi-sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/trades': typeof TradesRoute
+  '/api/metaapi-sync': typeof ApiMetaapiSyncRoute
   '/trade/new': typeof TradeNewRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/trades': typeof TradesRoute
+  '/api/metaapi-sync': typeof ApiMetaapiSyncRoute
   '/trade/new': typeof TradeNewRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/trades': typeof TradesRoute
+  '/api/metaapi-sync': typeof ApiMetaapiSyncRoute
   '/trade/new': typeof TradeNewRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/trades'
+    | '/api/metaapi-sync'
     | '/trade/new'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/trades'
+    | '/api/metaapi-sync'
     | '/trade/new'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/trades'
+    | '/api/metaapi-sync'
     | '/trade/new'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
   TradesRoute: typeof TradesRoute
+  ApiMetaapiSyncRoute: typeof ApiMetaapiSyncRoute
   TradeNewRoute: typeof TradeNewRoute
 }
 
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TradeNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/metaapi-sync': {
+      id: '/api/metaapi-sync'
+      path: '/api/metaapi-sync'
+      fullPath: '/api/metaapi-sync'
+      preLoaderRoute: typeof ApiMetaapiSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -203,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
   TradesRoute: TradesRoute,
+  ApiMetaapiSyncRoute: ApiMetaapiSyncRoute,
   TradeNewRoute: TradeNewRoute,
 }
 export const routeTree = rootRouteImport
