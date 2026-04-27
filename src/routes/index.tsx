@@ -188,7 +188,7 @@ function Landing() {
                   <span className="size-2.5 rounded-full bg-champagne/60" />
                   <span className="size-2.5 rounded-full bg-pos/60" />
                 </div>
-                <span className="ml-3 text-[11px] uppercase tracking-[0.18em] text-faint">aegis · live equity</span>
+                <span className="ml-3 text-[11px] uppercase tracking-[0.18em] text-faint">vesper · live equity</span>
               </div>
               <span className="font-mono text-[11px] text-soft">last 30 trades</span>
             </div>
@@ -409,7 +409,7 @@ function Landing() {
 
       <footer className="relative z-10 border-t border-border">
         <div className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between text-xs text-faint">
-          <span>© Vesper Journal Journal · Built for traders</span>
+          <span>© Vesper Journal · Built for traders</span>
           <span className="font-mono">SYS.READY</span>
         </div>
       </footer>
