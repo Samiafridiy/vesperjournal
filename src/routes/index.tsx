@@ -15,6 +15,10 @@ import {
   Target,
   Zap,
   CheckCircle2,
+  Check,
+  Newspaper,
+  FileText,
+  Cpu,
 } from "lucide-react";
 import { HeroChart } from "@/components/landing/HeroChart";
 import { Reveal, StaggerGroup, StaggerItem } from "@/components/motion/Reveal";
