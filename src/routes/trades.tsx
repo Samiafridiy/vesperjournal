@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/trades")({
   head: () => ({
     meta: [
-      { title: "Trade history — Aegis" },
+      { title: "Trade history — Vesper Journal" },
       { name: "description", content: "All your logged trades, filterable and searchable." },
     ],
   }),

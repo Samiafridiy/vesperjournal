@@ -25,7 +25,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <TrendingUp className="size-4 text-champagne" />
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-semibold tracking-tight">Aegis</span>
+            <span className="text-sm font-semibold tracking-tight">Vesper Journal</span>
             <span className="text-[10px] uppercase tracking-[0.18em] text-faint">Journal</span>
           </div>
         </Link>
@@ -75,7 +75,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="size-7 rounded-md bg-champagne/10 ring-1 ring-champagne/30 flex items-center justify-center">
               <TrendingUp className="size-3.5 text-champagne" />
             </div>
-            <span className="text-sm font-semibold">Aegis</span>
+            <span className="text-sm font-semibold">Vesper Journal</span>
           </Link>
           <Button
             variant="ghost"

@@ -22,13 +22,13 @@ import { Reveal, StaggerGroup, StaggerItem } from "@/components/motion/Reveal";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Aegis — Trade smarter, not just more" },
+      { title: "Vesper Journal — Trade smarter, not just more" },
       {
         name: "description",
         content:
           "A premium trading journal built around psychology and smart insights. Track every trade, log emotions and mistakes, and discover what's actually costing you.",
       },
-      { property: "og:title", content: "Aegis — Trade smarter, not just more" },
+      { property: "og:title", content: "Vesper Journal — Trade smarter, not just more" },
       {
         property: "og:description",
         content: "Track psychology, surface insights, improve performance.",
@@ -82,7 +82,7 @@ function Landing() {
           <div className="size-8 rounded-lg bg-champagne/10 ring-1 ring-champagne/30 flex items-center justify-center">
             <TrendingUp className="size-4 text-champagne" />
           </div>
-          <span className="text-sm font-semibold tracking-tight">Aegis</span>
+          <span className="text-sm font-semibold tracking-tight">Vesper Journal</span>
         </Link>
         <nav className="hidden md:flex items-center gap-8 text-sm text-soft">
           <a href="#features" className="hover:text-foreground transition-colors">Features</a>
@@ -138,7 +138,7 @@ function Landing() {
           className="mt-6 text-lg md:text-xl text-soft max-w-2xl text-pretty leading-relaxed"
         >
           A premium trading journal that tracks your psychology — not just your P&L.
-          Aegis surfaces the emotions, sessions, and mistakes quietly draining your edge.
+          Vesper Journal surfaces the emotions, sessions, and mistakes quietly draining your edge.
         </motion.p>
 
         <motion.div
@@ -240,7 +240,7 @@ function Landing() {
             <FeatureCard
               icon={Sparkles}
               title="Smart insights"
-              body="Aegis reads your journal and tells you the truth — your worst session, costliest mistake, the emotion that sabotages your edge."
+              body="Vesper Journal reads your journal and tells you the truth — your worst session, costliest mistake, the emotion that sabotages your edge."
               tag="AI-assisted"
             />
           </StaggerItem>
@@ -262,7 +262,7 @@ function Landing() {
             <FeatureCard
               icon={Target}
               title="Auto R:R + P&L"
-              body="Type entry, stop, lot. Aegis calculates pip value, R:R, and P&L instantly. No spreadsheets, no formulas."
+              body="Type entry, stop, lot. Vesper Journal calculates pip value, R:R, and P&L instantly. No spreadsheets, no formulas."
             />
           </StaggerItem>
           <StaggerItem>
@@ -285,7 +285,7 @@ function Landing() {
             </h2>
             <p className="mt-5 text-soft text-pretty leading-relaxed text-lg">
               Most traders fail because they journal their wins and forget their losses.
-              Aegis surfaces the patterns you'd rather not see — calmly, in plain language.
+              Vesper Journal surfaces the patterns you'd rather not see — calmly, in plain language.
             </p>
             <ul className="mt-8 space-y-3.5">
               {[
@@ -340,7 +340,7 @@ function Landing() {
             Free while we're in beta.
           </h2>
           <p className="mt-4 text-soft max-w-xl mx-auto">
-            Aegis is in open beta. Every feature is unlocked. No credit card. No catch.
+            Vesper Journal is in open beta. Every feature is unlocked. No credit card. No catch.
           </p>
         </Reveal>
 
@@ -409,7 +409,7 @@ function Landing() {
 
       <footer className="relative z-10 border-t border-border">
         <div className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between text-xs text-faint">
-          <span>© Aegis Journal · Built for traders</span>
+          <span>© Vesper Journal Journal · Built for traders</span>
           <span className="font-mono">SYS.READY</span>
         </div>
       </footer>

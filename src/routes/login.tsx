@@ -11,8 +11,8 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Sign in — Aegis" },
-      { name: "description", content: "Sign in to your Aegis trading journal." },
+      { title: "Sign in — Vesper Journal" },
+      { name: "description", content: "Sign in to your Vesper Journal trading journal." },
     ],
   }),
   component: LoginPage,
@@ -42,7 +42,7 @@ function LoginPage() {
     navigate({ to: "/dashboard" });
   }
 
-  return <AuthShell title="Welcome back" subtitle="Sign in to your Aegis journal.">
+  return <AuthShell title="Welcome back" subtitle="Sign in to your Vesper Journal journal.">
     <form onSubmit={onSubmit} className="flex flex-col gap-5">
       <Field label="Email">
         <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="bg-surface-2 border-border h-11" />
@@ -75,7 +75,7 @@ export function AuthShell({ title, subtitle, children }: { title: string; subtit
           <div className="size-9 rounded-lg bg-champagne/10 ring-1 ring-champagne/30 flex items-center justify-center">
             <TrendingUp className="size-4 text-champagne" />
           </div>
-          <span className="text-base font-semibold">Aegis</span>
+          <span className="text-base font-semibold">Vesper Journal</span>
         </Link>
         <div className="surface-card-elevated top-accent p-8">
           <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>

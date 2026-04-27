@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/trade/new")({
   head: () => ({
     meta: [
-      { title: "New trade — Aegis" },
+      { title: "New trade — Vesper Journal" },
       { name: "description", content: "Log a new trade with psychology tracking." },
     ],
   }),

@@ -26,7 +26,7 @@ import { CalendarHeatmap } from "@/components/CalendarHeatmap";
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
-      { title: "Overview — Aegis" },
+      { title: "Overview — Vesper Journal" },
       { name: "description", content: "Your trading performance at a glance." },
     ],
   }),
