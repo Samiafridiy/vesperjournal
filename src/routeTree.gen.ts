@@ -12,10 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TradesRouteImport } from './routes/trades'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ImportRouteImport } from './routes/import'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TradeNewRouteImport } from './routes/trade.new'
+import { Route as ApiMetaapiSyncRouteImport } from './routes/api.metaapi-sync'
+import { Route as ApiEaWebhookRouteImport } from './routes/api.ea-webhook'
 
 const TradesRoute = TradesRouteImport.update({
   id: '/trades',
@@ -30,6 +33,11 @@ const SignupRoute = SignupRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImportRoute = ImportRouteImport.update({
+  id: '/import',
+  path: '/import',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -52,23 +60,39 @@ const TradeNewRoute = TradeNewRouteImport.update({
   path: '/trade/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMetaapiSyncRoute = ApiMetaapiSyncRouteImport.update({
+  id: '/api/metaapi-sync',
+  path: '/api/metaapi-sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEaWebhookRoute = ApiEaWebhookRouteImport.update({
+  id: '/api/ea-webhook',
+  path: '/api/ea-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/dashboard': typeof DashboardRoute
+  '/import': typeof ImportRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/trades': typeof TradesRoute
+  '/api/ea-webhook': typeof ApiEaWebhookRoute
+  '/api/metaapi-sync': typeof ApiMetaapiSyncRoute
   '/trade/new': typeof TradeNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/dashboard': typeof DashboardRoute
+  '/import': typeof ImportRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/trades': typeof TradesRoute
+  '/api/ea-webhook': typeof ApiEaWebhookRoute
+  '/api/metaapi-sync': typeof ApiMetaapiSyncRoute
   '/trade/new': typeof TradeNewRoute
 }
 export interface FileRoutesById {
@@ -76,9 +100,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/dashboard': typeof DashboardRoute
+  '/import': typeof ImportRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/trades': typeof TradesRoute
+  '/api/ea-webhook': typeof ApiEaWebhookRoute
+  '/api/metaapi-sync': typeof ApiMetaapiSyncRoute
   '/trade/new': typeof TradeNewRoute
 }
 export interface FileRouteTypes {
@@ -87,27 +114,36 @@ export interface FileRouteTypes {
     | '/'
     | '/analytics'
     | '/dashboard'
+    | '/import'
     | '/login'
     | '/signup'
     | '/trades'
+    | '/api/ea-webhook'
+    | '/api/metaapi-sync'
     | '/trade/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/analytics'
     | '/dashboard'
+    | '/import'
     | '/login'
     | '/signup'
     | '/trades'
+    | '/api/ea-webhook'
+    | '/api/metaapi-sync'
     | '/trade/new'
   id:
     | '__root__'
     | '/'
     | '/analytics'
     | '/dashboard'
+    | '/import'
     | '/login'
     | '/signup'
     | '/trades'
+    | '/api/ea-webhook'
+    | '/api/metaapi-sync'
     | '/trade/new'
   fileRoutesById: FileRoutesById
 }
@@ -115,9 +151,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyticsRoute: typeof AnalyticsRoute
   DashboardRoute: typeof DashboardRoute
+  ImportRoute: typeof ImportRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
   TradesRoute: typeof TradesRoute
+  ApiEaWebhookRoute: typeof ApiEaWebhookRoute
+  ApiMetaapiSyncRoute: typeof ApiMetaapiSyncRoute
   TradeNewRoute: typeof TradeNewRoute
 }
 
@@ -142,6 +181,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/import': {
+      id: '/import'
+      path: '/import'
+      fullPath: '/import'
+      preLoaderRoute: typeof ImportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -172,6 +218,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TradeNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/metaapi-sync': {
+      id: '/api/metaapi-sync'
+      path: '/api/metaapi-sync'
+      fullPath: '/api/metaapi-sync'
+      preLoaderRoute: typeof ApiMetaapiSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ea-webhook': {
+      id: '/api/ea-webhook'
+      path: '/api/ea-webhook'
+      fullPath: '/api/ea-webhook'
+      preLoaderRoute: typeof ApiEaWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -179,20 +239,14 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyticsRoute: AnalyticsRoute,
   DashboardRoute: DashboardRoute,
+  ImportRoute: ImportRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
   TradesRoute: TradesRoute,
+  ApiEaWebhookRoute: ApiEaWebhookRoute,
+  ApiMetaapiSyncRoute: ApiMetaapiSyncRoute,
   TradeNewRoute: TradeNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, PlusCircle, History, BarChart3, LogOut, TrendingUp } from "lucide-react";
+import { LayoutDashboard, PlusCircle, History, BarChart3, LogOut, TrendingUp, Download } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import type { ReactNode } from "react";
@@ -9,6 +9,7 @@ const nav = [
   { to: "/trade/new", label: "New trade", icon: PlusCircle },
   { to: "/trades", label: "History", icon: History },
   { to: "/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/import", label: "Import", icon: Download },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -95,7 +96,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-sidebar/95 backdrop-blur border-t border-border">
-        <div className="grid grid-cols-4">
+        <div className="grid grid-cols-5">
           {nav.map((n) => {
             const active = loc.pathname === n.to || (n.to !== "/dashboard" && loc.pathname.startsWith(n.to));
             const Icon = n.icon;
