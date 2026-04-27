@@ -209,6 +209,30 @@ export function computeStats(trades: Trade[]) {
   const grossLoss = Math.abs(losses.reduce((a, b) => a + (b.pnl ?? 0), 0));
   const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? Infinity : 0;
 
+  const avgWin = wins.length ? grossProfit / wins.length : 0;
+  const avgLoss = losses.length ? grossLoss / losses.length : 0;
+  const expectancy = closed.length
+    ? (winRate / 100) * avgWin - (1 - winRate / 100) * avgLoss
+    : 0;
+
+  // Best / worst single trade
+  const bestTrade = closed.reduce((a, b) => ((b.pnl ?? 0) > (a?.pnl ?? -Infinity) ? b : a), closed[0] ?? null);
+  const worstTrade = closed.reduce((a, b) => ((b.pnl ?? 0) < (a?.pnl ?? Infinity) ? b : a), closed[0] ?? null);
+
+  // Max drawdown from equity curve
+  const sorted = [...closed].sort(
+    (a, b) => new Date(a.trade_date).getTime() - new Date(b.trade_date).getTime(),
+  );
+  let cum = 0;
+  let peak = 0;
+  let maxDD = 0;
+  for (const t of sorted) {
+    cum += t.pnl ?? 0;
+    if (cum > peak) peak = cum;
+    const dd = peak - cum;
+    if (dd > maxDD) maxDD = dd;
+  }
+
   // Streak — count consecutive same-result from most recent
   const byDate = [...closed].sort(
     (a, b) => new Date(b.trade_date).getTime() - new Date(a.trade_date).getTime(),
@@ -235,6 +259,12 @@ export function computeStats(trades: Trade[]) {
     totalPnl,
     avgRR,
     profitFactor,
+    expectancy,
+    avgWin,
+    avgLoss,
+    bestTrade,
+    worstTrade,
+    maxDrawdown: maxDD,
     streak,
     streakType,
   };
