@@ -22,6 +22,11 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 import { CalendarHeatmap } from "@/components/CalendarHeatmap";
+import { TraderScoreCard } from "@/components/coach/TraderScoreCard";
+import { DailyCoach } from "@/components/coach/DailyCoach";
+import { MistakeAlerts } from "@/components/coach/MistakeAlerts";
+import { DrawdownChart } from "@/components/coach/DrawdownChart";
+import { computeTraderScore, generateDailyCoach, detectMistakes } from "@/lib/trader-coach";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -44,6 +49,9 @@ function Dashboard() {
   const stats = useMemo(() => computeStats(trades), [trades]);
   const curve = useMemo(() => equityCurve(trades), [trades]);
   const insights = useMemo(() => generateInsights(trades), [trades]);
+  const traderScore = useMemo(() => computeTraderScore(trades), [trades]);
+  const coachMessages = useMemo(() => generateDailyCoach(trades), [trades]);
+  const mistakeAlerts = useMemo(() => detectMistakes(trades), [trades]);
 
   const winLossData = [
     { name: "Wins", value: stats.wins, color: "var(--pos)" },
@@ -81,6 +89,19 @@ function Dashboard() {
 
       {empty ? <EmptyState /> : (
         <>
+          {/* Coach row: Trader Score + Daily Coach + Mistake Alerts */}
+          <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-6">
+            <div className="lg:col-span-5">
+              <TraderScoreCard score={traderScore} />
+            </div>
+            <div className="lg:col-span-3">
+              <DailyCoach messages={coachMessages} />
+            </div>
+            <div className="lg:col-span-4">
+              <MistakeAlerts alerts={mistakeAlerts} />
+            </div>
+          </section>
+
           {/* Stats */}
           <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             <StatCard
@@ -261,7 +282,23 @@ function Dashboard() {
           </section>
 
           {/* Calendar heatmap */}
-          <section className="surface-card p-6 mb-6">
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+            <DrawdownChart trades={trades} />
+            <div className="surface-card p-6">
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-faint font-medium">
+                    Activity heatmap
+                  </div>
+                  <div className="text-sm text-soft mt-0.5">Daily P&L over the last 16 weeks</div>
+                </div>
+              </div>
+              <CalendarHeatmap trades={trades} />
+            </div>
+          </section>
+
+          {/* (old heatmap block removed — now inline above) */}
+          <section className="hidden">
             <div className="flex items-center justify-between mb-5">
               <div>
                 <div className="text-[11px] uppercase tracking-[0.18em] text-faint font-medium">
