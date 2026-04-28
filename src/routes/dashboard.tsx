@@ -282,7 +282,23 @@ function Dashboard() {
           </section>
 
           {/* Calendar heatmap */}
-          <section className="surface-card p-6 mb-6">
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+            <DrawdownChart trades={trades} />
+            <div className="surface-card p-6">
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-faint font-medium">
+                    Activity heatmap
+                  </div>
+                  <div className="text-sm text-soft mt-0.5">Daily P&L over the last 16 weeks</div>
+                </div>
+              </div>
+              <CalendarHeatmap trades={trades} />
+            </div>
+          </section>
+
+          {/* (old heatmap block removed — now inline above) */}
+          <section className="hidden">
             <div className="flex items-center justify-between mb-5">
               <div>
                 <div className="text-[11px] uppercase tracking-[0.18em] text-faint font-medium">
