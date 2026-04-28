@@ -46,15 +46,19 @@ export function calcRR(opts: {
   close?: number | null;
 }): number | null {
   if (opts.stop == null) return null;
-  const risk = Math.abs(opts.entry - opts.stop);
-  if (risk === 0) return null;
+  // Directional risk/reward. Always returned as a positive ratio.
+  //  BUY:  risk = entry - stop,    reward = tp - entry
+  //  SELL: risk = stop  - entry,   reward = entry - tp
+  const risk = opts.direction === "buy"
+    ? opts.entry - opts.stop
+    : opts.stop - opts.entry;
+  if (risk <= 0) return null;
   const target = opts.takeProfit ?? opts.close;
   if (target == null) return null;
-  const reward = Math.abs(target - opts.entry);
-  const sign = opts.direction === "buy"
-    ? (target > opts.entry ? 1 : -1)
-    : (target < opts.entry ? 1 : -1);
-  return Number(((reward / risk) * sign).toFixed(2));
+  const reward = opts.direction === "buy"
+    ? target - opts.entry
+    : opts.entry - target;
+  return Number((Math.abs(reward) / risk).toFixed(2));
 }
 
 export function calcResult(pnl: number | null): "win" | "loss" | "breakeven" | null {
