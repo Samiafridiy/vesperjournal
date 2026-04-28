@@ -298,27 +298,6 @@ function Dashboard() {
           </section>
 
           {/* (old heatmap block removed — now inline above) */}
-          <section className="hidden">
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <div className="text-[11px] uppercase tracking-[0.18em] text-faint font-medium">
-                  Activity heatmap
-                </div>
-                <div className="text-sm text-soft mt-0.5">Daily P&L over the last 16 weeks</div>
-              </div>
-              <div className="flex items-center gap-3 text-[10px] text-faint">
-                <span>Less</span>
-                <div className="flex gap-1">
-                  <span className="size-2.5 rounded-sm border border-border/40 bg-surface-2" />
-                  <span className="size-2.5 rounded-sm" style={{ background: "color-mix(in oklab, var(--pos) 30%, transparent)" }} />
-                  <span className="size-2.5 rounded-sm" style={{ background: "color-mix(in oklab, var(--pos) 60%, transparent)" }} />
-                  <span className="size-2.5 rounded-sm" style={{ background: "color-mix(in oklab, var(--pos) 90%, transparent)" }} />
-                </div>
-                <span>More</span>
-              </div>
-            </div>
-            <CalendarHeatmap trades={trades} />
-          </section>
 
           {/* Win/Loss + recent */}
           <section className="grid grid-cols-1 lg:grid-cols-12 gap-4">
