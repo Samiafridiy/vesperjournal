@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { RouteGate } from "@/components/RouteGate";
 import { AppShell } from "@/components/AppShell";
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, useMemo, type FormEvent, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,10 +27,14 @@ import {
   fmtMoney,
 } from "@/lib/trade-utils";
 import { toast } from "sonner";
-import { Loader2, Upload, ArrowLeft } from "lucide-react";
+import { Loader2, Upload, ArrowLeft, AlertTriangle, BarChart3, Lock, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { z } from "zod";
 
 export const Route = createFileRoute("/trade/new")({
+  validateSearch: z.object({
+    id: z.string().optional(),
+  }),
   head: () => ({
     meta: [
       { title: "New trade — Vesper Journal" },
@@ -49,9 +53,12 @@ export const Route = createFileRoute("/trade/new")({
 function NewTrade() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { id: editId } = Route.useSearch();
+  const isEdit = Boolean(editId);
   const [submitting, setSubmitting] = useState(false);
+  const [loadingTrade, setLoadingTrade] = useState(isEdit);
+  const [existingScreenshot, setExistingScreenshot] = useState<string | null>(null);
 
-  // Form state
   const [pair, setPair] = useState("EURUSD");
   const [direction, setDirection] = useState<"buy" | "sell">("buy");
   const [lot, setLot] = useState("0.10");
@@ -68,7 +75,38 @@ function NewTrade() {
   const [mistakes, setMistakes] = useState<string[]>([]);
   const [screenshot, setScreenshot] = useState<File | null>(null);
 
-  // Live preview
+  useEffect(() => {
+    if (!isEdit || !editId || !user) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from("trades").select("*").eq("id", editId).maybeSingle();
+      if (cancelled) return;
+      if (error || !data) {
+        toast.error("Trade not found.");
+        navigate({ to: "/trades" });
+        return;
+      }
+      setPair(data.pair);
+      setDirection(data.direction as "buy" | "sell");
+      setLot(String(data.lot_size));
+      setEntry(String(data.entry_price));
+      setStop(data.stop_loss != null ? String(data.stop_loss) : "");
+      setTp(data.take_profit != null ? String(data.take_profit) : "");
+      setClose(data.close_price != null ? String(data.close_price) : "");
+      setDate(new Date(data.trade_date).toISOString().slice(0, 16));
+      setSession(data.session ?? undefined);
+      setStrategy(data.strategy ?? "");
+      setNotes(data.notes ?? "");
+      setEmotionBefore(data.emotion_before ?? undefined);
+      setEmotionAfter(data.emotion_after ?? undefined);
+      setMistakes(data.mistakes ?? []);
+      setExistingScreenshot(data.screenshot_url ?? null);
+      setLoadingTrade(false);
+    })();
+    return () => { cancelled = true; };
+  }, [isEdit, editId, user, navigate]);
+
   const entryN = parseFloat(entry);
   const closeN = close === "" ? null : parseFloat(close);
   const lotN = parseFloat(lot);
@@ -77,8 +115,33 @@ function NewTrade() {
   const previewPnl = !isNaN(entryN) && !isNaN(lotN)
     ? calcPnl({ pair, direction, entry: entryN, close: closeN, lot: lotN })
     : null;
-  const previewRR = !isNaN(entryN)
-    ? calcRR({ direction, entry: entryN, stop: stopN, takeProfit: tpN, close: closeN })
+  const plannedRR = !isNaN(entryN)
+    ? calcRR({ direction, entry: entryN, stop: stopN, takeProfit: tpN })
+    : null;
+  const actualRR = !isNaN(entryN) && closeN != null
+    ? calcRR({ direction, entry: entryN, stop: stopN, close: closeN })
+    : null;
+
+  const { progress, nextStep } = useMemo(() => {
+    const checks: Array<{ ok: boolean; hint: string }> = [
+      { ok: !!pair, hint: "Enter a symbol" },
+      { ok: !isNaN(entryN), hint: "Enter entry price" },
+      { ok: !isNaN(lotN) && lotN > 0, hint: "Set lot size" },
+      { ok: stopN != null && !isNaN(stopN), hint: "Add a stop loss" },
+      { ok: tpN != null && !isNaN(tpN), hint: "Add a take profit" },
+      { ok: !!strategy || !!notes, hint: "Add a strategy tag or note" },
+    ];
+    const done = checks.filter((c) => c.ok).length;
+    const pct = Math.round((done / checks.length) * 100);
+    const next = checks.find((c) => !c.ok)?.hint ?? "Ready to save";
+    return { progress: pct, nextStep: next };
+  }, [pair, entryN, lotN, stopN, tpN, strategy, notes]);
+
+  const maxLoss = !isNaN(entryN) && !isNaN(lotN) && stopN != null
+    ? calcPnl({ pair, direction, entry: entryN, close: stopN, lot: lotN })
+    : null;
+  const maxProfit = !isNaN(entryN) && !isNaN(lotN) && tpN != null
+    ? calcPnl({ pair, direction, entry: entryN, close: tpN, lot: lotN })
     : null;
 
   function toggleMistake(m: string) {
@@ -98,7 +161,7 @@ function NewTrade() {
     const rr = calcRR({ direction, entry: entryN, stop: stopN, takeProfit: tpN, close: closeN });
     const result = calcResult(pnl);
 
-    let screenshot_url: string | null = null;
+    let screenshot_url: string | null = existingScreenshot;
     if (screenshot) {
       const ext = screenshot.name.split(".").pop() ?? "png";
       const path = `${user.id}/${Date.now()}.${ext}`;
@@ -111,8 +174,7 @@ function NewTrade() {
       }
     }
 
-    const { error } = await supabase.from("trades").insert({
-      user_id: user.id,
+    const payload = {
       pair,
       direction,
       lot_size: lotN,
@@ -131,35 +193,50 @@ function NewTrade() {
       pnl,
       rr,
       result,
-    });
+    };
+
+    const { error } = isEdit && editId
+      ? await supabase.from("trades").update(payload).eq("id", editId)
+      : await supabase.from("trades").insert({ ...payload, user_id: user.id });
 
     setSubmitting(false);
     if (error) {
       toast.error(error.message);
       return;
     }
-    toast.success("Trade logged.");
-    navigate({ to: "/dashboard" });
+    toast.success(isEdit ? "Trade updated successfully" : "Trade logged.");
+    navigate({ to: isEdit ? "/trades" : "/dashboard" });
+  }
+
+  if (loadingTrade) {
+    return (
+      <div className="px-5 md:px-10 py-20 flex items-center justify-center">
+        <Loader2 className="size-6 animate-spin text-champagne" />
+      </div>
+    );
   }
 
   return (
-    <div className="px-5 md:px-10 py-8 md:py-10 max-w-[1200px] mx-auto">
+    <div className="px-5 md:px-10 py-8 md:py-10 max-w-[1400px] mx-auto">
       <button
-        onClick={() => navigate({ to: "/dashboard" })}
+        onClick={() => navigate({ to: isEdit ? "/trades" : "/dashboard" })}
         className="flex items-center gap-2 text-sm text-soft hover:text-foreground transition-colors mb-6"
       >
         <ArrowLeft className="size-4" /> Back
       </button>
 
       <header className="border-b border-border pb-6 mb-8">
-        <div className="text-[11px] uppercase tracking-[0.18em] text-soft mb-2">New entry</div>
-        <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">Log a trade</h1>
+        <div className="text-[11px] uppercase tracking-[0.18em] text-soft mb-2">
+          {isEdit ? "Edit entry" : "New entry"}
+        </div>
+        <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
+          {isEdit ? "Edit trade" : "Log a trade"}
+        </h1>
         <p className="text-soft mt-2">P&L, R:R, and result are auto-calculated.</p>
       </header>
 
-      <form onSubmit={onSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Trade details */}
-        <section className="lg:col-span-2 surface-card p-6 md:p-8 flex flex-col gap-6">
+      <form onSubmit={onSubmit} className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-5">
+        <section className="surface-card p-6 md:p-8 flex flex-col gap-6">
           <SectionTitle>Trade</SectionTitle>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -222,7 +299,9 @@ function NewTrade() {
             <FormField label="Screenshot">
               <label className="flex items-center gap-3 h-11 px-3 rounded-md border border-dashed border-border bg-surface-2 cursor-pointer hover:bg-accent text-sm text-soft">
                 <Upload className="size-4" />
-                <span className="truncate">{screenshot?.name ?? "Upload chart screenshot"}</span>
+                <span className="truncate">
+                  {screenshot?.name ?? (existingScreenshot ? "Replace screenshot" : "Upload chart screenshot")}
+                </span>
                 <input type="file" accept="image/*" className="hidden" onChange={(e) => setScreenshot(e.target.files?.[0] ?? null)} />
               </label>
             </FormField>
@@ -260,46 +339,123 @@ function NewTrade() {
           </FormField>
         </section>
 
-        {/* Live preview */}
-        <aside className="surface-card-elevated top-accent p-6 h-fit lg:sticky lg:top-6 flex flex-col gap-5">
-          <div className="text-[11px] uppercase tracking-[0.18em] text-champagne font-medium">
-            Live calculation
+        <aside className="flex flex-col gap-5 h-fit lg:sticky lg:top-6">
+          <div className="surface-card p-5 flex flex-col gap-4">
+            <div className="text-sm font-semibold">Trade Progress</div>
+            <div>
+              <div className="flex items-center justify-between text-xs text-soft mb-2">
+                <span>Progress</span>
+                <span className="font-mono text-champagne">{progress}%</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-surface-2 overflow-hidden">
+                <div
+                  className="h-full bg-champagne transition-all duration-500"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+            <div className="rounded-lg border border-champagne/40 bg-champagne/5 p-3 flex items-start gap-2.5">
+              <AlertTriangle className="size-4 text-champagne mt-0.5 shrink-0" />
+              <div>
+                <div className="text-xs font-semibold text-champagne">Next Step</div>
+                <div className="text-xs text-soft mt-0.5">{nextStep}</div>
+              </div>
+            </div>
           </div>
-          <PreviewRow
-            label="Estimated P&L"
-            value={previewPnl == null ? "—" : fmtMoney(previewPnl, { sign: true })}
-            tone={previewPnl == null ? "neutral" : previewPnl >= 0 ? "pos" : "neg"}
-          />
-          <PreviewRow
-            label="Risk : Reward"
-            value={previewRR == null ? "—" : `${previewRR.toFixed(2)} R`}
-          />
-          <PreviewRow
-            label="Result"
-            value={
-              previewPnl == null
-                ? "Open"
-                : previewPnl > 0
-                ? "Win"
-                : previewPnl < 0
-                ? "Loss"
-                : "Breakeven"
-            }
-            tone={previewPnl == null ? "neutral" : previewPnl >= 0 ? "pos" : "neg"}
-          />
 
-          <Button type="submit" disabled={submitting}
-            className="bg-champagne text-primary-foreground hover:bg-champagne/90 h-11 mt-2">
-            {submitting && <Loader2 className="size-4 mr-2 animate-spin" />}
-            Save trade
-          </Button>
+          <div className="surface-card p-5 flex flex-col gap-3">
+            <div className="text-sm font-semibold">Trade Summary</div>
+            <SummaryRow label="Symbol" value={pair || "—"} />
+            <SummaryRow label="Entry" value={isNaN(entryN) ? "—" : String(entryN)} mono />
+            <SummaryRow label="Size" value={isNaN(lotN) ? "—" : `${lotN} lot`} mono />
+            <SummaryRow
+              label="P&L"
+              value={previewPnl == null ? "—" : fmtMoney(previewPnl, { sign: true })}
+              tone={previewPnl == null ? undefined : previewPnl >= 0 ? "pos" : "neg"}
+              mono
+            />
+            <div className="h-px bg-border my-1" />
+            <SummaryRow
+              label={<><Target className="size-3 inline mr-1" />Planned RR</>}
+              value={
+                plannedRR != null
+                  ? `1 : ${plannedRR.toFixed(2)}`
+                  : <span className="text-champagne text-xs">SL & TP Required</span>
+              }
+              mono={plannedRR != null}
+            />
+            <SummaryRow
+              label={<><Target className="size-3 inline mr-1" />Actual RR</>}
+              value={
+                actualRR != null
+                  ? `1 : ${actualRR.toFixed(2)}`
+                  : <span className="text-champagne text-xs">
+                      {stopN == null ? "SL Required" : "Close Required"}
+                    </span>
+              }
+              mono={actualRR != null}
+            />
+            <div className="h-px bg-border my-1" />
+            <SummaryRow
+              label="Max Loss"
+              value={maxLoss == null ? "—" : fmtMoney(maxLoss, { sign: true })}
+              tone={maxLoss == null ? undefined : "neg"}
+              mono
+            />
+            <SummaryRow
+              label="Max Profit"
+              value={maxProfit == null ? "—" : fmtMoney(maxProfit, { sign: true })}
+              tone={maxProfit == null ? undefined : "pos"}
+              mono
+            />
+            <div className="h-px bg-border my-1" />
+            <SummaryRow label="Risk Preset" value={<span className="text-xs">SMC Fixed Risk (12%)</span>} />
+          </div>
+
+          <div className="surface-card p-5 flex flex-col gap-3">
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <BarChart3 className="size-4 text-champagne" />
+              Edge Context
+            </div>
+            <div className="rounded-lg bg-surface-2 border border-border p-4 flex flex-col items-center gap-2 text-center">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-champagne/15 border border-champagne/40 text-champagne text-[11px] font-semibold">
+                <Lock className="size-3" /> Pro
+              </div>
+              <div className="text-xs text-soft">Improve your trading decisions</div>
+              <div className="text-[11px] text-faint leading-relaxed">
+                Historical edge for <span className="text-foreground font-medium">{pair}</span> on the{" "}
+                <span className="text-foreground font-medium">{session ?? "—"}</span> session with this setup.
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            {isEdit && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate({ to: "/trades" })}
+                className="flex-1 h-11"
+              >
+                Cancel
+              </Button>
+            )}
+            <Button
+              type="submit"
+              disabled={submitting}
+              className="flex-1 bg-champagne text-primary-foreground hover:bg-champagne/90 h-11"
+            >
+              {submitting && <Loader2 className="size-4 mr-2 animate-spin" />}
+              {isEdit ? "Update Trade" : "Save trade"}
+            </Button>
+          </div>
         </aside>
       </form>
     </div>
   );
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
+function SectionTitle({ children }: { children: ReactNode }) {
   return (
     <div className="text-[11px] uppercase tracking-[0.18em] text-faint font-medium border-b border-border pb-2">
       {children}
@@ -307,7 +463,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-function FormField({ label, children }: { label: string; children: React.ReactNode }) {
+function FormField({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-1.5">
       <Label className="text-xs uppercase tracking-[0.1em] text-faint">{label}</Label>
@@ -346,26 +502,30 @@ function PillGroup({
   );
 }
 
-function PreviewRow({
+function SummaryRow({
   label,
   value,
-  tone = "neutral",
+  tone,
+  mono,
 }: {
-  label: string;
-  value: string;
-  tone?: "pos" | "neg" | "neutral";
+  label: ReactNode;
+  value: ReactNode;
+  tone?: "pos" | "neg";
+  mono?: boolean;
 }) {
   return (
-    <div className="flex items-baseline justify-between border-b border-border pb-3 last:border-0">
-      <span className="text-xs text-soft uppercase tracking-wider">{label}</span>
+    <div className="flex items-center justify-between text-sm">
+      <span className="text-soft text-xs">{label}</span>
       <span
         className={cn(
-          "font-mono text-lg tabular-nums",
+          "text-sm font-medium",
+          mono && "font-mono tabular-nums",
           tone === "pos" && "text-pos",
           tone === "neg" && "text-neg",
+          !tone && "text-foreground",
         )}
       >
-        {value}
+        {value ?? "—"}
       </span>
     </div>
   );
