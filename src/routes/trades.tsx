@@ -13,10 +13,11 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Search, Trash2 } from "lucide-react";
+import { PlusCircle, Search, Trash2, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/trades")({
   head: () => ({
@@ -38,6 +39,7 @@ const ALL = "__all";
 
 function TradesList() {
   const { trades, loading } = useTrades();
+  const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [pairF, setPairF] = useState<string>(ALL);
   const [sessionF, setSessionF] = useState<string>(ALL);
@@ -212,10 +214,18 @@ function TradesList() {
               </a>
             )}
 
-            <Button variant="ghost" className="text-neg hover:bg-neg/10 hover:text-neg w-full gap-2"
-              onClick={() => deleteTrade(selected.id)}>
-              <Trash2 className="size-4" /> Delete trade
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                className="flex-1 bg-champagne text-primary-foreground hover:bg-champagne/90 gap-2"
+                onClick={() => navigate({ to: "/trade/new", search: { id: selected.id } })}
+              >
+                <Pencil className="size-4" /> Edit trade
+              </Button>
+              <Button variant="ghost" className="text-neg hover:bg-neg/10 hover:text-neg gap-2"
+                onClick={() => deleteTrade(selected.id)}>
+                <Trash2 className="size-4" /> Delete
+              </Button>
+            </div>
           </div>
         </div>
       )}
