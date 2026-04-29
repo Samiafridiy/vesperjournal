@@ -27,6 +27,8 @@ import { DailyCoach } from "@/components/coach/DailyCoach";
 import { MistakeAlerts } from "@/components/coach/MistakeAlerts";
 import { DrawdownChart } from "@/components/coach/DrawdownChart";
 import { computeTraderScore, generateDailyCoach, detectMistakes } from "@/lib/trader-coach";
+import { CoachSaysToday } from "@/components/coach/CoachSaysToday";
+import { DailyTipModal } from "@/components/coach/DailyTipModal";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -89,6 +91,9 @@ function Dashboard() {
 
       {empty ? <EmptyState /> : (
         <>
+          <CoachSaysToday trades={trades} />
+          <DailyTipModal trades={trades} />
+
           {/* Coach row: Trader Score + Daily Coach + Mistake Alerts */}
           <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-6">
             <div className="lg:col-span-5">
