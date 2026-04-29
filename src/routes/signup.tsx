@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AuthShell, Field } from "./login";
+import { PasswordField, isStrongPassword } from "@/components/auth/PasswordField";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({
@@ -32,6 +33,10 @@ function SignupPage() {
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
+    if (!isStrongPassword(password)) {
+      toast.error("Password too weak — please meet all requirements.");
+      return;
+    }
     setSubmitting(true);
     const { error } = await supabase.auth.signUp({
       email,
@@ -60,9 +65,19 @@ function SignupPage() {
           <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="bg-surface-2 border-border h-11" />
         </Field>
         <Field label="Password">
-          <Input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="bg-surface-2 border-border h-11" placeholder="At least 6 characters" />
+          <PasswordField
+            value={password}
+            onChange={setPassword}
+            showStrength
+            autoComplete="new-password"
+            placeholder="Create a strong password"
+          />
         </Field>
-        <Button type="submit" disabled={submitting} className="bg-champagne text-primary-foreground hover:bg-champagne/90 h-11 mt-2">
+        <Button
+          type="submit"
+          disabled={submitting || !isStrongPassword(password)}
+          className="bg-champagne text-primary-foreground hover:bg-champagne/90 h-11 mt-2 disabled:opacity-50"
+        >
           {submitting && <Loader2 className="size-4 mr-2 animate-spin" />}
           Create account
         </Button>
