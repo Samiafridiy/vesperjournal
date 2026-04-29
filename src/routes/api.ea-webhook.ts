@@ -64,7 +64,7 @@ export const Route = createFileRoute("/api/ea-webhook")({
           stop_loss: sl,
           take_profit: tp,
           pnl,
-          rr: calcRR({ direction, entry, stop: sl, takeProfit: tp, close }),
+          rr: calcRR({ pair, direction, entry, stop: sl, takeProfit: tp, close }),
           result: calcResult(pnl ?? null),
           trade_date: body.trade_date ?? new Date().toISOString(),
           strategy: "EA webhook",

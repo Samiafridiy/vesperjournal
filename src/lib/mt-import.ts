@@ -172,7 +172,7 @@ export function parseCsv(text: string): ParsedRow[] {
     if (!symbol || !entry || !lot || !direction) continue;
 
     const pnl = profit ?? calcPnl({ pair: symbol, direction, entry, close: closePrice, lot });
-    const rr = calcRR({ direction, entry, stop: sl, takeProfit: tp, close: closePrice });
+    const rr = calcRR({ pair: symbol, direction, entry, stop: sl, takeProfit: tp, close: closePrice });
 
     out.push({
       _key: `${symbol}-${dateStr ?? ""}-${entry}-${lot}`,
