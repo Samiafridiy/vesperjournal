@@ -13,19 +13,56 @@ export const EMOTIONS_AFTER = ["Confident", "Fear", "Greed", "Neutral", "Satisfi
 export const MISTAKES = ["Overtrading", "FOMO", "Early entry", "No stop loss", "Revenge trading", "Moved stop", "Closed early"] as const;
 
 /**
- * Pip value approximation for forex-style PnL.
- * For simplicity we use a generic point-based formula that works for most pairs:
- *   pnl = (close - entry) * lot_size * contract_size * direction_multiplier
- * where contract_size is 100,000 for forex majors. JPY pairs use 1,000 points.
+ * Pip definitions per instrument. A pip is the smallest "professional" price
+ * increment used by traders, NOT the broker's smallest decimal (which is a point).
+ *  - Most FX:    1 pip = 0.0001
+ *  - JPY pairs:  1 pip = 0.01
+ *  - Gold:       1 pip = 0.10
+ *  - Indices/Crypto: 1 pip = 1.0  (treated as 1 point)
  */
-function contractSize(pair: string): number {
-  if (pair.includes("JPY")) return 1000;
-  if (["XAUUSD"].includes(pair)) return 100;
-  if (["BTCUSD", "ETHUSD"].includes(pair)) return 1;
-  if (["NAS100", "US30", "SPX500"].includes(pair)) return 1;
-  return 100000;
+export function pipSize(pair: string): number {
+  const p = pair.toUpperCase();
+  if (p.includes("JPY")) return 0.01;
+  if (p === "XAUUSD" || p === "XAGUSD") return 0.1;
+  if (["BTCUSD", "ETHUSD", "NAS100", "US30", "SPX500", "GER40", "UK100"].includes(p)) return 1;
+  return 0.0001;
 }
 
+/**
+ * USD value of 1 pip for 1.0 standard lot.
+ * Standard lot conventions:
+ *   FX (USD quote):  $10 per pip per lot  (e.g. EURUSD, GBPUSD, USDCHF*)
+ *   FX JPY pairs:    ~$10 per pip per lot at typical rates (approximation)
+ *   Gold (XAUUSD):   $10 per pip (100 oz × 0.10)
+ *   Indices/Crypto:  $1 per point per lot  (broker dependent — sane default)
+ */
+export function pipValuePerLot(pair: string): number {
+  const p = pair.toUpperCase();
+  if (["NAS100", "US30", "SPX500", "GER40", "UK100", "BTCUSD", "ETHUSD"].includes(p)) return 1;
+  return 10;
+}
+
+/** Pip distance between two prices for a given direction. Always positive when in profit. */
+export function pipDistance(opts: {
+  pair: string;
+  direction: "buy" | "sell";
+  from: number;
+  to: number;
+}): number {
+  const diff = opts.direction === "buy" ? opts.to - opts.from : opts.from - opts.to;
+  return diff / pipSize(opts.pair);
+}
+
+/** Absolute pip distance regardless of direction (for risk/SL distance). */
+export function absPips(pair: string, a: number, b: number): number {
+  return Math.abs(a - b) / pipSize(pair);
+}
+
+/**
+ * Profit / Loss using pip math:
+ *   pnl = pip_distance(entry → close) × pip_value_per_lot × lot
+ * Returns null if close is missing.
+ */
 export function calcPnl(opts: {
   pair: string;
   direction: "buy" | "sell";
@@ -34,31 +71,32 @@ export function calcPnl(opts: {
   lot: number;
 }): number | null {
   if (opts.close == null) return null;
-  const sign = opts.direction === "buy" ? 1 : -1;
-  return (opts.close - opts.entry) * opts.lot * contractSize(opts.pair) * sign;
+  const pips = pipDistance({ pair: opts.pair, direction: opts.direction, from: opts.entry, to: opts.close });
+  return Number((pips * pipValuePerLot(opts.pair) * opts.lot).toFixed(2));
 }
 
+/**
+ * Risk / Reward computed from pip distances. Consistent with profit math:
+ *   risk_pips   = |entry - stop|
+ *   reward_pips = |target - entry|       target = takeProfit ?? close
+ *   RR = reward_pips / risk_pips
+ */
 export function calcRR(opts: {
   direction: "buy" | "sell";
   entry: number;
   stop: number | null | undefined;
   takeProfit?: number | null;
   close?: number | null;
+  pair?: string;
 }): number | null {
   if (opts.stop == null) return null;
-  // Directional risk/reward. Always returned as a positive ratio.
-  //  BUY:  risk = entry - stop,    reward = tp - entry
-  //  SELL: risk = stop  - entry,   reward = entry - tp
-  const risk = opts.direction === "buy"
-    ? opts.entry - opts.stop
-    : opts.stop - opts.entry;
-  if (risk <= 0) return null;
   const target = opts.takeProfit ?? opts.close;
   if (target == null) return null;
-  const reward = opts.direction === "buy"
-    ? target - opts.entry
-    : opts.entry - target;
-  return Number((Math.abs(reward) / risk).toFixed(2));
+  const pair = opts.pair ?? "EURUSD";
+  const risk = absPips(pair, opts.entry, opts.stop);
+  const reward = absPips(pair, opts.entry, target);
+  if (risk <= 0) return null;
+  return Number((reward / risk).toFixed(2));
 }
 
 export function calcResult(pnl: number | null): "win" | "loss" | "breakeven" | null {

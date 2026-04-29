@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TrendingUp, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { PasswordField } from "@/components/auth/PasswordField";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -35,7 +36,11 @@ function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setSubmitting(false);
     if (error) {
-      toast.error(error.message);
+      const msg = error.message.toLowerCase();
+      if (msg.includes("invalid login")) toast.error("Invalid email or password.");
+      else if (msg.includes("not found") || msg.includes("user not")) toast.error("Email not found.");
+      else if (msg.includes("email not confirmed")) toast.error("Please verify your email first.");
+      else toast.error(error.message);
       return;
     }
     toast.success("Welcome back.");
@@ -48,7 +53,12 @@ function LoginPage() {
         <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="bg-surface-2 border-border h-11" />
       </Field>
       <Field label="Password">
-        <Input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="bg-surface-2 border-border h-11" />
+        <PasswordField value={password} onChange={setPassword} autoComplete="current-password" />
+        <div className="flex justify-end -mt-1">
+          <Link to="/forgot-password" className="text-xs text-soft hover:text-champagne transition-colors">
+            Forgot password?
+          </Link>
+        </div>
       </Field>
       <Button type="submit" disabled={submitting} className="bg-champagne text-primary-foreground hover:bg-champagne/90 h-11 mt-2">
         {submitting && <Loader2 className="size-4 mr-2 animate-spin" />}

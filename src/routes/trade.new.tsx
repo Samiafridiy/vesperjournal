@@ -25,6 +25,8 @@ import {
   calcRR,
   calcResult,
   fmtMoney,
+  absPips,
+  pipDistance,
 } from "@/lib/trade-utils";
 import { toast } from "sonner";
 import { Loader2, Upload, ArrowLeft, AlertTriangle, BarChart3, Lock, Target } from "lucide-react";
@@ -116,10 +118,20 @@ function NewTrade() {
     ? calcPnl({ pair, direction, entry: entryN, close: closeN, lot: lotN })
     : null;
   const plannedRR = !isNaN(entryN)
-    ? calcRR({ direction, entry: entryN, stop: stopN, takeProfit: tpN })
+    ? calcRR({ pair, direction, entry: entryN, stop: stopN, takeProfit: tpN })
     : null;
   const actualRR = !isNaN(entryN) && closeN != null
-    ? calcRR({ direction, entry: entryN, stop: stopN, close: closeN })
+    ? calcRR({ pair, direction, entry: entryN, stop: stopN, close: closeN })
+    : null;
+
+  const riskPips = !isNaN(entryN) && stopN != null
+    ? absPips(pair, entryN, stopN)
+    : null;
+  const rewardPips = !isNaN(entryN) && tpN != null
+    ? absPips(pair, entryN, tpN)
+    : null;
+  const livePips = !isNaN(entryN) && closeN != null
+    ? pipDistance({ pair, direction, from: entryN, to: closeN })
     : null;
 
   const { progress, nextStep } = useMemo(() => {
@@ -158,7 +170,7 @@ function NewTrade() {
     setSubmitting(true);
 
     const pnl = calcPnl({ pair, direction, entry: entryN, close: closeN, lot: lotN });
-    const rr = calcRR({ direction, entry: entryN, stop: stopN, takeProfit: tpN, close: closeN });
+    const rr = calcRR({ pair, direction, entry: entryN, stop: stopN, takeProfit: tpN, close: closeN });
     const result = calcResult(pnl);
 
     let screenshot_url: string | null = existingScreenshot;
@@ -369,12 +381,27 @@ function NewTrade() {
             <SummaryRow label="Entry" value={isNaN(entryN) ? "—" : String(entryN)} mono />
             <SummaryRow label="Size" value={isNaN(lotN) ? "—" : `${lotN} lot`} mono />
             <SummaryRow
+              label="Pips"
+              value={livePips == null ? "—" : `${livePips >= 0 ? "+" : ""}${livePips.toFixed(1)} pips`}
+              tone={livePips == null ? undefined : livePips >= 0 ? "pos" : "neg"}
+              mono
+            />
+            <SummaryRow
               label="P&L"
               value={previewPnl == null ? "—" : fmtMoney(previewPnl, { sign: true })}
               tone={previewPnl == null ? undefined : previewPnl >= 0 ? "pos" : "neg"}
               mono
             />
             <div className="h-px bg-border my-1" />
+            <SummaryRow
+              label="Risk / Reward (pips)"
+              value={
+                riskPips != null && rewardPips != null
+                  ? `${riskPips.toFixed(1)} / ${rewardPips.toFixed(1)}`
+                  : "—"
+              }
+              mono
+            />
             <SummaryRow
               label={<><Target className="size-3 inline mr-1" />Planned RR</>}
               value={

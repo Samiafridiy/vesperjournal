@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, FileText, Zap, CheckCircle2, AlertTriangle, Cpu, Copy } from "lucide-react";
+import { Upload, FileText, Zap, CheckCircle2, AlertTriangle, Cpu, Copy, PlugZap, Loader2 } from "lucide-react";
 import { parseCsv, parseMtHtml, type ParsedRow } from "@/lib/mt-import";
 import { fmtMoney } from "@/lib/trade-utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -345,6 +345,8 @@ function MetaApiSetup() {
 
 function EaSetup() {
   const { user } = useAuth();
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
   const webhookUrl =
     typeof window !== "undefined"
       ? `${window.location.origin}/api/ea-webhook?uid=${user?.id ?? "YOUR_USER_ID"}`
@@ -353,6 +355,28 @@ function EaSetup() {
   function copy() {
     navigator.clipboard.writeText(webhookUrl);
     toast.success("Webhook URL copied");
+  }
+
+  async function testWebhook() {
+    if (!user) return;
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const res = await fetch(`/api/ea-webhook?uid=${user.id}&test=1`, { method: "GET" });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && json.ok) {
+        setTestResult({ ok: true, msg: "Connection live ✓ — your EA can now POST trades to this URL." });
+        toast.success("Webhook is live");
+      } else {
+        setTestResult({ ok: false, msg: json.error || `Failed (HTTP ${res.status})` });
+        toast.error(json.error || "Webhook test failed");
+      }
+    } catch (e: any) {
+      setTestResult({ ok: false, msg: e.message || "Network error" });
+      toast.error(e.message || "Network error");
+    } finally {
+      setTesting(false);
+    }
   }
 
   return (
@@ -381,7 +405,31 @@ function EaSetup() {
           <Button onClick={copy} variant="outline" className="h-11 gap-2 shrink-0">
             <Copy className="size-4" /> Copy
           </Button>
+          <Button
+            type="button"
+            onClick={testWebhook}
+            disabled={testing || !user}
+            className="h-11 gap-2 shrink-0 bg-champagne text-primary-foreground hover:bg-champagne/90"
+          >
+            {testing ? <Loader2 className="size-4 animate-spin" /> : <PlugZap className="size-4" />}
+            {testing ? "Testing…" : "Test"}
+          </Button>
         </div>
+        {testResult && (
+          <div
+            className={cn(
+              "mt-3 rounded-lg border p-3 text-xs flex items-start gap-2",
+              testResult.ok
+                ? "border-pos/30 bg-pos/5 text-pos"
+                : "border-neg/30 bg-neg/5 text-neg",
+            )}
+          >
+            {testResult.ok
+              ? <CheckCircle2 className="size-4 mt-0.5 shrink-0" />
+              : <AlertTriangle className="size-4 mt-0.5 shrink-0" />}
+            <span className="leading-relaxed">{testResult.msg}</span>
+          </div>
+        )}
       </div>
 
       <div className="mt-6">
