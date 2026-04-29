@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, PlusCircle, History, BarChart3, LogOut, TrendingUp, Download } from "lucide-react";
+import { LayoutDashboard, PlusCircle, History, BarChart3, LogOut, TrendingUp, Download, Brain } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import type { ReactNode } from "react";
@@ -9,6 +9,7 @@ const nav = [
   { to: "/trade/new", label: "New trade", icon: PlusCircle },
   { to: "/trades", label: "History", icon: History },
   { to: "/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/coach", label: "AI Coach", icon: Brain },
   { to: "/import", label: "Import", icon: Download },
 ] as const;
 
