@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TradingLabRouteImport } from './routes/trading-lab'
 import { Route as TradesRouteImport } from './routes/trades'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -23,6 +24,11 @@ import { Route as TradeNewRouteImport } from './routes/trade.new'
 import { Route as ApiMetaapiSyncRouteImport } from './routes/api.metaapi-sync'
 import { Route as ApiEaWebhookRouteImport } from './routes/api.ea-webhook'
 
+const TradingLabRoute = TradingLabRouteImport.update({
+  id: '/trading-lab',
+  path: '/trading-lab',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TradesRoute = TradesRouteImport.update({
   id: '/trades',
   path: '/trades',
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/trades': typeof TradesRoute
+  '/trading-lab': typeof TradingLabRoute
   '/api/ea-webhook': typeof ApiEaWebhookRoute
   '/api/metaapi-sync': typeof ApiMetaapiSyncRoute
   '/trade/new': typeof TradeNewRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/trades': typeof TradesRoute
+  '/trading-lab': typeof TradingLabRoute
   '/api/ea-webhook': typeof ApiEaWebhookRoute
   '/api/metaapi-sync': typeof ApiMetaapiSyncRoute
   '/trade/new': typeof TradeNewRoute
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/trades': typeof TradesRoute
+  '/trading-lab': typeof TradingLabRoute
   '/api/ea-webhook': typeof ApiEaWebhookRoute
   '/api/metaapi-sync': typeof ApiMetaapiSyncRoute
   '/trade/new': typeof TradeNewRoute
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/trades'
+    | '/trading-lab'
     | '/api/ea-webhook'
     | '/api/metaapi-sync'
     | '/trade/new'
@@ -163,6 +173,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/trades'
+    | '/trading-lab'
     | '/api/ea-webhook'
     | '/api/metaapi-sync'
     | '/trade/new'
@@ -178,6 +189,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/trades'
+    | '/trading-lab'
     | '/api/ea-webhook'
     | '/api/metaapi-sync'
     | '/trade/new'
@@ -194,6 +206,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   TradesRoute: typeof TradesRoute
+  TradingLabRoute: typeof TradingLabRoute
   ApiEaWebhookRoute: typeof ApiEaWebhookRoute
   ApiMetaapiSyncRoute: typeof ApiMetaapiSyncRoute
   TradeNewRoute: typeof TradeNewRoute
@@ -201,6 +214,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/trading-lab': {
+      id: '/trading-lab'
+      path: '/trading-lab'
+      fullPath: '/trading-lab'
+      preLoaderRoute: typeof TradingLabRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/trades': {
       id: '/trades'
       path: '/trades'
@@ -306,6 +326,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   TradesRoute: TradesRoute,
+  TradingLabRoute: TradingLabRoute,
   ApiEaWebhookRoute: ApiEaWebhookRoute,
   ApiMetaapiSyncRoute: ApiMetaapiSyncRoute,
   TradeNewRoute: TradeNewRoute,

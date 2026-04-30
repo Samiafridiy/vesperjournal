@@ -27,11 +27,21 @@ import {
   fmtMoney,
   absPips,
   pipDistance,
+  pipSize,
+  pipValuePerLot,
+  fmtPct,
 } from "@/lib/trade-utils";
 import { toast } from "sonner";
-import { Loader2, Upload, ArrowLeft, AlertTriangle, BarChart3, Lock, Target } from "lucide-react";
+import { Loader2, Upload, ArrowLeft, AlertTriangle, BarChart3, Target, ChevronDown, Beaker } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
+import { useRiskPresets, useTradingAccounts, riskProfileLabel, suggestLotSize } from "@/hooks/use-risk";
+import { useTrades } from "@/hooks/use-trades";
+import { computeEdge } from "@/lib/edge-context";
+import {
+  Popover, PopoverTrigger, PopoverContent,
+} from "@/components/ui/popover";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/trade/new")({
   validateSearch: z.object({
@@ -77,6 +87,31 @@ function NewTrade() {
   const [mistakes, setMistakes] = useState<string[]>([]);
   const [screenshot, setScreenshot] = useState<File | null>(null);
 
+  // Risk preset + accounts integration
+  const { presets, defaultPreset } = useRiskPresets();
+  const { accounts, defaultAccount } = useTradingAccounts();
+  const { trades: allTrades } = useTrades();
+  const [presetId, setPresetId] = useState<string | null>(null);
+  const [autoTpApplied, setAutoTpApplied] = useState(false);
+
+  const selectedPreset = useMemo(
+    () => presets.find((p) => p.id === presetId) ?? defaultPreset ?? null,
+    [presets, presetId, defaultPreset],
+  );
+  const selectedAccount = useMemo(
+    () =>
+      accounts.find((a) => a.id === selectedPreset?.account_id)
+        ?? defaultAccount
+        ?? null,
+    [accounts, selectedPreset, defaultAccount],
+  );
+  const accountBalance = Number(selectedAccount?.balance ?? 0);
+
+  // Default the preset selector when the default preset loads (only if user hasn't picked one)
+  useEffect(() => {
+    if (presetId == null && defaultPreset) setPresetId(defaultPreset.id);
+  }, [defaultPreset, presetId]);
+
   useEffect(() => {
     if (!isEdit || !editId || !user) return;
     let cancelled = false;
@@ -104,6 +139,7 @@ function NewTrade() {
       setEmotionAfter(data.emotion_after ?? undefined);
       setMistakes(data.mistakes ?? []);
       setExistingScreenshot(data.screenshot_url ?? null);
+      if (data.risk_preset_id) setPresetId(data.risk_preset_id);
       setLoadingTrade(false);
     })();
     return () => { cancelled = true; };
@@ -156,6 +192,48 @@ function NewTrade() {
     ? calcPnl({ pair, direction, entry: entryN, close: tpN, lot: lotN })
     : null;
 
+  // Preset-based risk computations
+  const presetRiskPct = selectedPreset ? Number(selectedPreset.risk_pct) : null;
+  const presetRR = selectedPreset?.rr_ratio ? Number(selectedPreset.rr_ratio) : null;
+  const presetMaxLoss = presetRiskPct != null && accountBalance > 0
+    ? -accountBalance * (presetRiskPct / 100)
+    : null;
+  const presetMaxProfit = presetMaxLoss != null && presetRR != null
+    ? Math.abs(presetMaxLoss) * presetRR
+    : null;
+  const profileBadge = presetRiskPct != null ? riskProfileLabel(presetRiskPct) : null;
+
+  // Suggested lot from preset
+  const suggestedLot = useMemo(() => {
+    if (!selectedPreset || !stopN || isNaN(entryN) || accountBalance <= 0) return null;
+    const stopPips = absPips(pair, entryN, stopN);
+    if (stopPips <= 0) return null;
+    return suggestLotSize({
+      balance: accountBalance,
+      riskPct: Number(selectedPreset.risk_pct),
+      stopPips,
+      pipValuePerLot: pipValuePerLot(pair),
+    });
+  }, [selectedPreset, stopN, entryN, accountBalance, pair]);
+
+  // Auto-fill TP from preset R:R when user sets entry+stop and TP is empty
+  useEffect(() => {
+    if (!presetRR || tp !== "" || isNaN(entryN) || stopN == null || autoTpApplied) return;
+    const stopDist = Math.abs(entryN - stopN);
+    if (stopDist <= 0) return;
+    const targetPrice = direction === "buy"
+      ? entryN + stopDist * presetRR
+      : entryN - stopDist * presetRR;
+    setTp(targetPrice.toFixed(pipSize(pair) >= 1 ? 2 : 5));
+    setAutoTpApplied(true);
+  }, [presetRR, entryN, stopN, direction, pair, tp, autoTpApplied]);
+
+  // Edge context for this pair + session (90 days)
+  const edge = useMemo(
+    () => computeEdge(allTrades, pair, session ?? null),
+    [allTrades, pair, session],
+  );
+
   function toggleMistake(m: string) {
     setMistakes((prev) => (prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m]));
   }
@@ -205,6 +283,8 @@ function NewTrade() {
       pnl,
       rr,
       result,
+      risk_preset_id: selectedPreset?.id ?? null,
+      account_id: selectedAccount?.id ?? null,
     };
 
     const { error } = isEdit && editId
@@ -425,18 +505,99 @@ function NewTrade() {
             <div className="h-px bg-border my-1" />
             <SummaryRow
               label="Max Loss"
-              value={maxLoss == null ? "—" : fmtMoney(maxLoss, { sign: true })}
-              tone={maxLoss == null ? undefined : "neg"}
+              value={
+                presetMaxLoss != null
+                  ? fmtMoney(presetMaxLoss, { sign: true })
+                  : maxLoss == null
+                  ? "—"
+                  : fmtMoney(maxLoss, { sign: true })
+              }
+              tone={(presetMaxLoss ?? maxLoss) == null ? undefined : "neg"}
               mono
             />
             <SummaryRow
               label="Max Profit"
-              value={maxProfit == null ? "—" : fmtMoney(maxProfit, { sign: true })}
-              tone={maxProfit == null ? undefined : "pos"}
+              value={
+                presetMaxProfit != null
+                  ? fmtMoney(presetMaxProfit, { sign: true })
+                  : maxProfit == null
+                  ? "—"
+                  : fmtMoney(maxProfit, { sign: true })
+              }
+              tone={(presetMaxProfit ?? maxProfit) == null ? undefined : "pos"}
               mono
             />
+            {suggestedLot != null && (
+              <SummaryRow
+                label="Suggested lot"
+                value={
+                  <span className="flex items-center gap-2">
+                    <span>{suggestedLot.toFixed(2)}</span>
+                    <button
+                      type="button"
+                      onClick={() => setLot(String(suggestedLot))}
+                      className="text-[10px] uppercase tracking-wider text-champagne hover:underline"
+                    >
+                      Apply
+                    </button>
+                  </span>
+                }
+                mono
+              />
+            )}
             <div className="h-px bg-border my-1" />
-            <SummaryRow label="Risk Preset" value={<span className="text-xs">SMC Fixed Risk (12%)</span>} />
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-soft text-xs">Risk Preset</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex items-center gap-1.5 text-xs font-medium hover:text-champagne transition-colors"
+                  >
+                    {profileBadge && (
+                      <span className="size-2 rounded-full" style={{ background: profileBadge.color }} />
+                    )}
+                    <span>
+                      {selectedPreset
+                        ? `${selectedPreset.name} (${Number(selectedPreset.risk_pct).toFixed(1)}%)`
+                        : "No preset"}
+                    </span>
+                    <ChevronDown className="size-3 text-faint" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-64 p-2">
+                  <div className="text-[10px] uppercase tracking-wider text-faint px-2 py-1">Switch preset</div>
+                  {presets.length === 0 && (
+                    <Link to="/trading-lab" className="block px-2 py-2 text-xs text-champagne hover:underline">
+                      <Beaker className="size-3 inline mr-1" /> Create your first preset
+                    </Link>
+                  )}
+                  {presets.map((p) => {
+                    const prof = riskProfileLabel(Number(p.risk_pct));
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => { setPresetId(p.id); setAutoTpApplied(false); }}
+                        className={cn(
+                          "w-full flex items-center gap-2 px-2 py-2 rounded-md text-left text-sm hover:bg-accent transition-colors",
+                          presetId === p.id && "bg-accent",
+                        )}
+                      >
+                        <span className="size-2 rounded-full" style={{ background: prof.color }} />
+                        <span className="flex-1 truncate">{p.name}</span>
+                        <span className="text-xs text-soft font-mono">{Number(p.risk_pct).toFixed(1)}%</span>
+                      </button>
+                    );
+                  })}
+                  <div className="border-t border-border mt-1 pt-1">
+                    <Link to="/trading-lab" className="block px-2 py-1.5 text-xs text-soft hover:text-champagne">
+                      <Beaker className="size-3 inline mr-1" /> Manage presets
+                    </Link>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
 
           <div className="surface-card p-5 flex flex-col gap-3">
@@ -444,16 +605,31 @@ function NewTrade() {
               <BarChart3 className="size-4 text-champagne" />
               Edge Context
             </div>
-            <div className="rounded-lg bg-surface-2 border border-border p-4 flex flex-col items-center gap-2 text-center">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-champagne/15 border border-champagne/40 text-champagne text-[11px] font-semibold">
-                <Lock className="size-3" /> Pro
+            {edge ? (
+              <div className="rounded-lg bg-surface-2 border border-border p-4 flex flex-col gap-2.5">
+                <div className="text-[10px] uppercase tracking-wider text-faint">
+                  {pair} · {session ?? "Any session"} · last 90d
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <Stat label="Win rate" value={fmtPct(edge.winRate)} tone={edge.winRate >= 50 ? "pos" : "neg"} />
+                  <Stat label="Avg R:R" value={edge.avgRR.toFixed(2)} />
+                  <Stat label="Net" value={fmtMoney(edge.netPnl, { sign: true })} tone={edge.netPnl >= 0 ? "pos" : "neg"} />
+                </div>
+                <div className="text-[11px] text-foreground/80 leading-relaxed border-t border-border pt-2">
+                  💡 {edge.suggestion}
+                </div>
+                <div className="text-[10px] text-faint">Sample: {edge.sample} trades</div>
               </div>
-              <div className="text-xs text-soft">Improve your trading decisions</div>
-              <div className="text-[11px] text-faint leading-relaxed">
-                Historical edge for <span className="text-foreground font-medium">{pair}</span> on the{" "}
-                <span className="text-foreground font-medium">{session ?? "—"}</span> session with this setup.
+            ) : (
+              <div className="rounded-lg bg-surface-2 border border-border p-4 text-center">
+                <div className="text-xs text-soft">
+                  Not enough history for {pair}{session ? ` · ${session}` : ""}.
+                </div>
+                <div className="text-[11px] text-faint mt-1">
+                  Need 3+ closed trades in the last 90 days to compute edge.
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="flex gap-2">
@@ -554,6 +730,19 @@ function SummaryRow({
       >
         {value ?? "—"}
       </span>
+    </div>
+  );
+}
+
+function Stat({ label, value, tone }: { label: string; value: string; tone?: "pos" | "neg" }) {
+  return (
+    <div className="rounded-md border border-border bg-surface px-2 py-1.5">
+      <div className="text-[9px] uppercase tracking-wider text-faint">{label}</div>
+      <div className={cn(
+        "text-xs font-mono tabular-nums",
+        tone === "pos" && "text-pos",
+        tone === "neg" && "text-neg",
+      )}>{value}</div>
     </div>
   );
 }
