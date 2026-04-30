@@ -27,11 +27,21 @@ import {
   fmtMoney,
   absPips,
   pipDistance,
+  pipSize,
+  pipValuePerLot,
+  fmtPct,
 } from "@/lib/trade-utils";
 import { toast } from "sonner";
-import { Loader2, Upload, ArrowLeft, AlertTriangle, BarChart3, Lock, Target } from "lucide-react";
+import { Loader2, Upload, ArrowLeft, AlertTriangle, BarChart3, Target, ChevronDown, Beaker } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
+import { useRiskPresets, useTradingAccounts, riskProfileLabel, suggestLotSize } from "@/hooks/use-risk";
+import { useTrades } from "@/hooks/use-trades";
+import { computeEdge } from "@/lib/edge-context";
+import {
+  Popover, PopoverTrigger, PopoverContent,
+} from "@/components/ui/popover";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/trade/new")({
   validateSearch: z.object({
@@ -77,6 +87,31 @@ function NewTrade() {
   const [mistakes, setMistakes] = useState<string[]>([]);
   const [screenshot, setScreenshot] = useState<File | null>(null);
 
+  // Risk preset + accounts integration
+  const { presets, defaultPreset } = useRiskPresets();
+  const { accounts, defaultAccount } = useTradingAccounts();
+  const { trades: allTrades } = useTrades();
+  const [presetId, setPresetId] = useState<string | null>(null);
+  const [autoTpApplied, setAutoTpApplied] = useState(false);
+
+  const selectedPreset = useMemo(
+    () => presets.find((p) => p.id === presetId) ?? defaultPreset ?? null,
+    [presets, presetId, defaultPreset],
+  );
+  const selectedAccount = useMemo(
+    () =>
+      accounts.find((a) => a.id === selectedPreset?.account_id)
+        ?? defaultAccount
+        ?? null,
+    [accounts, selectedPreset, defaultAccount],
+  );
+  const accountBalance = Number(selectedAccount?.balance ?? 0);
+
+  // Default the preset selector when the default preset loads (only if user hasn't picked one)
+  useEffect(() => {
+    if (presetId == null && defaultPreset) setPresetId(defaultPreset.id);
+  }, [defaultPreset, presetId]);
+
   useEffect(() => {
     if (!isEdit || !editId || !user) return;
     let cancelled = false;
@@ -104,6 +139,7 @@ function NewTrade() {
       setEmotionAfter(data.emotion_after ?? undefined);
       setMistakes(data.mistakes ?? []);
       setExistingScreenshot(data.screenshot_url ?? null);
+      if (data.risk_preset_id) setPresetId(data.risk_preset_id);
       setLoadingTrade(false);
     })();
     return () => { cancelled = true; };
@@ -156,6 +192,48 @@ function NewTrade() {
     ? calcPnl({ pair, direction, entry: entryN, close: tpN, lot: lotN })
     : null;
 
+  // Preset-based risk computations
+  const presetRiskPct = selectedPreset ? Number(selectedPreset.risk_pct) : null;
+  const presetRR = selectedPreset?.rr_ratio ? Number(selectedPreset.rr_ratio) : null;
+  const presetMaxLoss = presetRiskPct != null && accountBalance > 0
+    ? -accountBalance * (presetRiskPct / 100)
+    : null;
+  const presetMaxProfit = presetMaxLoss != null && presetRR != null
+    ? Math.abs(presetMaxLoss) * presetRR
+    : null;
+  const profileBadge = presetRiskPct != null ? riskProfileLabel(presetRiskPct) : null;
+
+  // Suggested lot from preset
+  const suggestedLot = useMemo(() => {
+    if (!selectedPreset || !stopN || isNaN(entryN) || accountBalance <= 0) return null;
+    const stopPips = absPips(pair, entryN, stopN);
+    if (stopPips <= 0) return null;
+    return suggestLotSize({
+      balance: accountBalance,
+      riskPct: Number(selectedPreset.risk_pct),
+      stopPips,
+      pipValuePerLot: pipValuePerLot(pair),
+    });
+  }, [selectedPreset, stopN, entryN, accountBalance, pair]);
+
+  // Auto-fill TP from preset R:R when user sets entry+stop and TP is empty
+  useEffect(() => {
+    if (!presetRR || tp !== "" || isNaN(entryN) || stopN == null || autoTpApplied) return;
+    const stopDist = Math.abs(entryN - stopN);
+    if (stopDist <= 0) return;
+    const targetPrice = direction === "buy"
+      ? entryN + stopDist * presetRR
+      : entryN - stopDist * presetRR;
+    setTp(targetPrice.toFixed(pipSize(pair) >= 1 ? 2 : 5));
+    setAutoTpApplied(true);
+  }, [presetRR, entryN, stopN, direction, pair, tp, autoTpApplied]);
+
+  // Edge context for this pair + session (90 days)
+  const edge = useMemo(
+    () => computeEdge(allTrades, pair, session ?? null),
+    [allTrades, pair, session],
+  );
+
   function toggleMistake(m: string) {
     setMistakes((prev) => (prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m]));
   }
@@ -205,6 +283,8 @@ function NewTrade() {
       pnl,
       rr,
       result,
+      risk_preset_id: selectedPreset?.id ?? null,
+      account_id: selectedAccount?.id ?? null,
     };
 
     const { error } = isEdit && editId
