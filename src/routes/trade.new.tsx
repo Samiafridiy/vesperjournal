@@ -505,18 +505,99 @@ function NewTrade() {
             <div className="h-px bg-border my-1" />
             <SummaryRow
               label="Max Loss"
-              value={maxLoss == null ? "—" : fmtMoney(maxLoss, { sign: true })}
-              tone={maxLoss == null ? undefined : "neg"}
+              value={
+                presetMaxLoss != null
+                  ? fmtMoney(presetMaxLoss, { sign: true })
+                  : maxLoss == null
+                  ? "—"
+                  : fmtMoney(maxLoss, { sign: true })
+              }
+              tone={(presetMaxLoss ?? maxLoss) == null ? undefined : "neg"}
               mono
             />
             <SummaryRow
               label="Max Profit"
-              value={maxProfit == null ? "—" : fmtMoney(maxProfit, { sign: true })}
-              tone={maxProfit == null ? undefined : "pos"}
+              value={
+                presetMaxProfit != null
+                  ? fmtMoney(presetMaxProfit, { sign: true })
+                  : maxProfit == null
+                  ? "—"
+                  : fmtMoney(maxProfit, { sign: true })
+              }
+              tone={(presetMaxProfit ?? maxProfit) == null ? undefined : "pos"}
               mono
             />
+            {suggestedLot != null && (
+              <SummaryRow
+                label="Suggested lot"
+                value={
+                  <span className="flex items-center gap-2">
+                    <span>{suggestedLot.toFixed(2)}</span>
+                    <button
+                      type="button"
+                      onClick={() => setLot(String(suggestedLot))}
+                      className="text-[10px] uppercase tracking-wider text-champagne hover:underline"
+                    >
+                      Apply
+                    </button>
+                  </span>
+                }
+                mono
+              />
+            )}
             <div className="h-px bg-border my-1" />
-            <SummaryRow label="Risk Preset" value={<span className="text-xs">SMC Fixed Risk (12%)</span>} />
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-soft text-xs">Risk Preset</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex items-center gap-1.5 text-xs font-medium hover:text-champagne transition-colors"
+                  >
+                    {profileBadge && (
+                      <span className="size-2 rounded-full" style={{ background: profileBadge.color }} />
+                    )}
+                    <span>
+                      {selectedPreset
+                        ? `${selectedPreset.name} (${Number(selectedPreset.risk_pct).toFixed(1)}%)`
+                        : "No preset"}
+                    </span>
+                    <ChevronDown className="size-3 text-faint" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-64 p-2">
+                  <div className="text-[10px] uppercase tracking-wider text-faint px-2 py-1">Switch preset</div>
+                  {presets.length === 0 && (
+                    <Link to="/trading-lab" className="block px-2 py-2 text-xs text-champagne hover:underline">
+                      <Beaker className="size-3 inline mr-1" /> Create your first preset
+                    </Link>
+                  )}
+                  {presets.map((p) => {
+                    const prof = riskProfileLabel(Number(p.risk_pct));
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => { setPresetId(p.id); setAutoTpApplied(false); }}
+                        className={cn(
+                          "w-full flex items-center gap-2 px-2 py-2 rounded-md text-left text-sm hover:bg-accent transition-colors",
+                          presetId === p.id && "bg-accent",
+                        )}
+                      >
+                        <span className="size-2 rounded-full" style={{ background: prof.color }} />
+                        <span className="flex-1 truncate">{p.name}</span>
+                        <span className="text-xs text-soft font-mono">{Number(p.risk_pct).toFixed(1)}%</span>
+                      </button>
+                    );
+                  })}
+                  <div className="border-t border-border mt-1 pt-1">
+                    <Link to="/trading-lab" className="block px-2 py-1.5 text-xs text-soft hover:text-champagne">
+                      <Beaker className="size-3 inline mr-1" /> Manage presets
+                    </Link>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
 
           <div className="surface-card p-5 flex flex-col gap-3">
@@ -524,16 +605,31 @@ function NewTrade() {
               <BarChart3 className="size-4 text-champagne" />
               Edge Context
             </div>
-            <div className="rounded-lg bg-surface-2 border border-border p-4 flex flex-col items-center gap-2 text-center">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-champagne/15 border border-champagne/40 text-champagne text-[11px] font-semibold">
-                <Lock className="size-3" /> Pro
+            {edge ? (
+              <div className="rounded-lg bg-surface-2 border border-border p-4 flex flex-col gap-2.5">
+                <div className="text-[10px] uppercase tracking-wider text-faint">
+                  {pair} · {session ?? "Any session"} · last 90d
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <Stat label="Win rate" value={fmtPct(edge.winRate)} tone={edge.winRate >= 50 ? "pos" : "neg"} />
+                  <Stat label="Avg R:R" value={edge.avgRR.toFixed(2)} />
+                  <Stat label="Net" value={fmtMoney(edge.netPnl, { sign: true })} tone={edge.netPnl >= 0 ? "pos" : "neg"} />
+                </div>
+                <div className="text-[11px] text-foreground/80 leading-relaxed border-t border-border pt-2">
+                  💡 {edge.suggestion}
+                </div>
+                <div className="text-[10px] text-faint">Sample: {edge.sample} trades</div>
               </div>
-              <div className="text-xs text-soft">Improve your trading decisions</div>
-              <div className="text-[11px] text-faint leading-relaxed">
-                Historical edge for <span className="text-foreground font-medium">{pair}</span> on the{" "}
-                <span className="text-foreground font-medium">{session ?? "—"}</span> session with this setup.
+            ) : (
+              <div className="rounded-lg bg-surface-2 border border-border p-4 text-center">
+                <div className="text-xs text-soft">
+                  Not enough history for {pair}{session ? ` · ${session}` : ""}.
+                </div>
+                <div className="text-[11px] text-faint mt-1">
+                  Need 3+ closed trades in the last 90 days to compute edge.
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="flex gap-2">
