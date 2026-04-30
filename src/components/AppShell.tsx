@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, PlusCircle, History, BarChart3, LogOut, TrendingUp, Download, Brain } from "lucide-react";
+import { LayoutDashboard, PlusCircle, History, BarChart3, LogOut, TrendingUp, Download, Brain, Beaker } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import type { ReactNode } from "react";
@@ -9,6 +9,7 @@ const nav = [
   { to: "/trade/new", label: "New trade", icon: PlusCircle },
   { to: "/trades", label: "History", icon: History },
   { to: "/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/trading-lab", label: "Lab", icon: Beaker },
   { to: "/coach", label: "AI Coach", icon: Brain },
   { to: "/import", label: "Import", icon: Download },
 ] as const;
@@ -97,7 +98,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-sidebar/95 backdrop-blur border-t border-border">
-        <div className="grid grid-cols-6">
+        <div className="grid grid-cols-7">
           {nav.map((n) => {
             const active = loc.pathname === n.to || (n.to !== "/dashboard" && loc.pathname.startsWith(n.to));
             const Icon = n.icon;
@@ -106,11 +107,11 @@ export function AppShell({ children }: { children: ReactNode }) {
                 key={n.to}
                 to={n.to}
                 className={
-                  "flex flex-col items-center justify-center gap-1 py-3 text-[10px] " +
+                  "flex flex-col items-center justify-center gap-0.5 py-2.5 text-[9px] " +
                   (active ? "text-champagne" : "text-soft")
                 }
               >
-                <Icon className="size-5" />
+                <Icon className="size-4" />
                 {n.label}
               </Link>
             );
