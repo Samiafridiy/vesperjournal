@@ -14,6 +14,65 @@ export type Database = {
   }
   public: {
     Tables: {
+      coach_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      coach_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "coach_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -35,8 +94,62 @@ export type Database = {
         }
         Relationships: []
       }
+      risk_presets: {
+        Row: {
+          account_id: string | null
+          created_at: string
+          id: string
+          is_default: boolean
+          max_daily_risk_pct: number | null
+          max_weekly_risk_pct: number | null
+          name: string
+          risk_pct: number
+          rr_ratio: number | null
+          strategy_tag: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          max_daily_risk_pct?: number | null
+          max_weekly_risk_pct?: number | null
+          name: string
+          risk_pct?: number
+          rr_ratio?: number | null
+          strategy_tag?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string | null
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          max_daily_risk_pct?: number | null
+          max_weekly_risk_pct?: number | null
+          name?: string
+          risk_pct?: number
+          rr_ratio?: number | null
+          strategy_tag?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_presets_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "trading_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trades: {
         Row: {
+          account_id: string | null
           close_price: number | null
           created_at: string
           direction: string
@@ -50,6 +163,7 @@ export type Database = {
           pair: string
           pnl: number | null
           result: string | null
+          risk_preset_id: string | null
           rr: number | null
           screenshot_url: string | null
           session: string | null
@@ -61,6 +175,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          account_id?: string | null
           close_price?: number | null
           created_at?: string
           direction: string
@@ -74,6 +189,7 @@ export type Database = {
           pair: string
           pnl?: number | null
           result?: string | null
+          risk_preset_id?: string | null
           rr?: number | null
           screenshot_url?: string | null
           session?: string | null
@@ -85,6 +201,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          account_id?: string | null
           close_price?: number | null
           created_at?: string
           direction?: string
@@ -98,6 +215,7 @@ export type Database = {
           pair?: string
           pnl?: number | null
           result?: string | null
+          risk_preset_id?: string | null
           rr?: number | null
           screenshot_url?: string | null
           session?: string | null
@@ -105,6 +223,57 @@ export type Database = {
           strategy?: string | null
           take_profit?: number | null
           trade_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trades_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "trading_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trades_risk_preset_id_fkey"
+            columns: ["risk_preset_id"]
+            isOneToOne: false
+            referencedRelation: "risk_presets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trading_accounts: {
+        Row: {
+          balance: number
+          broker: string | null
+          created_at: string
+          currency: string
+          id: string
+          is_default: boolean
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          broker?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          is_default?: boolean
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          broker?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          is_default?: boolean
+          name?: string
           updated_at?: string
           user_id?: string
         }
