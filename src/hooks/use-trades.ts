@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useId } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import type { Trade } from "@/lib/trade-utils";
@@ -7,6 +7,7 @@ export function useTrades() {
   const { user } = useAuth();
   const [trades, setTrades] = useState<Trade[]>([]);
   const [loading, setLoading] = useState(true);
+  const instanceId = useId();
 
   const refetch = useCallback(async () => {
     if (!user) {
@@ -31,7 +32,7 @@ export function useTrades() {
   useEffect(() => {
     if (!user) return;
     const channel = supabase
-      .channel("trades-changes")
+      .channel(`trades-changes-${instanceId}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "trades", filter: `user_id=eq.${user.id}` },
@@ -41,7 +42,7 @@ export function useTrades() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, refetch]);
+  }, [user, refetch, instanceId]);
 
   return { trades, loading, refetch };
 }
