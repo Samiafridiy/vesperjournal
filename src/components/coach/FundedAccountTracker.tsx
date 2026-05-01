@@ -1,8 +1,7 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
-import { Trophy, AlertTriangle, ShieldAlert, Clock, CalendarDays } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { Trophy, ShieldAlert, Clock, CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fmtMoney } from "@/lib/trade-utils";
 import { useRiskPresets } from "@/hooks/use-risk";
