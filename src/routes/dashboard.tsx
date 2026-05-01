@@ -92,13 +92,13 @@ function Dashboard() {
 
       {empty ? <EmptyState /> : (
         <>
-          <FundedAlertBanner />
+          <FundedAlertBanner trades={trades} />
           <CoachSaysToday trades={trades} />
           <DailyTipModal trades={trades} />
 
           {/* Funded account tracker */}
           <section className="mb-6">
-            <FundedAccountTracker />
+            <FundedAccountTracker trades={trades} />
           </section>
 
           {/* Coach row: Trader Score + Daily Coach + Mistake Alerts */}
