@@ -470,6 +470,45 @@ function PresetDialog({
               <Field label="Max weekly risk %"><Input type="number" step="0.1" value={weekly} onChange={(e) => setWeekly(e.target.value)} placeholder="e.g. 6" className="font-mono" /></Field>
             </div>
           </div>
+          {/* Funded Account Settings */}
+          <div className="border-t border-border pt-4">
+            <label className="flex items-center justify-between mb-3">
+              <span className="flex items-center gap-2 text-sm font-medium">
+                <Trophy className="size-4 text-champagne" />
+                Funded Account Rules
+              </span>
+              <Switch checked={fundedEnabled} onCheckedChange={setFundedEnabled} />
+            </label>
+            {fundedEnabled && (
+              <div className="flex flex-col gap-3">
+                <Field label="Account type">
+                  <Select value={accountType} onValueChange={(v) => setAccountType(v as AccountType)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="personal">{ACCOUNT_TYPE_LABEL.personal}</SelectItem>
+                      <SelectItem value="challenge_p1">{ACCOUNT_TYPE_LABEL.challenge_p1}</SelectItem>
+                      <SelectItem value="challenge_p2">{ACCOUNT_TYPE_LABEL.challenge_p2}</SelectItem>
+                      <SelectItem value="funded_live">{ACCOUNT_TYPE_LABEL.funded_live}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field label={`Starting balance (defaults to ${fmtMoney(balance)})`}>
+                  <Input type="number" step="any" value={startingBal} onChange={(e) => setStartingBal(e.target.value)} placeholder={String(balance)} className="font-mono" />
+                </Field>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Profit target ($)"><Input type="number" step="any" value={profitTarget} onChange={(e) => setProfitTarget(e.target.value)} placeholder="e.g. 500" className="font-mono" /></Field>
+                  <Field label="Max drawdown ($)"><Input type="number" step="any" value={maxDD} onChange={(e) => setMaxDD(e.target.value)} placeholder="e.g. 400" className="font-mono" /></Field>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Daily loss limit ($)"><Input type="number" step="any" value={dailyLossLimit} onChange={(e) => setDailyLossLimit(e.target.value)} placeholder="e.g. 200" className="font-mono" /></Field>
+                  <Field label="Min trading days"><Input type="number" step="1" value={minDays} onChange={(e) => setMinDays(e.target.value)} placeholder="e.g. 5" className="font-mono" /></Field>
+                </div>
+                <Field label="Challenge deadline">
+                  <Input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="font-mono" />
+                </Field>
+              </div>
+            )}
+          </div>
           <label className="flex items-center justify-between">
             <span className="text-sm">Set as default preset</span>
             <Switch checked={isDefault} onCheckedChange={setIsDefault} />
