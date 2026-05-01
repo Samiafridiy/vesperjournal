@@ -35,8 +35,6 @@ import { cn } from "@/lib/utils";
 import {
   ACCOUNT_TYPE_LABEL,
   accountTypeBadge,
-  fundedRiskPerTrade,
-  tradesUntilBreach,
   type AccountType,
 } from "@/lib/funded-account";
 
