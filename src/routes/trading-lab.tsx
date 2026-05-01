@@ -321,6 +321,14 @@ function RiskEngineTab() {
                           <Star className="size-2.5" />
                         </span>
                       )}
+                      {p.funded_enabled && (() => {
+                        const b = accountTypeBadge(p.account_type as AccountType);
+                        return (
+                          <span className={cn("inline-flex items-center px-1.5 py-0.5 rounded-full border text-[10px] uppercase tracking-wider shrink-0", b.className)}>
+                            {b.label}
+                          </span>
+                        );
+                      })()}
                     </div>
                     <div className="text-xs text-soft mt-0.5">{profile.label} · {p.strategy_tag || "Any strategy"}</div>
                   </div>
