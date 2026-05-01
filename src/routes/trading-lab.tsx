@@ -30,8 +30,13 @@ import { useTrades } from "@/hooks/use-trades";
 import { computeRiskUsedPct } from "@/lib/edge-context";
 import { fmtMoney, fmtPct } from "@/lib/trade-utils";
 import { toast } from "sonner";
-import { Beaker, Plus, Trash2, Star, AlertTriangle, Wallet, ShieldCheck } from "lucide-react";
+import { Beaker, Plus, Trash2, Star, AlertTriangle, Wallet, ShieldCheck, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  ACCOUNT_TYPE_LABEL,
+  accountTypeBadge,
+  type AccountType,
+} from "@/lib/funded-account";
 
 export const Route = createFileRoute("/trading-lab")({
   head: () => ({
@@ -316,6 +321,14 @@ function RiskEngineTab() {
                           <Star className="size-2.5" />
                         </span>
                       )}
+                      {p.funded_enabled && (() => {
+                        const b = accountTypeBadge(p.account_type as AccountType);
+                        return (
+                          <span className={cn("inline-flex items-center px-1.5 py-0.5 rounded-full border text-[10px] uppercase tracking-wider shrink-0", b.className)}>
+                            {b.label}
+                          </span>
+                        );
+                      })()}
                     </div>
                     <div className="text-xs text-soft mt-0.5">{profile.label} · {p.strategy_tag || "Any strategy"}</div>
                   </div>
@@ -381,6 +394,16 @@ function PresetDialog({
   const [isDefault, setIsDefault] = useState(edit?.is_default ?? false);
   const [saving, setSaving] = useState(false);
 
+  // Funded account fields
+  const [fundedEnabled, setFundedEnabled] = useState<boolean>(edit?.funded_enabled ?? false);
+  const [accountType, setAccountType] = useState<AccountType>((edit?.account_type as AccountType) ?? "personal");
+  const [profitTarget, setProfitTarget] = useState(edit?.profit_target != null ? String(edit.profit_target) : "");
+  const [maxDD, setMaxDD] = useState(edit?.max_drawdown_amount != null ? String(edit.max_drawdown_amount) : "");
+  const [dailyLossLimit, setDailyLossLimit] = useState(edit?.daily_loss_limit != null ? String(edit.daily_loss_limit) : "");
+  const [minDays, setMinDays] = useState(edit?.min_trading_days != null ? String(edit.min_trading_days) : "");
+  const [deadline, setDeadline] = useState(edit?.challenge_deadline ?? "");
+  const [startingBal, setStartingBal] = useState(edit?.starting_balance != null ? String(edit.starting_balance) : "");
+
   const account = accounts.find((a) => a.id === accountId) ?? null;
   const balance = Number(account?.balance ?? 0);
   const riskN = Number(riskPct) || 0;
@@ -406,6 +429,14 @@ function PresetDialog({
       strategy_tag: strategy || null,
       account_id: accountId,
       is_default: isDefault,
+      funded_enabled: fundedEnabled,
+      account_type: fundedEnabled ? accountType : "personal",
+      profit_target: fundedEnabled && profitTarget ? Number(profitTarget) : null,
+      max_drawdown_amount: fundedEnabled && maxDD ? Number(maxDD) : null,
+      daily_loss_limit: fundedEnabled && dailyLossLimit ? Number(dailyLossLimit) : null,
+      min_trading_days: fundedEnabled && minDays ? Number(minDays) : null,
+      challenge_deadline: fundedEnabled && deadline ? deadline : null,
+      starting_balance: fundedEnabled ? Number(startingBal || balance || 0) : null,
     };
     const { error } = edit
       ? await supabase.from("risk_presets").update(payload).eq("id", edit.id)
@@ -444,6 +475,45 @@ function PresetDialog({
               <Field label="Max daily risk %"><Input type="number" step="0.1" value={daily} onChange={(e) => setDaily(e.target.value)} placeholder="e.g. 3" className="font-mono" /></Field>
               <Field label="Max weekly risk %"><Input type="number" step="0.1" value={weekly} onChange={(e) => setWeekly(e.target.value)} placeholder="e.g. 6" className="font-mono" /></Field>
             </div>
+          </div>
+          {/* Funded Account Settings */}
+          <div className="border-t border-border pt-4">
+            <label className="flex items-center justify-between mb-3">
+              <span className="flex items-center gap-2 text-sm font-medium">
+                <Trophy className="size-4 text-champagne" />
+                Funded Account Rules
+              </span>
+              <Switch checked={fundedEnabled} onCheckedChange={setFundedEnabled} />
+            </label>
+            {fundedEnabled && (
+              <div className="flex flex-col gap-3">
+                <Field label="Account type">
+                  <Select value={accountType} onValueChange={(v) => setAccountType(v as AccountType)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="personal">{ACCOUNT_TYPE_LABEL.personal}</SelectItem>
+                      <SelectItem value="challenge_p1">{ACCOUNT_TYPE_LABEL.challenge_p1}</SelectItem>
+                      <SelectItem value="challenge_p2">{ACCOUNT_TYPE_LABEL.challenge_p2}</SelectItem>
+                      <SelectItem value="funded_live">{ACCOUNT_TYPE_LABEL.funded_live}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field label={`Starting balance (defaults to ${fmtMoney(balance)})`}>
+                  <Input type="number" step="any" value={startingBal} onChange={(e) => setStartingBal(e.target.value)} placeholder={String(balance)} className="font-mono" />
+                </Field>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Profit target ($)"><Input type="number" step="any" value={profitTarget} onChange={(e) => setProfitTarget(e.target.value)} placeholder="e.g. 500" className="font-mono" /></Field>
+                  <Field label="Max drawdown ($)"><Input type="number" step="any" value={maxDD} onChange={(e) => setMaxDD(e.target.value)} placeholder="e.g. 400" className="font-mono" /></Field>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Daily loss limit ($)"><Input type="number" step="any" value={dailyLossLimit} onChange={(e) => setDailyLossLimit(e.target.value)} placeholder="e.g. 200" className="font-mono" /></Field>
+                  <Field label="Min trading days"><Input type="number" step="1" value={minDays} onChange={(e) => setMinDays(e.target.value)} placeholder="e.g. 5" className="font-mono" /></Field>
+                </div>
+                <Field label="Challenge deadline">
+                  <Input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="font-mono" />
+                </Field>
+              </div>
+            )}
           </div>
           <label className="flex items-center justify-between">
             <span className="text-sm">Set as default preset</span>
@@ -486,6 +556,41 @@ function PresetDialog({
               <div className="flex justify-between border-t border-border pt-2"><span className="text-soft">Balance after 10 losses</span><span className="font-mono">{fmtMoney(dd10.remaining)}</span></div>
             </div>
           </div>
+          {fundedEnabled && (() => {
+            const startBal = Number(startingBal) || balance;
+            const dd = Number(maxDD) || 0;
+            const dl = Number(dailyLossLimit) || 0;
+            const pt = Number(profitTarget) || 0;
+            // Risk per trade calculated from MAX DRAWDOWN, not balance
+            const fundedRisk = dd > 0 ? dd * (riskN / 100) : 0;
+            const lossesToDD = fundedRisk > 0 ? Math.floor(dd / fundedRisk) : 0;
+            const lossesToDaily = fundedRisk > 0 && dl > 0 ? Math.floor(dl / fundedRisk) : 0;
+            const badge = accountTypeBadge(accountType);
+            const dlNum = (() => {
+              if (!deadline) return null;
+              const d = new Date(deadline);
+              const now = new Date();
+              now.setHours(0,0,0,0);
+              return Math.ceil((d.getTime() - now.getTime()) / 86_400_000);
+            })();
+            return (
+              <div className="border-t border-border pt-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-[11px] uppercase tracking-wider text-faint">Funded preview</div>
+                  <span className={cn("inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] uppercase tracking-wider", badge.className)}>
+                    {badge.label}
+                  </span>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between"><span className="text-soft">Risk per trade (of max DD)</span><span className="font-mono">{fmtMoney(fundedRisk)}</span></div>
+                  <div className="flex justify-between"><span className="text-soft">Losses until max DD breached</span><span className="font-mono text-neg">{lossesToDD || "—"}</span></div>
+                  <div className="flex justify-between"><span className="text-soft">Losses until daily limit breached</span><span className="font-mono text-champagne">{lossesToDaily || "—"}</span></div>
+                  {pt > 0 && <div className="flex justify-between"><span className="text-soft">Profit target</span><span className="font-mono text-pos">{fmtMoney(pt)} ({((pt / startBal) * 100).toFixed(1)}%)</span></div>}
+                  {dlNum != null && <div className="flex justify-between"><span className="text-soft">Days remaining</span><span className={cn("font-mono", dlNum <= 3 ? "text-neg" : "")}>{dlNum < 0 ? "Expired" : dlNum}</span></div>}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
       <DialogFooter>

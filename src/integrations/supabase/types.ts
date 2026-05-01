@@ -97,42 +97,66 @@ export type Database = {
       risk_presets: {
         Row: {
           account_id: string | null
+          account_type: string
+          challenge_deadline: string | null
           created_at: string
+          daily_loss_limit: number | null
+          funded_enabled: boolean
           id: string
           is_default: boolean
           max_daily_risk_pct: number | null
+          max_drawdown_amount: number | null
           max_weekly_risk_pct: number | null
+          min_trading_days: number | null
           name: string
+          profit_target: number | null
           risk_pct: number
           rr_ratio: number | null
+          starting_balance: number | null
           strategy_tag: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           account_id?: string | null
+          account_type?: string
+          challenge_deadline?: string | null
           created_at?: string
+          daily_loss_limit?: number | null
+          funded_enabled?: boolean
           id?: string
           is_default?: boolean
           max_daily_risk_pct?: number | null
+          max_drawdown_amount?: number | null
           max_weekly_risk_pct?: number | null
+          min_trading_days?: number | null
           name: string
+          profit_target?: number | null
           risk_pct?: number
           rr_ratio?: number | null
+          starting_balance?: number | null
           strategy_tag?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           account_id?: string | null
+          account_type?: string
+          challenge_deadline?: string | null
           created_at?: string
+          daily_loss_limit?: number | null
+          funded_enabled?: boolean
           id?: string
           is_default?: boolean
           max_daily_risk_pct?: number | null
+          max_drawdown_amount?: number | null
           max_weekly_risk_pct?: number | null
+          min_trading_days?: number | null
           name?: string
+          profit_target?: number | null
           risk_pct?: number
           rr_ratio?: number | null
+          starting_balance?: number | null
           strategy_tag?: string | null
           updated_at?: string
           user_id?: string

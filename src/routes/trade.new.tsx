@@ -372,7 +372,12 @@ function NewTrade() {
               <Input type="number" step="any" value={close} onChange={(e) => setClose(e.target.value)} placeholder="Leave blank if open" className="bg-surface-2 border-border h-11 font-mono" />
             </FormField>
             <FormField label="Date & time">
-              <Input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} className="bg-surface-2 border-border h-11" />
+              <Input
+                type="datetime-local"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="bg-surface-2 border-border h-11 w-full min-w-0 text-xs sm:text-sm font-mono px-2 sm:px-3"
+              />
             </FormField>
             <FormField label="Session">
               <Select value={session} onValueChange={setSession}>
