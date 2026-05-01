@@ -29,6 +29,7 @@ import { DrawdownChart } from "@/components/coach/DrawdownChart";
 import { computeTraderScore, generateDailyCoach, detectMistakes } from "@/lib/trader-coach";
 import { CoachSaysToday } from "@/components/coach/CoachSaysToday";
 import { DailyTipModal } from "@/components/coach/DailyTipModal";
+import { FundedAccountTracker, FundedAlertBanner } from "@/components/coach/FundedAccountTracker";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -91,8 +92,14 @@ function Dashboard() {
 
       {empty ? <EmptyState /> : (
         <>
+          <FundedAlertBanner />
           <CoachSaysToday trades={trades} />
           <DailyTipModal trades={trades} />
+
+          {/* Funded account tracker */}
+          <section className="mb-6">
+            <FundedAccountTracker />
+          </section>
 
           {/* Coach row: Trader Score + Daily Coach + Mistake Alerts */}
           <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-6">
@@ -188,12 +195,13 @@ function Dashboard() {
             <StatCard
               label="Best / Worst"
               value={
-                <span className="flex items-baseline gap-2 text-2xl">
-                  <span className="text-pos">
+                <span className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2 leading-tight">
+                  <span className="text-pos text-lg sm:text-2xl tabular-nums">
                     {fmtMoney(stats.bestTrade?.pnl ?? null, { sign: true })}
                   </span>
-                  <span className="text-faint text-base">/</span>
-                  <span className="text-neg">
+                  <span className="text-faint text-sm sm:text-base hidden sm:inline">/</span>
+                  <span className="text-neg text-lg sm:text-2xl tabular-nums">
+                    <span className="sm:hidden">/ </span>
                     {fmtMoney(stats.worstTrade?.pnl ?? null, { sign: true })}
                   </span>
                 </span>
