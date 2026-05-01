@@ -30,8 +30,15 @@ import { useTrades } from "@/hooks/use-trades";
 import { computeRiskUsedPct } from "@/lib/edge-context";
 import { fmtMoney, fmtPct } from "@/lib/trade-utils";
 import { toast } from "sonner";
-import { Beaker, Plus, Trash2, Star, AlertTriangle, Wallet, ShieldCheck } from "lucide-react";
+import { Beaker, Plus, Trash2, Star, AlertTriangle, Wallet, ShieldCheck, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  ACCOUNT_TYPE_LABEL,
+  accountTypeBadge,
+  fundedRiskPerTrade,
+  tradesUntilBreach,
+  type AccountType,
+} from "@/lib/funded-account";
 
 export const Route = createFileRoute("/trading-lab")({
   head: () => ({
@@ -381,6 +388,16 @@ function PresetDialog({
   const [isDefault, setIsDefault] = useState(edit?.is_default ?? false);
   const [saving, setSaving] = useState(false);
 
+  // Funded account fields
+  const [fundedEnabled, setFundedEnabled] = useState<boolean>(edit?.funded_enabled ?? false);
+  const [accountType, setAccountType] = useState<AccountType>((edit?.account_type as AccountType) ?? "personal");
+  const [profitTarget, setProfitTarget] = useState(edit?.profit_target != null ? String(edit.profit_target) : "");
+  const [maxDD, setMaxDD] = useState(edit?.max_drawdown_amount != null ? String(edit.max_drawdown_amount) : "");
+  const [dailyLossLimit, setDailyLossLimit] = useState(edit?.daily_loss_limit != null ? String(edit.daily_loss_limit) : "");
+  const [minDays, setMinDays] = useState(edit?.min_trading_days != null ? String(edit.min_trading_days) : "");
+  const [deadline, setDeadline] = useState(edit?.challenge_deadline ?? "");
+  const [startingBal, setStartingBal] = useState(edit?.starting_balance != null ? String(edit.starting_balance) : "");
+
   const account = accounts.find((a) => a.id === accountId) ?? null;
   const balance = Number(account?.balance ?? 0);
   const riskN = Number(riskPct) || 0;
@@ -406,6 +423,14 @@ function PresetDialog({
       strategy_tag: strategy || null,
       account_id: accountId,
       is_default: isDefault,
+      funded_enabled: fundedEnabled,
+      account_type: fundedEnabled ? accountType : "personal",
+      profit_target: fundedEnabled && profitTarget ? Number(profitTarget) : null,
+      max_drawdown_amount: fundedEnabled && maxDD ? Number(maxDD) : null,
+      daily_loss_limit: fundedEnabled && dailyLossLimit ? Number(dailyLossLimit) : null,
+      min_trading_days: fundedEnabled && minDays ? Number(minDays) : null,
+      challenge_deadline: fundedEnabled && deadline ? deadline : null,
+      starting_balance: fundedEnabled ? Number(startingBal || balance || 0) : null,
     };
     const { error } = edit
       ? await supabase.from("risk_presets").update(payload).eq("id", edit.id)
