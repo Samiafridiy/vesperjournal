@@ -550,6 +550,41 @@ function PresetDialog({
               <div className="flex justify-between border-t border-border pt-2"><span className="text-soft">Balance after 10 losses</span><span className="font-mono">{fmtMoney(dd10.remaining)}</span></div>
             </div>
           </div>
+          {fundedEnabled && (() => {
+            const startBal = Number(startingBal) || balance;
+            const dd = Number(maxDD) || 0;
+            const dl = Number(dailyLossLimit) || 0;
+            const pt = Number(profitTarget) || 0;
+            // Risk per trade calculated from MAX DRAWDOWN, not balance
+            const fundedRisk = dd > 0 ? dd * (riskN / 100) : 0;
+            const lossesToDD = fundedRisk > 0 ? Math.floor(dd / fundedRisk) : 0;
+            const lossesToDaily = fundedRisk > 0 && dl > 0 ? Math.floor(dl / fundedRisk) : 0;
+            const badge = accountTypeBadge(accountType);
+            const dlNum = (() => {
+              if (!deadline) return null;
+              const d = new Date(deadline);
+              const now = new Date();
+              now.setHours(0,0,0,0);
+              return Math.ceil((d.getTime() - now.getTime()) / 86_400_000);
+            })();
+            return (
+              <div className="border-t border-border pt-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-[11px] uppercase tracking-wider text-faint">Funded preview</div>
+                  <span className={cn("inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] uppercase tracking-wider", badge.className)}>
+                    {badge.label}
+                  </span>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between"><span className="text-soft">Risk per trade (of max DD)</span><span className="font-mono">{fmtMoney(fundedRisk)}</span></div>
+                  <div className="flex justify-between"><span className="text-soft">Losses until max DD breached</span><span className="font-mono text-neg">{lossesToDD || "—"}</span></div>
+                  <div className="flex justify-between"><span className="text-soft">Losses until daily limit breached</span><span className="font-mono text-champagne">{lossesToDaily || "—"}</span></div>
+                  {pt > 0 && <div className="flex justify-between"><span className="text-soft">Profit target</span><span className="font-mono text-pos">{fmtMoney(pt)} ({((pt / startBal) * 100).toFixed(1)}%)</span></div>}
+                  {dlNum != null && <div className="flex justify-between"><span className="text-soft">Days remaining</span><span className={cn("font-mono", dlNum <= 3 ? "text-neg" : "")}>{dlNum < 0 ? "Expired" : dlNum}</span></div>}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
       <DialogFooter>
