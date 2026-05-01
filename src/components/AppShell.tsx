@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 import type { ReactNode } from "react";
 
 const nav = [
-  { to: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { to: "/trade/new", label: "New trade", icon: PlusCircle },
-  { to: "/trades", label: "History", icon: History },
-  { to: "/analytics", label: "Analytics", icon: BarChart3 },
-  { to: "/trading-lab", label: "Lab", icon: Beaker },
-  { to: "/coach", label: "AI Coach", icon: Brain },
-  { to: "/import", label: "Import", icon: Download },
+  { to: "/dashboard", label: "Overview", shortLabel: "Home", icon: LayoutDashboard },
+  { to: "/trade/new", label: "New trade", shortLabel: "New", icon: PlusCircle },
+  { to: "/trades", label: "History", shortLabel: "Log", icon: History },
+  { to: "/analytics", label: "Analytics", shortLabel: "Stats", icon: BarChart3 },
+  { to: "/trading-lab", label: "Lab", shortLabel: "Lab", icon: Beaker },
+  { to: "/coach", label: "AI Coach", shortLabel: "Coach", icon: Brain },
+  { to: "/import", label: "Import", shortLabel: "Import", icon: Download },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -98,7 +98,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-sidebar/95 backdrop-blur border-t border-border">
-        <div className="grid grid-cols-7">
+        <div className="grid grid-cols-7 px-1">
           {nav.map((n) => {
             const active = loc.pathname === n.to || (n.to !== "/dashboard" && loc.pathname.startsWith(n.to));
             const Icon = n.icon;
@@ -107,12 +107,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                 key={n.to}
                 to={n.to}
                 className={
-                  "flex flex-col items-center justify-center gap-0.5 py-2.5 text-[9px] " +
+                  "flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] leading-none truncate " +
                   (active ? "text-champagne" : "text-soft")
                 }
               >
-                <Icon className="size-4" />
-                {n.label}
+                <Icon className="size-[18px]" />
+                <span className="truncate max-w-full">{n.shortLabel}</span>
               </Link>
             );
           })}
