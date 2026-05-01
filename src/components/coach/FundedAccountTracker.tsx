@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { fmtMoney } from "@/lib/trade-utils";
 import { useRiskPresets } from "@/hooks/use-risk";
 import { useTrades } from "@/hooks/use-trades";
+import type { Trade } from "@/lib/trade-utils";
 import {
   computeFundedMetrics,
   accountTypeBadge,
@@ -13,9 +14,10 @@ import {
 } from "@/lib/funded-account";
 
 /** Returns the active funded preset (default or first funded one), if any. */
-function useFundedMetrics(): FundedMetrics | null {
+function useFundedMetrics(tradesProp?: Trade[]): FundedMetrics | null {
   const { presets, defaultPreset } = useRiskPresets();
-  const { trades } = useTrades();
+  const fallback = useTrades();
+  const trades = tradesProp ?? fallback.trades;
   return useMemo(() => {
     const preset =
       (defaultPreset && defaultPreset.funded_enabled ? defaultPreset : null) ??
@@ -25,8 +27,8 @@ function useFundedMetrics(): FundedMetrics | null {
   }, [presets, defaultPreset, trades]);
 }
 
-export function FundedAlertBanner() {
-  const m = useFundedMetrics();
+export function FundedAlertBanner({ trades }: { trades?: Trade[] } = {}) {
+  const m = useFundedMetrics(trades);
   if (!m) return null;
   const showDaily = m.dailyAlert;
   const showDD = m.drawdownAlert;
@@ -60,8 +62,8 @@ export function FundedAlertBanner() {
   );
 }
 
-export function FundedAccountTracker() {
-  const m = useFundedMetrics();
+export function FundedAccountTracker({ trades }: { trades?: Trade[] } = {}) {
+  const m = useFundedMetrics(trades);
   if (!m) return null;
 
   const badge = accountTypeBadge(m.type);
