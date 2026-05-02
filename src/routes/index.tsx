@@ -10,15 +10,20 @@ import {
   ArrowRight,
   BarChart3,
   Shield,
-  Calendar,
-  LineChart,
-  Target,
-  Zap,
   CheckCircle2,
   Check,
-  Newspaper,
-  FileText,
-  Cpu,
+  MessageSquare,
+  AlertTriangle,
+  Target,
+  Activity,
+  Gauge,
+  Trophy,
+  Building2,
+  User,
+  Send,
+  Flame,
+  Eye,
+  ChevronRight,
 } from "lucide-react";
 import { HeroChart } from "@/components/landing/HeroChart";
 import { Reveal, StaggerGroup, StaggerItem } from "@/components/motion/Reveal";
@@ -30,12 +35,12 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "A premium trading journal built around psychology and smart insights. Track every trade, log emotions and mistakes, and discover what's actually costing you.",
+          "AI-powered trading journal that scores your discipline, catches your mistakes, and tells you exactly what's costing you money. Free during beta.",
       },
       { property: "og:title", content: "Vesper Journal — Trade smarter, not just more" },
       {
         property: "og:description",
-        content: "Track psychology, surface insights, improve performance.",
+        content: "AI Trader Score, live coach, mistake alerts, and risk engine — built for funded, live, and learning traders.",
       },
     ],
   }),
@@ -90,7 +95,7 @@ function Landing() {
         </Link>
         <nav className="hidden md:flex items-center gap-8 text-sm text-soft">
           <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-          <a href="#analytics" className="hover:text-foreground transition-colors">Analytics</a>
+          <a href="#built-for" className="hover:text-foreground transition-colors">Who it's for</a>
           <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
         </nav>
         <div className="flex items-center gap-2">
@@ -110,7 +115,7 @@ function Landing() {
       {/* HERO */}
       <motion.section
         style={{ y: heroY, opacity: heroOpacity }}
-        className="relative z-10 max-w-6xl mx-auto px-6 pt-12 md:pt-20 pb-24"
+        className="relative z-10 max-w-6xl mx-auto px-6 pt-12 md:pt-20 pb-16"
       >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -119,7 +124,7 @@ function Landing() {
           className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-surface/60 backdrop-blur text-[11px] uppercase tracking-[0.18em] text-soft mb-8"
         >
           <span className="size-1.5 bg-champagne rounded-full glow-champagne" />
-          The next-generation trading journal
+          The AI trading journal
         </motion.div>
 
         <motion.h1
@@ -141,8 +146,7 @@ function Landing() {
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.25 }}
           className="mt-6 text-lg md:text-xl text-soft max-w-2xl text-pretty leading-relaxed"
         >
-          A premium trading journal that tracks your psychology — not just your P&L.
-          Vesper Journal surfaces the emotions, sessions, and mistakes quietly draining your edge.
+          Vesper scores your discipline, catches your mistakes in real time, and tells you exactly what's costing you money — using your own trade data.
         </motion.p>
 
         <motion.div
@@ -177,12 +181,12 @@ function Landing() {
           <span className="flex items-center gap-1.5"><CheckCircle2 className="size-3.5 text-pos" /> Encrypted & private</span>
         </motion.div>
 
-        {/* Hero Chart */}
+        {/* Hero preview card with stats */}
         <motion.div
           initial={{ opacity: 0, y: 60, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.5 }}
-          className="mt-20 surface-card-elevated top-accent p-3 md:p-5 relative"
+          className="mt-16 surface-card-elevated top-accent p-3 md:p-5 relative"
         >
           <div className="rounded-xl bg-surface/60 border border-border/60 overflow-hidden">
             <div className="flex items-center justify-between px-5 py-3 border-b border-border/60">
@@ -192,211 +196,157 @@ function Landing() {
                   <span className="size-2.5 rounded-full bg-champagne/60" />
                   <span className="size-2.5 rounded-full bg-pos/60" />
                 </div>
-                <span className="ml-3 text-[11px] uppercase tracking-[0.18em] text-faint">vesper · live equity</span>
+                <span className="ml-3 text-[11px] uppercase tracking-[0.18em] text-faint">vesper · live dashboard</span>
               </div>
               <span className="font-mono text-[11px] text-soft">last 30 trades</span>
             </div>
+
+            {/* Stats strip */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border/60">
+              <HeroStat label="AI Trader Score" value="67" suffix="/100" tone="champagne" />
+              <HeroStat label="Win Rate" value="58" suffix="%" tone="pos" />
+              <HeroStat label="Trades" value="124" tone="default" />
+              <HeroStat label="Max Drawdown" value="-$180" tone="neg" />
+            </div>
+
             <div className="p-3">
               <HeroChart />
             </div>
           </div>
         </motion.div>
-
-        {/* Logo strip / social proof */}
-        <Reveal delay={0.2} className="mt-16 text-center">
-          <div className="text-[10px] uppercase tracking-[0.22em] text-faint mb-5">Built for traders on</div>
-          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-soft text-sm font-medium">
-            <span>MetaTrader 4</span>
-            <span className="text-faint">·</span>
-            <span>MetaTrader 5</span>
-            <span className="text-faint">·</span>
-            <span>cTrader</span>
-            <span className="text-faint">·</span>
-            <span>TradingView</span>
-            <span className="text-faint">·</span>
-            <span>Binance</span>
-            <span className="text-faint">·</span>
-            <span>Bybit</span>
-          </div>
-        </Reveal>
       </motion.section>
 
-      {/* FEATURES */}
-      <section id="features" className="relative z-10 max-w-6xl mx-auto px-6 py-24">
-        <Reveal className="max-w-2xl mb-14">
+      {/* SOCIAL PROOF BAR */}
+      <section className="relative z-10 max-w-6xl mx-auto px-6 pb-20">
+        <Reveal>
+          <div className="surface-card top-accent px-6 py-5 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            {[
+              { v: "325+", l: "trades analyzed" },
+              { v: "Free", l: "during beta" },
+              { v: "Built for", l: "every trader" },
+              { v: "0", l: "credit card required" },
+            ].map((s) => (
+              <div key={s.l} className="flex flex-col items-center">
+                <div className="text-xl md:text-2xl font-semibold tracking-tight text-champagne tabular">{s.v}</div>
+                <div className="text-[11px] uppercase tracking-[0.18em] text-faint mt-1">{s.l}</div>
+              </div>
+            ))}
+          </div>
+        </Reveal>
+      </section>
+
+      {/* PROBLEM STATEMENT */}
+      <section className="relative z-10 max-w-4xl mx-auto px-6 py-24 text-center">
+        <Reveal>
+          <div className="text-[11px] uppercase tracking-[0.22em] text-champagne mb-4">The hard truth</div>
+          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight leading-[1.05] text-balance">
+            You know <span className="text-soft">HOW</span> to trade.<br />
+            So why are you still <span className="text-neg">losing?</span>
+          </h2>
+          <p className="mt-6 text-soft text-pretty leading-relaxed text-lg max-w-2xl mx-auto">
+            Most traders lose not because of strategy — but because of patterns they can't see.
+            Vesper shows you exactly what's costing you money.
+          </p>
+        </Reveal>
+      </section>
+
+      {/* FEATURES INTRO */}
+      <section id="features" className="relative z-10 max-w-6xl mx-auto px-6 pt-8 pb-12">
+        <Reveal className="max-w-3xl">
           <div className="text-[11px] uppercase tracking-[0.22em] text-champagne mb-4">Features</div>
           <h2 className="text-3xl md:text-5xl font-semibold tracking-tight leading-[1.05]">
-            Everything in MyFXBook.<br />
-            <span className="text-soft">Plus the things they forgot.</span>
+            Other journals track trades.<br />
+            <span className="text-soft">Vesper fixes traders.</span>
+          </h2>
+        </Reveal>
+      </section>
+
+      {/* ZIGZAG FEATURES */}
+      <section className="relative z-10 max-w-6xl mx-auto px-6 space-y-28 md:space-y-36 pb-24">
+        <ZigzagFeature
+          index={1}
+          title="Your trading score. Updated after every trade."
+          description="Vesper measures your discipline, risk management, and emotional control — not just your P&L. Know exactly what's holding you back with a score out of 100."
+          mockup={<TraderScoreMockup />}
+        />
+        <ZigzagFeature
+          index={2}
+          reverse
+          title="Your coach catches what you miss."
+          description="Every time you open your dashboard, Vesper analyzes your recent trades and tells you exactly what's going wrong — with real numbers from your own journal."
+          mockup={<CoachSaysMockup />}
+        />
+        <ZigzagFeature
+          index={3}
+          title="Ask your AI coach anything. Get honest answers."
+          description="Chat with Vesper — your personal AI trading coach. Ask why you're losing, what your best setup is, or which session to avoid. Vesper reads your real trade data and gives specific advice — not generic tips. Available 24/7. Completely free."
+          badge="Tradezella's AI is still coming soon. Vesper's is live now."
+          mockup={<AICoachMockup />}
+        />
+        <ZigzagFeature
+          index={4}
+          reverse
+          title="Your mind is costing you money. Here's the proof."
+          description="Log your emotions before and after every trade. Tag mistakes like FOMO, revenge trading, and early exits. See exactly which emotions drain your account — shown in real dollar amounts."
+          mockup={<PsychologyMockup />}
+        />
+        <ZigzagFeature
+          index={5}
+          title="Stop repeating the same mistakes."
+          description="Vesper automatically detects your dangerous patterns. Trading without stop loss. Revenge trading. Overtrading. Real alerts with real fixes — before your account pays the price."
+          mockup={<MistakeAlertsMockup />}
+        />
+        <ZigzagFeature
+          index={6}
+          reverse
+          title="See exactly what's working. And what isn't."
+          description="Deep analytics showing your P&L by pair, session, emotion, and strategy. Find out which pairs make you money, which sessions to avoid, and how your emotions affect your performance."
+          mockup={<AnalyticsMockup />}
+        />
+        <ZigzagFeature
+          index={7}
+          title="Risk the right amount. Every single trade."
+          description="Set risk presets once. Vesper auto-calculates your position size, max loss, and take profit on every trade. Set daily limits and get alerts before you overtrade."
+          mockup={<RiskEngineMockup />}
+        />
+      </section>
+
+      {/* BUILT FOR EVERY TRADER */}
+      <section id="built-for" className="relative z-10 max-w-6xl mx-auto px-6 py-24">
+        <Reveal className="text-center mb-14 max-w-2xl mx-auto">
+          <div className="text-[11px] uppercase tracking-[0.22em] text-champagne mb-4">Who it's for</div>
+          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight leading-[1.05]">
+            Built for every type of trader
           </h2>
         </Reveal>
 
         <StaggerGroup className="grid md:grid-cols-3 gap-4">
           <StaggerItem>
-            <FeatureCard
-              icon={Brain}
-              title="Psychology tracking"
-              body="Log emotions before and after each trade. Tag mistakes like FOMO and revenge. See what your mind does under pressure."
-              tag="Unique"
+            <TraderTypeCard
+              icon={Trophy}
+              title="Funded Traders"
+              body="Track challenge rules, drawdown limits, and profit targets. Never breach your prop firm rules again."
+              tag="Prop firm ready"
             />
           </StaggerItem>
           <StaggerItem>
-            <FeatureCard
-              icon={Sparkles}
-              title="Smart insights"
-              body="Vesper Journal reads your journal and tells you the truth — your worst session, costliest mistake, the emotion that sabotages your edge."
-              tag="AI-assisted"
+            <TraderTypeCard
+              icon={Building2}
+              title="Live Traders"
+              body="Protect real capital with risk presets, daily loss limits, and live mistake alerts. Your account, defended every trade."
             />
           </StaggerItem>
           <StaggerItem>
-            <FeatureCard
-              icon={LineChart}
-              title="Clean analytics"
-              body="Equity curve, win rate, profit factor, expectancy, max drawdown. Auto-calculated. Updated in real time."
-            />
-          </StaggerItem>
-          <StaggerItem>
-            <FeatureCard
-              icon={Calendar}
-              title="Calendar heatmap"
-              body="See your green and red days at a glance. Spot your dangerous patterns — Mondays, post-loss revenge, late nights."
-            />
-          </StaggerItem>
-          <StaggerItem>
-            <FeatureCard
-              icon={Target}
-              title="Auto R:R + P&L"
-              body="Type entry, stop, lot. Vesper Journal calculates pip value, R:R, and P&L instantly. No spreadsheets, no formulas."
-            />
-          </StaggerItem>
-          <StaggerItem>
-            <FeatureCard
-              icon={Zap}
-              title="Lightning fast"
-              body="Log a full trade in under 20 seconds. Built mobile-first. Realtime sync across devices via secure cloud."
+            <TraderTypeCard
+              icon={User}
+              title="Learning Traders"
+              body="Build discipline from day one. Track psychology, get personalised AI coaching, and grow your score with every trade."
             />
           </StaggerItem>
         </StaggerGroup>
       </section>
 
-      {/* WHAT YOU GET — checklist highlights */}
-      <section className="relative z-10 max-w-6xl mx-auto px-6 pb-8">
-        <div className="grid lg:grid-cols-[1.05fr_1fr] gap-10 items-center">
-          <Reveal>
-            <div className="text-[11px] uppercase tracking-[0.22em] text-champagne mb-4">What you get</div>
-            <h2 className="text-3xl md:text-5xl font-semibold tracking-tight leading-[1.05]">
-              Everything serious traders<br />
-              <span className="text-soft">actually need.</span>
-            </h2>
-            <p className="mt-5 text-soft text-pretty leading-relaxed text-lg max-w-xl">
-              One subscription unlocks the full toolkit — from AI-driven trade insights to
-              live news and automatic broker syncing. No add-ons. No upsells.
-            </p>
-            <Link to="/signup" className="inline-block mt-8">
-              <Button
-                size="lg"
-                className="bg-champagne text-primary-foreground hover:bg-champagne/90 gap-2 h-12 px-6"
-              >
-                Try it free <ArrowRight className="size-4" />
-              </Button>
-            </Link>
-          </Reveal>
-
-          <Reveal delay={0.15}>
-            <div className="surface-card-elevated top-accent p-7 md:p-9 relative overflow-hidden">
-              <div className="absolute -top-24 -right-24 size-64 bg-champagne/[0.07] rounded-full blur-3xl pointer-events-none" />
-              <ul className="relative space-y-4">
-                {[
-                  { icon: Brain, label: "AI Trade insights", detail: "Smart pattern detection across every entry." },
-                  { icon: FileText, label: "Full trading reports", detail: "Exportable monthly & quarterly performance reports." },
-                  { icon: Newspaper, label: "Complete news data", detail: "Live macro & forex news beside your equity curve." },
-                  { icon: Cpu, label: "3 MT4 / MT5 auto-journal", detail: "Connect up to 3 broker accounts — trades sync automatically." },
-                  { icon: BarChart3, label: "Advanced analytics", detail: "Profit factor, expectancy, drawdown, R-multiple curves." },
-                ].map((row, i) => (
-                  <motion.li
-                    key={row.label}
-                    initial={{ opacity: 0, x: -16 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.45, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
-                    className="flex items-start gap-4 group"
-                  >
-                    <div className="mt-0.5 size-7 rounded-md bg-pos/15 ring-1 ring-pos/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                      <Check className="size-4 text-pos" strokeWidth={3} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <row.icon className="size-4 text-champagne shrink-0" />
-                        <span className="text-[15px] font-medium tracking-tight">{row.label}</span>
-                      </div>
-                      <p className="mt-1 text-xs text-soft leading-relaxed">{row.detail}</p>
-                    </div>
-                  </motion.li>
-                ))}
-              </ul>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ANALYTICS PREVIEW */}
-      <section id="analytics" className="relative z-10 max-w-6xl mx-auto px-6 py-24">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <Reveal>
-            <div className="text-[11px] uppercase tracking-[0.22em] text-champagne mb-4">The honest mirror</div>
-            <h2 className="text-3xl md:text-5xl font-semibold tracking-tight leading-[1.05]">
-              Insights you can't lie to yourself about.
-            </h2>
-            <p className="mt-5 text-soft text-pretty leading-relaxed text-lg">
-              Most traders fail because they journal their wins and forget their losses.
-              Vesper Journal surfaces the patterns you'd rather not see — calmly, in plain language.
-            </p>
-            <ul className="mt-8 space-y-3.5">
-              {[
-                '"You lose 73% of trades entered with greed."',
-                '"Your worst session is New York Fridays."',
-                '"FOMO costs you $1,240 this month."',
-                '"Trades held >4h are 2.1× more profitable."',
-              ].map((q) => (
-                <li key={q} className="flex items-start gap-3">
-                  <Sparkles className="size-4 text-champagne mt-1 shrink-0" />
-                  <span className="text-soft italic">{q}</span>
-                </li>
-              ))}
-            </ul>
-          </Reveal>
-
-          <Reveal delay={0.15}>
-            <div className="surface-card-elevated top-accent p-5 md:p-7 space-y-4">
-              {[
-                { tone: "warn", title: "You lose more in the New York session", detail: "−$840 over 12 trades. Consider sitting out or tightening rules." },
-                { tone: "good", title: "London is your strongest session", detail: "+$1,420 across 18 trades. Lean into it." },
-                { tone: "warn", title: "Most common mistake: FOMO", detail: "Tagged on 7 trades, costing −$520." },
-                { tone: "good", title: "You perform best when Confident", detail: "+$1,680 from confident entries — your A-game state." },
-              ].map((ins, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
-                  className={
-                    "rounded-lg p-4 border " +
-                    (ins.tone === "warn"
-                      ? "border-neg/20 bg-neg/10"
-                      : "border-pos/20 bg-pos/10")
-                  }
-                >
-                  <div className="text-sm font-medium">{ins.title}</div>
-                  <div className="text-xs text-soft mt-1 leading-relaxed">{ins.detail}</div>
-                </motion.div>
-              ))}
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* PRICING TEASER */}
+      {/* PRICING */}
       <section id="pricing" className="relative z-10 max-w-4xl mx-auto px-6 py-24">
         <Reveal className="text-center mb-12">
           <div className="text-[11px] uppercase tracking-[0.22em] text-champagne mb-4">Pricing</div>
@@ -404,7 +354,7 @@ function Landing() {
             Free while we're in beta.
           </h2>
           <p className="mt-4 text-soft max-w-xl mx-auto">
-            Vesper Journal is in open beta. Every feature is unlocked. No credit card. No catch.
+            Vesper is in open beta. Every feature is unlocked. No credit card. No catch.
           </p>
         </Reveal>
 
@@ -418,11 +368,11 @@ function Landing() {
             </div>
             <ul className="mt-7 space-y-3 text-sm">
               {[
-                "Unlimited trades & journals",
-                "Psychology & mistake tracking",
-                "Smart insights engine",
-                "Calendar heatmap & analytics",
-                "Realtime cross-device sync",
+                "AI Trader Score & live coach",
+                "Mistake alerts & psychology tracking",
+                "Risk Engine & funded account rules",
+                "Deep analytics & calendar heatmap",
+                "MT4 / MT5 auto-journaling",
                 "Encrypted, row-level security",
               ].map((f) => (
                 <li key={f} className="flex items-center gap-2.5">
@@ -481,7 +431,481 @@ function Landing() {
   );
 }
 
-function FeatureCard({
+// ---------- Hero stat cell ----------
+function HeroStat({
+  label,
+  value,
+  suffix,
+  tone,
+}: {
+  label: string;
+  value: string;
+  suffix?: string;
+  tone: "champagne" | "pos" | "neg" | "default";
+}) {
+  const toneCls =
+    tone === "champagne"
+      ? "text-champagne"
+      : tone === "pos"
+      ? "text-pos"
+      : tone === "neg"
+      ? "text-neg"
+      : "text-foreground";
+  return (
+    <div className="bg-surface px-4 py-3 md:py-4">
+      <div className="text-[10px] uppercase tracking-[0.18em] text-faint">{label}</div>
+      <div className={`mt-1 font-semibold tracking-tight tabular text-lg md:text-2xl ${toneCls}`}>
+        {value}
+        {suffix && <span className="text-soft text-xs md:text-sm ml-0.5 font-normal">{suffix}</span>}
+      </div>
+    </div>
+  );
+}
+
+// ---------- Zigzag wrapper ----------
+function ZigzagFeature({
+  index,
+  title,
+  description,
+  mockup,
+  reverse,
+  badge,
+}: {
+  index: number;
+  title: string;
+  description: string;
+  mockup: React.ReactNode;
+  reverse?: boolean;
+  badge?: string;
+}) {
+  return (
+    <div
+      className={`grid lg:grid-cols-2 gap-10 lg:gap-14 items-center ${
+        reverse ? "lg:[&>*:first-child]:order-2" : ""
+      }`}
+    >
+      <Reveal>
+        <div className="text-[11px] uppercase tracking-[0.22em] text-champagne mb-4">
+          Feature {String(index).padStart(2, "0")}
+        </div>
+        <h3 className="text-2xl md:text-4xl font-semibold tracking-tight leading-[1.1] text-balance">
+          {title}
+        </h3>
+        <p className="mt-5 text-soft text-pretty leading-relaxed text-base md:text-lg">
+          {description}
+        </p>
+        {badge && (
+          <div className="mt-5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-champagne/30 bg-champagne/10 text-[11px] text-champagne">
+            <Sparkles className="size-3.5" />
+            {badge}
+          </div>
+        )}
+      </Reveal>
+      <Reveal delay={0.1}>{mockup}</Reveal>
+    </div>
+  );
+}
+
+// ---------- Mockup: AI Trader Score ----------
+function TraderScoreMockup() {
+  return (
+    <div className="surface-card-elevated top-accent p-5 md:p-6 relative overflow-hidden">
+      <div className="absolute -top-20 -right-20 size-48 bg-champagne/[0.08] rounded-full blur-3xl pointer-events-none" />
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-2">
+          <Gauge className="size-4 text-champagne" />
+          <span className="text-sm font-medium">AI Trader Score</span>
+        </div>
+        <span className="text-[10px] uppercase tracking-[0.18em] text-faint">last 30d</span>
+      </div>
+      <div className="flex items-end gap-3">
+        <div className="text-6xl md:text-7xl font-semibold tracking-tight tabular text-champagne">67</div>
+        <div className="pb-2">
+          <div className="text-soft text-sm">/100</div>
+          <div className="text-pos text-xs flex items-center gap-1 mt-1">
+            <TrendingUp className="size-3" /> +4 this week
+          </div>
+        </div>
+      </div>
+      <div className="mt-6 space-y-3">
+        {[
+          { label: "Discipline", value: 72, tone: "pos" },
+          { label: "Risk Management", value: 58, tone: "champagne" },
+          { label: "Emotional Control", value: 49, tone: "neg" },
+        ].map((b) => (
+          <div key={b.label}>
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-soft">{b.label}</span>
+              <span className="tabular text-foreground">{b.value}</span>
+            </div>
+            <div className="mt-1.5 h-1.5 rounded-full bg-surface overflow-hidden">
+              <div
+                className={`h-full rounded-full ${
+                  b.tone === "pos" ? "bg-pos" : b.tone === "neg" ? "bg-neg" : "bg-champagne"
+                }`}
+                style={{ width: `${b.value}%` }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-6 pt-5 border-t border-border">
+        <div className="text-[10px] uppercase tracking-[0.18em] text-faint mb-2">How to improve</div>
+        <ul className="space-y-1.5 text-xs text-soft">
+          <li className="flex items-start gap-2"><Check className="size-3 text-pos mt-0.5" /> Cut revenge trades after 2 losses</li>
+          <li className="flex items-start gap-2"><Check className="size-3 text-pos mt-0.5" /> Always set a stop loss on entry</li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Mockup: Coach Says Today ----------
+function CoachSaysMockup() {
+  return (
+    <div className="surface-card-elevated top-accent p-5 md:p-6 relative overflow-hidden">
+      <div className="absolute -top-20 -left-20 size-48 bg-neg/[0.1] rounded-full blur-3xl pointer-events-none" />
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Brain className="size-4 text-champagne" />
+          <span className="text-sm font-medium">Coach says today</span>
+        </div>
+        <span className="text-[10px] uppercase tracking-[0.18em] text-faint">live</span>
+      </div>
+      <div className="rounded-lg p-4 border border-neg/30 bg-neg/10 mb-3">
+        <div className="flex items-center gap-2 mb-2">
+          <Flame className="size-4 text-neg" />
+          <span className="text-xs font-semibold uppercase tracking-wide text-neg">Revenge trading detected</span>
+        </div>
+        <p className="text-sm text-foreground leading-relaxed">
+          You took <span className="tabular text-neg font-semibold">4 trades on USDCHF</span> within 12 minutes after a loss yesterday — costing you <span className="tabular text-neg font-semibold">−$340</span>.
+        </p>
+        <p className="text-xs text-soft mt-2">Try a 15-min cooldown after any losing trade this week.</p>
+      </div>
+      <div className="rounded-lg p-3 border border-pos/30 bg-pos/10">
+        <div className="flex items-center gap-2 mb-1">
+          <CheckCircle2 className="size-3.5 text-pos" />
+          <span className="text-xs font-medium text-pos">Win of the week</span>
+        </div>
+        <p className="text-xs text-soft">Your London EURUSD setup is +$620 across 7 trades. Keep leaning in.</p>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Mockup: AI Coach Chat ----------
+function AICoachMockup() {
+  return (
+    <div className="surface-card-elevated top-accent p-3 md:p-4 relative overflow-hidden">
+      <div className="grid grid-cols-[100px_1fr] md:grid-cols-[140px_1fr] gap-3 min-h-[320px]">
+        {/* Sidebar */}
+        <div className="rounded-lg bg-surface border border-border p-2 space-y-1">
+          <div className="text-[9px] uppercase tracking-[0.18em] text-faint px-1 mb-1">Chats</div>
+          {["Why am I losing?", "Best session?", "EURUSD review", "Risk per trade"].map((c, i) => (
+            <div
+              key={c}
+              className={`px-2 py-1.5 rounded text-[11px] truncate ${
+                i === 0 ? "bg-champagne/10 text-foreground border border-champagne/30" : "text-soft hover:bg-surface-2"
+              }`}
+            >
+              {c}
+            </div>
+          ))}
+        </div>
+        {/* Chat panel */}
+        <div className="rounded-lg bg-surface/60 border border-border flex flex-col">
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-border">
+            <div className="size-6 rounded-md bg-champagne/15 ring-1 ring-champagne/30 flex items-center justify-center">
+              <Sparkles className="size-3 text-champagne" />
+            </div>
+            <span className="text-xs font-medium">Vesper Coach</span>
+            <span className="ml-auto size-1.5 rounded-full bg-pos glow-pos" />
+          </div>
+          <div className="flex-1 p-3 space-y-2.5 text-xs">
+            <div className="ml-auto max-w-[80%] rounded-lg bg-champagne/15 border border-champagne/30 px-3 py-2 text-foreground">
+              Why am I losing on Fridays?
+            </div>
+            <div className="max-w-[90%] rounded-lg bg-surface-2 border border-border px-3 py-2 text-soft leading-relaxed">
+              Your Friday NY session is <span className="text-neg tabular">−$420</span> over 9 trades. You also tag "tired" 6 of those times. Try ending your week at London close.
+            </div>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-2 border-t border-border">
+            <div className="flex-1 h-7 rounded-md bg-surface border border-border px-2 text-[11px] text-faint flex items-center">
+              Ask anything…
+            </div>
+            <div className="size-7 rounded-md bg-champagne flex items-center justify-center">
+              <Send className="size-3 text-primary-foreground" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Mockup: Psychology ----------
+function PsychologyMockup() {
+  const emotions = [
+    { l: "Calm", active: true, tone: "pos" },
+    { l: "Confident", active: false },
+    { l: "FOMO", active: true, tone: "neg" },
+    { l: "Greedy", active: false },
+    { l: "Tired", active: false },
+    { l: "Revenge", active: false },
+  ];
+  const mistakes = [
+    { l: "No stop loss", active: false },
+    { l: "Moved SL", active: true, tone: "neg" },
+    { l: "Early exit", active: false },
+    { l: "Overtrade", active: true, tone: "neg" },
+    { l: "Chased entry", active: false },
+  ];
+  return (
+    <div className="surface-card-elevated top-accent p-5 md:p-6 relative overflow-hidden">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Brain className="size-4 text-champagne" />
+          <span className="text-sm font-medium">New trade · Psychology</span>
+        </div>
+        <span className="text-[10px] uppercase tracking-[0.18em] text-faint">EURUSD · BUY</span>
+      </div>
+      <div className="text-[10px] uppercase tracking-[0.18em] text-faint mb-2">Emotion before</div>
+      <div className="flex flex-wrap gap-2 mb-5">
+        {emotions.map((e) => (
+          <span
+            key={e.l}
+            className={`px-2.5 py-1 rounded-full text-xs border ${
+              e.active && e.tone === "pos"
+                ? "border-pos/40 bg-pos/15 text-pos"
+                : e.active && e.tone === "neg"
+                ? "border-neg/40 bg-neg/15 text-neg"
+                : "border-border bg-surface text-soft"
+            }`}
+          >
+            {e.l}
+          </span>
+        ))}
+      </div>
+      <div className="text-[10px] uppercase tracking-[0.18em] text-faint mb-2">Mistakes</div>
+      <div className="flex flex-wrap gap-2 mb-5">
+        {mistakes.map((m) => (
+          <span
+            key={m.l}
+            className={`px-2.5 py-1 rounded-full text-xs border ${
+              m.active
+                ? "border-neg/40 bg-neg/15 text-neg"
+                : "border-border bg-surface text-soft"
+            }`}
+          >
+            {m.l}
+          </span>
+        ))}
+      </div>
+      <div className="rounded-lg p-3 border border-neg/20 bg-neg/5 flex items-center justify-between">
+        <span className="text-xs text-soft">FOMO this month</span>
+        <span className="tabular text-neg font-semibold text-sm">−$520</span>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Mockup: Mistake Alerts ----------
+function MistakeAlertsMockup() {
+  return (
+    <div className="surface-card-elevated top-accent p-5 md:p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="size-4 text-neg" />
+          <span className="text-sm font-medium">Mistake Alerts</span>
+        </div>
+        <span className="text-[10px] uppercase tracking-[0.18em] text-faint">3 active</span>
+      </div>
+      <div className="space-y-3">
+        <AlertRow
+          severity="HIGH"
+          title="Trading without stop loss"
+          body="3 of your last 10 trades had no SL. Average loss: −$140."
+          fix="Always set SL before clicking buy."
+        />
+        <AlertRow
+          severity="HIGH"
+          title="Revenge trading pattern"
+          body="You take 2.4× more trades within 30 min of a loss."
+          fix="Enforce a 15-min cooldown after losers."
+        />
+        <AlertRow
+          severity="MED"
+          title="Overtrading on Fridays"
+          body="14 trades last Friday vs 6 daily average."
+          fix="Cap your Friday session at 8 trades."
+        />
+      </div>
+    </div>
+  );
+}
+
+function AlertRow({
+  severity,
+  title,
+  body,
+  fix,
+}: {
+  severity: "HIGH" | "MED";
+  title: string;
+  body: string;
+  fix: string;
+}) {
+  const isHigh = severity === "HIGH";
+  return (
+    <div
+      className={`rounded-lg p-3 border ${
+        isHigh ? "border-neg/30 bg-neg/10" : "border-champagne/30 bg-champagne/10"
+      }`}
+    >
+      <div className="flex items-center gap-2 mb-1.5">
+        <span
+          className={`text-[9px] uppercase tracking-[0.18em] font-semibold px-1.5 py-0.5 rounded ${
+            isHigh ? "bg-neg/30 text-neg" : "bg-champagne/30 text-champagne"
+          }`}
+        >
+          {severity}
+        </span>
+        <span className="text-xs font-medium">{title}</span>
+      </div>
+      <p className="text-xs text-soft leading-relaxed">{body}</p>
+      <p className="text-[11px] text-foreground/80 mt-1.5 flex items-start gap-1.5">
+        <ChevronRight className="size-3 text-champagne mt-0.5 shrink-0" /> {fix}
+      </p>
+    </div>
+  );
+}
+
+// ---------- Mockup: Analytics ----------
+function AnalyticsMockup() {
+  const pairs = [
+    { l: "EURUSD", v: 1240, pos: true },
+    { l: "GBPUSD", v: 680, pos: true },
+    { l: "USDJPY", v: 220, pos: true },
+    { l: "USDCHF", v: -340, pos: false },
+    { l: "XAUUSD", v: -560, pos: false },
+  ];
+  const emotions = [
+    { l: "Confident", v: 1680, pos: true },
+    { l: "Calm", v: 920, pos: true },
+    { l: "FOMO", v: -520, pos: false },
+    { l: "Revenge", v: -780, pos: false },
+  ];
+  const max = Math.max(...pairs.map((p) => Math.abs(p.v)), ...emotions.map((e) => Math.abs(e.v)));
+
+  return (
+    <div className="surface-card-elevated top-accent p-5 md:p-6">
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-2">
+          <BarChart3 className="size-4 text-champagne" />
+          <span className="text-sm font-medium">Analytics</span>
+        </div>
+        <span className="text-[10px] uppercase tracking-[0.18em] text-faint">last 90d</span>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.18em] text-faint mb-3">P&L by pair</div>
+          <div className="space-y-2">
+            {pairs.map((p) => (
+              <BarRow key={p.l} label={p.l} value={p.v} max={max} pos={p.pos} />
+            ))}
+          </div>
+        </div>
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.18em] text-faint mb-3">P&L by emotion</div>
+          <div className="space-y-2">
+            {emotions.map((e) => (
+              <BarRow key={e.l} label={e.l} value={e.v} max={max} pos={e.pos} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BarRow({ label, value, max, pos }: { label: string; value: number; max: number; pos: boolean }) {
+  const pct = Math.max(6, (Math.abs(value) / max) * 100);
+  return (
+    <div>
+      <div className="flex items-center justify-between text-xs mb-1">
+        <span className="text-soft">{label}</span>
+        <span className={`tabular ${pos ? "text-pos" : "text-neg"}`}>
+          {pos ? "+" : "−"}${Math.abs(value)}
+        </span>
+      </div>
+      <div className="h-2 rounded-full bg-surface overflow-hidden">
+        <div
+          className={`h-full rounded-full ${pos ? "bg-pos" : "bg-neg"}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ---------- Mockup: Risk Engine ----------
+function RiskEngineMockup() {
+  return (
+    <div className="surface-card-elevated top-accent p-5 md:p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Target className="size-4 text-champagne" />
+          <span className="text-sm font-medium">New risk preset</span>
+        </div>
+        <span className="text-[10px] uppercase tracking-[0.18em] text-pos px-2 py-0.5 rounded-full bg-pos/10 border border-pos/30">
+          Conservative
+        </span>
+      </div>
+      <div className="grid grid-cols-2 gap-3 mb-5">
+        <Field label="Risk %" value="1.0%" />
+        <Field label="R:R" value="1 : 2.5" />
+        <Field label="Daily loss limit" value="$200" />
+        <Field label="Max trades / day" value="5" />
+      </div>
+      <div className="rounded-lg border border-border bg-surface p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Activity className="size-3.5 text-champagne" />
+          <span className="text-xs font-medium">Live drawdown projection</span>
+        </div>
+        <div className="grid grid-cols-3 gap-2 text-center">
+          {[
+            { l: "Per trade", v: "$50", tone: "default" },
+            { l: "5 losses", v: "−$250", tone: "champagne" },
+            { l: "10 losses", v: "−$500", tone: "neg" },
+          ].map((s) => (
+            <div key={s.l} className="rounded-md bg-surface-2 p-2.5">
+              <div className="text-[9px] uppercase tracking-[0.18em] text-faint">{s.l}</div>
+              <div
+                className={`mt-1 tabular text-sm font-semibold ${
+                  s.tone === "neg" ? "text-neg" : s.tone === "champagne" ? "text-champagne" : "text-foreground"
+                }`}
+              >
+                {s.v}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg bg-surface border border-border px-3 py-2.5">
+      <div className="text-[10px] uppercase tracking-[0.18em] text-faint">{label}</div>
+      <div className="mt-1 tabular text-sm font-medium">{value}</div>
+    </div>
+  );
+}
+
+// ---------- Trader type card ----------
+function TraderTypeCard({
   icon: Icon,
   title,
   body,
@@ -512,3 +936,7 @@ function FeatureCard({
     </motion.div>
   );
 }
+
+// Suppress unused-import warnings for icons reserved for future use
+void Eye;
+void MessageSquare;
