@@ -394,7 +394,7 @@ function Landing() {
 
       {/* FINAL CTA */}
       <section className="relative z-10 max-w-5xl mx-auto px-6 py-24">
-        {/* Testimonials handled in section above */}
+        {/* Final CTA */}
         <Reveal>
           <div className="surface-card-elevated top-accent p-10 md:p-16 text-center relative overflow-hidden">
             <motion.div
