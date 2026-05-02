@@ -24,6 +24,8 @@ import {
   Flame,
   Eye,
   ChevronRight,
+  Quote,
+  Twitter,
 } from "lucide-react";
 import { HeroChart } from "@/components/landing/HeroChart";
 import { Reveal, StaggerGroup, StaggerItem } from "@/components/motion/Reveal";
@@ -390,8 +392,68 @@ function Landing() {
         </Reveal>
       </section>
 
+      {/* TESTIMONIALS */}
+      <section className="relative z-10 max-w-6xl mx-auto px-6 py-20">
+        <Reveal>
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-surface text-[11px] uppercase tracking-[0.18em] text-faint mb-4">
+              <Quote className="size-3 text-champagne" /> Trader reviews
+            </div>
+            <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
+              Real traders. Real results.
+            </h2>
+            <p className="mt-3 text-soft">
+              What funded, live, and day traders say after journaling with Vesper.
+            </p>
+          </div>
+
+          <StaggerGroup className="grid md:grid-cols-3 gap-5">
+            {[
+              {
+                quote:
+                  "Vesper caught that I was revenge trading within 30 minutes of every loss. Fixed it in 2 weeks. My funded account is still alive.",
+                name: "Ahmed K.",
+                role: "GoatFunded trader",
+                initials: "AK",
+              },
+              {
+                quote:
+                  "I was paying $30/month for Tradezella. Vesper is free and the AI Coach actually works right now.",
+                name: "Marcus T.",
+                role: "Live forex trader",
+                initials: "MT",
+              },
+              {
+                quote:
+                  "The emotion tracking showed me I lose money every time I trade feeling confident. Vesper proved it with my own data.",
+                name: "Sarah L.",
+                role: "Day trader",
+                initials: "SL",
+              },
+            ].map((t) => (
+              <StaggerItem key={t.name}>
+                <div className="surface-card p-6 h-full flex flex-col gap-5 hover:bg-surface-2 transition-colors">
+                  <Quote className="size-5 text-champagne/70" />
+                  <p className="text-sm leading-relaxed text-foreground/90">"{t.quote}"</p>
+                  <div className="mt-auto flex items-center gap-3 pt-4 border-t border-border">
+                    <div className="size-9 rounded-full bg-surface-2 border border-border flex items-center justify-center text-[11px] font-mono text-champagne">
+                      {t.initials}
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">{t.name}</span>
+                      <span className="text-xs text-faint">{t.role}</span>
+                    </div>
+                  </div>
+                </div>
+              </StaggerItem>
+            ))}
+          </StaggerGroup>
+        </Reveal>
+      </section>
+
       {/* FINAL CTA */}
       <section className="relative z-10 max-w-5xl mx-auto px-6 py-24">
+        {/* Final CTA */}
         <Reveal>
           <div className="surface-card-elevated top-accent p-10 md:p-16 text-center relative overflow-hidden">
             <motion.div
@@ -421,10 +483,25 @@ function Landing() {
         </Reveal>
       </section>
 
-      <footer className="relative z-10 border-t border-border">
-        <div className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between text-xs text-faint">
-          <span>© Vesper Journal · Built for traders</span>
-          <span className="font-mono">SYS.READY</span>
+      <footer className="relative z-10 border-t border-border mt-8">
+        <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="flex flex-col gap-1">
+            <span className="text-sm font-medium tracking-tight">Vesper Journal</span>
+            <span className="text-xs text-faint">© 2026 Vesper Journal. All rights reserved.</span>
+          </div>
+          <nav className="flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-soft">
+            <Link to="/" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+            <Link to="/" className="hover:text-foreground transition-colors">Terms of Service</Link>
+            <a
+              href="https://twitter.com/vesperjournal"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors"
+              aria-label="Vesper Journal on X (Twitter)"
+            >
+              <Twitter className="size-3.5" /> Twitter / X
+            </a>
+          </nav>
         </div>
       </footer>
     </div>
