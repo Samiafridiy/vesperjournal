@@ -176,4 +176,59 @@
     top: 0; left: 0; right: 0; height: 1px;
     background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--champagne) 50%, transparent), transparent);
   }
+
+  /* Market Intel — premium animations */
+  @keyframes mi-pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+  .mi-pulse { animation: mi-pulse-soft 2.4s ease-in-out infinite; }
+
+  @keyframes mi-glow-red {
+    0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--neg) 0%, transparent); }
+    50% { box-shadow: 0 0 14px 2px color-mix(in oklab, var(--neg) 35%, transparent); }
+  }
+  .mi-glow-red { animation: mi-glow-red 2.2s ease-in-out infinite; }
+
+  @keyframes mi-arrow-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+  }
+  .mi-arrow { animation: mi-arrow-bob 1.8s ease-in-out infinite; }
+
+  @keyframes mi-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .mi-shimmer {
+    background-image: linear-gradient(
+      110deg,
+      transparent 30%,
+      color-mix(in oklab, var(--neg) 12%, transparent) 50%,
+      transparent 70%
+    );
+    background-size: 200% 100%;
+    animation: mi-shimmer 3.5s linear infinite;
+  }
+  .mi-skeleton-shimmer {
+    background-image: linear-gradient(
+      110deg,
+      transparent 30%,
+      oklch(1 0 0 / 6%) 50%,
+      transparent 70%
+    );
+    background-size: 200% 100%;
+    animation: mi-shimmer 1.6s linear infinite;
+  }
+
+  @keyframes mi-clock-tick {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+  }
+  .mi-tick { animation: mi-clock-tick 1s steps(2, end) infinite; }
+
+  /* hide horizontal scrollbar on mobile bias rail */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
