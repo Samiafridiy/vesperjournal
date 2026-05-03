@@ -13,6 +13,7 @@ import { Route as TradingLabRouteImport } from './routes/trading-lab'
 import { Route as TradesRouteImport } from './routes/trades'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as MarketIntelRouteImport } from './routes/market-intel'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ImportRouteImport } from './routes/import'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
@@ -42,6 +43,11 @@ const SignupRoute = SignupRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketIntelRoute = MarketIntelRouteImport.update({
+  id: '/market-intel',
+  path: '/market-intel',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof ForgotPasswordRoute
   '/import': typeof ImportRoute
   '/login': typeof LoginRoute
+  '/market-intel': typeof MarketIntelRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/trades': typeof TradesRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/import': typeof ImportRoute
   '/login': typeof LoginRoute
+  '/market-intel': typeof MarketIntelRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/trades': typeof TradesRoute
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/forgot-password': typeof ForgotPasswordRoute
   '/import': typeof ImportRoute
   '/login': typeof LoginRoute
+  '/market-intel': typeof MarketIntelRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/trades': typeof TradesRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/import'
     | '/login'
+    | '/market-intel'
     | '/reset-password'
     | '/signup'
     | '/trades'
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/import'
     | '/login'
+    | '/market-intel'
     | '/reset-password'
     | '/signup'
     | '/trades'
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/import'
     | '/login'
+    | '/market-intel'
     | '/reset-password'
     | '/signup'
     | '/trades'
@@ -203,6 +215,7 @@ export interface RootRouteChildren {
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   ImportRoute: typeof ImportRoute
   LoginRoute: typeof LoginRoute
+  MarketIntelRoute: typeof MarketIntelRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   TradesRoute: typeof TradesRoute
@@ -240,6 +253,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/market-intel': {
+      id: '/market-intel'
+      path: '/market-intel'
+      fullPath: '/market-intel'
+      preLoaderRoute: typeof MarketIntelRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -323,6 +343,7 @@ const rootRouteChildren: RootRouteChildren = {
   ForgotPasswordRoute: ForgotPasswordRoute,
   ImportRoute: ImportRoute,
   LoginRoute: LoginRoute,
+  MarketIntelRoute: MarketIntelRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   TradesRoute: TradesRoute,
