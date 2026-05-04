@@ -19,15 +19,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useServerFn } from "@tanstack/react-start";
-import { getMarketNews, analyzeHeadlines, type NewsItem, type NewsAnalysis } from "@/server/market.functions";
+import {
+  getMarketNews,
+  analyzeHeadlines,
+  getEconomicCalendar,
+  analyzeCalendar,
+  type NewsItem,
+  type NewsAnalysis,
+  type CalendarEvent,
+  type CalendarAnalysis,
+} from "@/server/market.functions";
 import { useTrades } from "@/hooks/use-trades";
 import { cn } from "@/lib/utils";
 import {
-  getTodaysEvents,
   impactRank,
   classifyHeadlineImpact,
-  activeScenario,
-  type EconomicEvent,
   type Impact,
 } from "@/lib/economic-calendar";
 
