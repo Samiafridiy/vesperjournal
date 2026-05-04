@@ -21,6 +21,25 @@ export type NewsAnalysis = {
   longTerm: string;
 };
 
+export type CalendarEvent = {
+  id: string;
+  title: string;
+  country: string;     // e.g. USD
+  date: string;        // ISO datetime
+  impact: "HIGH" | "MEDIUM" | "LOW" | "HOLIDAY";
+  forecast: string;
+  previous: string;
+  actual: string;
+};
+
+export type CalendarAnalysis = {
+  shortTerm: string;
+  longTerm: string;
+  above: string;
+  on: string;
+  below: string;
+};
+
 /* -------------------------------------------------------------------------- */
 /*  News fetch (Google News RSS — no API key)                                 */
 /* -------------------------------------------------------------------------- */
