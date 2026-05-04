@@ -441,16 +441,83 @@ function MarketIntelPage() {
 
       {/* Economic Calendar Playbook */}
       <section className="space-y-3">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <CalendarClock className="size-4 text-champagne" />
-          <h2 className="text-sm font-medium tracking-wide">Economic Calendar — Today</h2>
-          <span className="text-[10px] text-faint">sorted by impact</span>
+          <h2 className="text-sm font-medium tracking-wide">Economic Calendar</h2>
+          <span className="text-[10px] text-faint">live · sorted by impact</span>
+          <div className="ml-auto flex items-center gap-1 rounded-full border border-border p-0.5 bg-card">
+            {(["today", "tomorrow", "week"] as const).map((r) => (
+              <button
+                key={r}
+                onClick={() => setRange(r)}
+                className={cn(
+                  "px-3 py-1 rounded-full text-[11px] capitalize transition-colors",
+                  range === r
+                    ? "bg-champagne/15 text-champagne"
+                    : "text-soft hover:text-foreground",
+                )}
+              >
+                {r === "week" ? "This week" : r}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="grid gap-3 md:grid-cols-2">
-          {events.map((ev, i) => (
-            <EventCard key={ev.id} ev={ev} index={i} />
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] uppercase tracking-[0.18em] text-faint">Impact</span>
+          {(
+            [
+              { k: "high", label: "🔥 High only" },
+              { k: "medium", label: "🟡 + Medium" },
+              { k: "low", label: "All" },
+            ] as const
+          ).map((o) => (
+            <button
+              key={o.k}
+              onClick={() => setImpactFilter(o.k)}
+              className={cn(
+                "px-2.5 py-1 rounded-full text-[11px] border transition-colors",
+                impactFilter === o.k
+                  ? "bg-champagne/10 border-champagne/50 text-champagne"
+                  : "border-border text-soft hover:text-foreground hover:bg-accent/40",
+              )}
+            >
+              {o.label}
+            </button>
           ))}
+          {calError && (
+            <span className="ml-auto text-[11px] text-neg">{calError}</span>
+          )}
         </div>
+        {calLoading && events.length === 0 ? (
+          <div className="grid gap-3 md:grid-cols-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-44 rounded-xl border border-border bg-card mi-skeleton-shimmer"
+              />
+            ))}
+          </div>
+        ) : events.length === 0 ? (
+          <div className="text-center text-soft text-sm py-8 rounded-xl border border-border bg-card">
+            No {impactFilter === "high" ? "high-impact" : ""} events for{" "}
+            {range === "week" ? "this week" : range}.
+          </div>
+        ) : (
+          <div className="grid gap-3 md:grid-cols-2">
+            {events.map((ev, i) => (
+              <EventCard
+                key={ev.id}
+                ev={ev}
+                index={i}
+                analysis={calAnalysis[ev.id]}
+                expanded={!!calExpanded[ev.id]}
+                onToggle={() =>
+                  setCalExpanded((p) => ({ ...p, [ev.id]: !p[ev.id] }))
+                }
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Filters */}
