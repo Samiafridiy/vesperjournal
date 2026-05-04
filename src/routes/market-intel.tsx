@@ -32,7 +32,6 @@ import {
 import { useTrades } from "@/hooks/use-trades";
 import { cn } from "@/lib/utils";
 import {
-  impactRank,
   classifyHeadlineImpact,
   type Impact,
 } from "@/lib/economic-calendar";
