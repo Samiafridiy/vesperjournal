@@ -117,8 +117,19 @@ function MarketIntelPage() {
   const [now, setNow] = useState(new Date());
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
+  // Calendar state
+  const [range, setRange] = useState<"today" | "tomorrow" | "week">("today");
+  const [impactFilter, setImpactFilter] = useState<"high" | "medium" | "low">("high");
+  const [calEvents, setCalEvents] = useState<CalendarEvent[]>([]);
+  const [calAnalysis, setCalAnalysis] = useState<Record<string, CalendarAnalysis>>({});
+  const [calLoading, setCalLoading] = useState(true);
+  const [calError, setCalError] = useState<string | null>(null);
+  const [calExpanded, setCalExpanded] = useState<Record<string, boolean>>({});
+
   const fetchNews = useServerFn(getMarketNews);
   const fetchAnalysis = useServerFn(analyzeHeadlines);
+  const fetchCalendar = useServerFn(getEconomicCalendar);
+  const fetchCalAnalysis = useServerFn(analyzeCalendar);
   const { trades } = useTrades();
 
   const load = useCallback(
@@ -158,6 +169,67 @@ function MarketIntelPage() {
     return () => clearInterval(t);
   }, [filter, load]);
 
+  // Load calendar + AI analysis (refresh every 5 min)
+  const loadCalendar = useCallback(
+    async (r: "today" | "tomorrow" | "week") => {
+      setCalLoading(true);
+      setCalError(null);
+      const res = await fetchCalendar({ data: { range: r } });
+      if (res.error) setCalError(res.error);
+      const evs = res.events ?? [];
+      setCalEvents(evs);
+      setCalLoading(false);
+
+      // Analyze top 12 by impact + soonest
+      const top = [...evs]
+        .filter((e) => e.impact !== "HOLIDAY")
+        .sort((a, b) => {
+          const rk = (i: CalendarEvent["impact"]) =>
+            i === "HIGH" ? 0 : i === "MEDIUM" ? 1 : 2;
+          const d = rk(a.impact) - rk(b.impact);
+          if (d !== 0) return d;
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        })
+        .slice(0, 12);
+      if (top.length === 0) return;
+      const a = await fetchCalAnalysis({
+        data: {
+          events: top.map((e) => ({
+            id: e.id,
+            title: e.title,
+            country: e.country,
+            impact: e.impact,
+            forecast: e.forecast,
+            previous: e.previous,
+          })),
+        },
+      });
+      if (a.results?.length) {
+        setCalAnalysis((prev) => {
+          const next = { ...prev };
+          for (const r of a.results) {
+            next[r.id] = {
+              shortTerm: r.shortTerm,
+              longTerm: r.longTerm,
+              above: r.above,
+              on: r.on,
+              below: r.below,
+            };
+          }
+          return next;
+        });
+      }
+    },
+    [fetchCalendar, fetchCalAnalysis],
+  );
+
+  useEffect(() => {
+    setCalAnalysis({});
+    loadCalendar(range);
+    const t = setInterval(() => loadCalendar(range), 5 * 60_000);
+    return () => clearInterval(t);
+  }, [range, loadCalendar]);
+
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
@@ -180,13 +252,26 @@ function MarketIntelPage() {
   }, [items]);
 
   const events = useMemo(() => {
-    const list = getTodaysEvents();
-    return [...list].sort((a, b) => {
-      const ir = impactRank(a.impact) - impactRank(b.impact);
-      if (ir !== 0) return ir;
-      return new Date(a.time).getTime() - new Date(b.time).getTime();
+    const allow = new Set<CalendarEvent["impact"]>(
+      impactFilter === "high"
+        ? ["HIGH"]
+        : impactFilter === "medium"
+          ? ["HIGH", "MEDIUM"]
+          : ["HIGH", "MEDIUM", "LOW", "HOLIDAY"],
+    );
+    const filtered = calEvents.filter((e) => allow.has(e.impact));
+    const rk = (i: CalendarEvent["impact"]) =>
+      i === "HIGH" ? 0 : i === "MEDIUM" ? 1 : i === "LOW" ? 2 : 3;
+    const nowMs = Date.now();
+    return [...filtered].sort((a, b) => {
+      const aReleased = !!a.actual || new Date(a.date).getTime() < nowMs - 60 * 60_000;
+      const bReleased = !!b.actual || new Date(b.date).getTime() < nowMs - 60 * 60_000;
+      if (aReleased !== bReleased) return aReleased ? 1 : -1;
+      const r = rk(a.impact) - rk(b.impact);
+      if (r !== 0) return r;
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
     });
-  }, []);
+  }, [calEvents, impactFilter]);
 
   // "How this affects your trades" — recently traded pairs vs today's high-impact events + news
   const personalAlerts = useMemo(() => {
@@ -208,9 +293,9 @@ function MarketIntelPage() {
 
     // Match upcoming high-impact events to user's recent currency exposure
     for (const ev of events) {
-      const minutes = Math.round((new Date(ev.time).getTime() - Date.now()) / 60000);
+      const minutes = Math.round((new Date(ev.date).getTime() - Date.now()) / 60000);
       if (minutes < -120 || minutes > 8 * 60) continue;
-      const ccy = ev.currency.toUpperCase();
+      const ccy = ev.country.toUpperCase();
       for (const p of recentPairs) {
         if (p.includes(ccy) || (ccy === "USD" && (p === "XAUUSD" || p === "DXY" || p === "SP500" || p === "NASDAQ"))) {
           const urgency: "high" | "medium" =
@@ -220,10 +305,10 @@ function MarketIntelPage() {
             pair: p,
             title:
               minutes > 0
-                ? `${ev.name} releases in ${minutes} min — you have ${p} exposure`
+                ? `${ev.title} releases in ${minutes} min — you have ${p} exposure`
                 : minutes > -15
-                  ? `${ev.name} just released — watch ${p}`
-                  : `${ev.name} earlier today may still affect ${p}`,
+                  ? `${ev.title} just released — watch ${p}`
+                  : `${ev.title} earlier today may still affect ${p}`,
             urgency,
             minutesUntil: minutes,
           });
