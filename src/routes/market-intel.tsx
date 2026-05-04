@@ -19,15 +19,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useServerFn } from "@tanstack/react-start";
-import { getMarketNews, analyzeHeadlines, type NewsItem, type NewsAnalysis } from "@/server/market.functions";
+import {
+  getMarketNews,
+  analyzeHeadlines,
+  getEconomicCalendar,
+  analyzeCalendar,
+  type NewsItem,
+  type NewsAnalysis,
+  type CalendarEvent,
+  type CalendarAnalysis,
+} from "@/server/market.functions";
 import { useTrades } from "@/hooks/use-trades";
 import { cn } from "@/lib/utils";
 import {
-  getTodaysEvents,
-  impactRank,
   classifyHeadlineImpact,
-  activeScenario,
-  type EconomicEvent,
   type Impact,
 } from "@/lib/economic-calendar";
 
@@ -111,8 +116,19 @@ function MarketIntelPage() {
   const [now, setNow] = useState(new Date());
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
+  // Calendar state
+  const [range, setRange] = useState<"today" | "tomorrow" | "week">("today");
+  const [impactFilter, setImpactFilter] = useState<"high" | "medium" | "low">("high");
+  const [calEvents, setCalEvents] = useState<CalendarEvent[]>([]);
+  const [calAnalysis, setCalAnalysis] = useState<Record<string, CalendarAnalysis>>({});
+  const [calLoading, setCalLoading] = useState(true);
+  const [calError, setCalError] = useState<string | null>(null);
+  const [calExpanded, setCalExpanded] = useState<Record<string, boolean>>({});
+
   const fetchNews = useServerFn(getMarketNews);
   const fetchAnalysis = useServerFn(analyzeHeadlines);
+  const fetchCalendar = useServerFn(getEconomicCalendar);
+  const fetchCalAnalysis = useServerFn(analyzeCalendar);
   const { trades } = useTrades();
 
   const load = useCallback(
@@ -152,6 +168,67 @@ function MarketIntelPage() {
     return () => clearInterval(t);
   }, [filter, load]);
 
+  // Load calendar + AI analysis (refresh every 5 min)
+  const loadCalendar = useCallback(
+    async (r: "today" | "tomorrow" | "week") => {
+      setCalLoading(true);
+      setCalError(null);
+      const res = await fetchCalendar({ data: { range: r } });
+      if (res.error) setCalError(res.error);
+      const evs = res.events ?? [];
+      setCalEvents(evs);
+      setCalLoading(false);
+
+      // Analyze top 12 by impact + soonest
+      const top = [...evs]
+        .filter((e) => e.impact !== "HOLIDAY")
+        .sort((a, b) => {
+          const rk = (i: CalendarEvent["impact"]) =>
+            i === "HIGH" ? 0 : i === "MEDIUM" ? 1 : 2;
+          const d = rk(a.impact) - rk(b.impact);
+          if (d !== 0) return d;
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        })
+        .slice(0, 12);
+      if (top.length === 0) return;
+      const a = await fetchCalAnalysis({
+        data: {
+          events: top.map((e) => ({
+            id: e.id,
+            title: e.title,
+            country: e.country,
+            impact: e.impact,
+            forecast: e.forecast,
+            previous: e.previous,
+          })),
+        },
+      });
+      if (a.results?.length) {
+        setCalAnalysis((prev) => {
+          const next = { ...prev };
+          for (const r of a.results) {
+            next[r.id] = {
+              shortTerm: r.shortTerm,
+              longTerm: r.longTerm,
+              above: r.above,
+              on: r.on,
+              below: r.below,
+            };
+          }
+          return next;
+        });
+      }
+    },
+    [fetchCalendar, fetchCalAnalysis],
+  );
+
+  useEffect(() => {
+    setCalAnalysis({});
+    loadCalendar(range);
+    const t = setInterval(() => loadCalendar(range), 5 * 60_000);
+    return () => clearInterval(t);
+  }, [range, loadCalendar]);
+
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
@@ -174,13 +251,26 @@ function MarketIntelPage() {
   }, [items]);
 
   const events = useMemo(() => {
-    const list = getTodaysEvents();
-    return [...list].sort((a, b) => {
-      const ir = impactRank(a.impact) - impactRank(b.impact);
-      if (ir !== 0) return ir;
-      return new Date(a.time).getTime() - new Date(b.time).getTime();
+    const allow = new Set<CalendarEvent["impact"]>(
+      impactFilter === "high"
+        ? ["HIGH"]
+        : impactFilter === "medium"
+          ? ["HIGH", "MEDIUM"]
+          : ["HIGH", "MEDIUM", "LOW", "HOLIDAY"],
+    );
+    const filtered = calEvents.filter((e) => allow.has(e.impact));
+    const rk = (i: CalendarEvent["impact"]) =>
+      i === "HIGH" ? 0 : i === "MEDIUM" ? 1 : i === "LOW" ? 2 : 3;
+    const nowMs = Date.now();
+    return [...filtered].sort((a, b) => {
+      const aReleased = !!a.actual || new Date(a.date).getTime() < nowMs - 60 * 60_000;
+      const bReleased = !!b.actual || new Date(b.date).getTime() < nowMs - 60 * 60_000;
+      if (aReleased !== bReleased) return aReleased ? 1 : -1;
+      const r = rk(a.impact) - rk(b.impact);
+      if (r !== 0) return r;
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
     });
-  }, []);
+  }, [calEvents, impactFilter]);
 
   // "How this affects your trades" — recently traded pairs vs today's high-impact events + news
   const personalAlerts = useMemo(() => {
@@ -202,9 +292,9 @@ function MarketIntelPage() {
 
     // Match upcoming high-impact events to user's recent currency exposure
     for (const ev of events) {
-      const minutes = Math.round((new Date(ev.time).getTime() - Date.now()) / 60000);
+      const minutes = Math.round((new Date(ev.date).getTime() - Date.now()) / 60000);
       if (minutes < -120 || minutes > 8 * 60) continue;
-      const ccy = ev.currency.toUpperCase();
+      const ccy = ev.country.toUpperCase();
       for (const p of recentPairs) {
         if (p.includes(ccy) || (ccy === "USD" && (p === "XAUUSD" || p === "DXY" || p === "SP500" || p === "NASDAQ"))) {
           const urgency: "high" | "medium" =
@@ -214,10 +304,10 @@ function MarketIntelPage() {
             pair: p,
             title:
               minutes > 0
-                ? `${ev.name} releases in ${minutes} min — you have ${p} exposure`
+                ? `${ev.title} releases in ${minutes} min — you have ${p} exposure`
                 : minutes > -15
-                  ? `${ev.name} just released — watch ${p}`
-                  : `${ev.name} earlier today may still affect ${p}`,
+                  ? `${ev.title} just released — watch ${p}`
+                  : `${ev.title} earlier today may still affect ${p}`,
             urgency,
             minutesUntil: minutes,
           });
@@ -350,16 +440,83 @@ function MarketIntelPage() {
 
       {/* Economic Calendar Playbook */}
       <section className="space-y-3">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <CalendarClock className="size-4 text-champagne" />
-          <h2 className="text-sm font-medium tracking-wide">Economic Calendar — Today</h2>
-          <span className="text-[10px] text-faint">sorted by impact</span>
+          <h2 className="text-sm font-medium tracking-wide">Economic Calendar</h2>
+          <span className="text-[10px] text-faint">live · sorted by impact</span>
+          <div className="ml-auto flex items-center gap-1 rounded-full border border-border p-0.5 bg-card">
+            {(["today", "tomorrow", "week"] as const).map((r) => (
+              <button
+                key={r}
+                onClick={() => setRange(r)}
+                className={cn(
+                  "px-3 py-1 rounded-full text-[11px] capitalize transition-colors",
+                  range === r
+                    ? "bg-champagne/15 text-champagne"
+                    : "text-soft hover:text-foreground",
+                )}
+              >
+                {r === "week" ? "This week" : r}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="grid gap-3 md:grid-cols-2">
-          {events.map((ev, i) => (
-            <EventCard key={ev.id} ev={ev} index={i} />
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] uppercase tracking-[0.18em] text-faint">Impact</span>
+          {(
+            [
+              { k: "high", label: "🔥 High only" },
+              { k: "medium", label: "🟡 + Medium" },
+              { k: "low", label: "All" },
+            ] as const
+          ).map((o) => (
+            <button
+              key={o.k}
+              onClick={() => setImpactFilter(o.k)}
+              className={cn(
+                "px-2.5 py-1 rounded-full text-[11px] border transition-colors",
+                impactFilter === o.k
+                  ? "bg-champagne/10 border-champagne/50 text-champagne"
+                  : "border-border text-soft hover:text-foreground hover:bg-accent/40",
+              )}
+            >
+              {o.label}
+            </button>
           ))}
+          {calError && (
+            <span className="ml-auto text-[11px] text-neg">{calError}</span>
+          )}
         </div>
+        {calLoading && events.length === 0 ? (
+          <div className="grid gap-3 md:grid-cols-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-44 rounded-xl border border-border bg-card mi-skeleton-shimmer"
+              />
+            ))}
+          </div>
+        ) : events.length === 0 ? (
+          <div className="text-center text-soft text-sm py-8 rounded-xl border border-border bg-card">
+            No {impactFilter === "high" ? "high-impact" : ""} events for{" "}
+            {range === "week" ? "this week" : range}.
+          </div>
+        ) : (
+          <div className="grid gap-3 md:grid-cols-2">
+            {events.map((ev, i) => (
+              <EventCard
+                key={ev.id}
+                ev={ev}
+                index={i}
+                analysis={calAnalysis[ev.id]}
+                expanded={!!calExpanded[ev.id]}
+                onToggle={() =>
+                  setCalExpanded((p) => ({ ...p, [ev.id]: !p[ev.id] }))
+                }
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Filters */}
@@ -639,104 +796,227 @@ function Sparkline({ values, tone }: { values: number[]; tone: "pos" | "neg" | "
   );
 }
 
-function EventCard({ ev, index }: { ev: EconomicEvent; index: number }) {
-  const t = new Date(ev.time);
-  const time = t.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
-  const minutesAway = Math.round((t.getTime() - Date.now()) / 60000);
-  const released = ev.actualNumber != null;
-  const active = activeScenario(ev);
+function parseNum(s: string): number | null {
+  if (!s) return null;
+  const m = String(s).replace(/,/g, "").match(/-?\d+(\.\d+)?/);
+  return m ? parseFloat(m[0]) : null;
+}
+
+function activeScenarioFor(forecast: string, actual: string): "above" | "on" | "below" | null {
+  const f = parseNum(forecast);
+  const a = parseNum(actual);
+  if (f == null || a == null) return null;
+  const tol = Math.max(Math.abs(f) * 0.02, 0.05);
+  const diff = a - f;
+  if (Math.abs(diff) <= tol) return "on";
+  return diff > 0 ? "above" : "below";
+}
+
+function statusOf(ev: CalendarEvent): {
+  label: string;
+  cls: string;
+} {
+  const t = new Date(ev.date).getTime();
+  const minutes = Math.round((t - Date.now()) / 60000);
+  if (ev.actual) return { label: "Released", cls: "bg-accent/40 text-soft border-border" };
+  if (minutes < -5) return { label: "Released", cls: "bg-accent/40 text-soft border-border" };
+  if (minutes >= -5 && minutes <= 5)
+    return { label: "LIVE", cls: "bg-neg/20 text-neg border-neg/50 mi-glow-red" };
+  if (minutes > 5 && minutes <= 60)
+    return { label: "Soon", cls: "bg-champagne/15 text-champagne border-champagne/40 mi-pulse" };
+  return { label: "", cls: "" };
+}
+
+function countdown(iso: string): string {
+  const m = Math.round((new Date(iso).getTime() - Date.now()) / 60000);
+  if (m <= 0) return "";
+  if (m < 60) return `in ${m}m`;
+  const h = Math.floor(m / 60);
+  const rem = m % 60;
+  return `in ${h}h ${rem}m`;
+}
+
+function impactIcon(i: CalendarEvent["impact"]): string {
+  if (i === "HIGH") return "🔥";
+  if (i === "MEDIUM") return "🟡";
+  if (i === "HOLIDAY") return "🔵";
+  return "⚪";
+}
+
+function EventCard({
+  ev,
+  index,
+  analysis,
+  expanded,
+  onToggle,
+}: {
+  ev: CalendarEvent;
+  index: number;
+  analysis?: CalendarAnalysis;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  const t = new Date(ev.date);
+  const time = t.toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZoneName: "short",
+  });
+  const released = !!ev.actual || t.getTime() < Date.now() - 5 * 60_000;
+  const active = activeScenarioFor(ev.forecast, ev.actual);
+  const status = statusOf(ev);
+  const cd = countdown(ev.date);
 
   const leftBorder =
     ev.impact === "HIGH"
       ? "border-l-neg"
       : ev.impact === "MEDIUM"
         ? "border-l-champagne"
-        : "border-l-border";
+        : ev.impact === "HOLIDAY"
+          ? "border-l-chart-4"
+          : "border-l-border";
 
   const impactBadge =
     ev.impact === "HIGH"
       ? "bg-neg/15 text-neg border-neg/40 mi-glow-red"
       : ev.impact === "MEDIUM"
         ? "bg-champagne/10 text-champagne border-champagne/30"
-        : "bg-accent/30 text-soft border-border";
+        : ev.impact === "HOLIDAY"
+          ? "bg-chart-4/10 text-soft border-border"
+          : "bg-accent/30 text-soft border-border";
 
-  const trendTone: "pos" | "neg" | "soft" =
-    ev.history.length >= 2
-      ? ev.history[ev.history.length - 1] > ev.history[0]
-        ? "pos"
-        : ev.history[ev.history.length - 1] < ev.history[0]
-          ? "neg"
-          : "soft"
-      : "soft";
+  // Default scenario phrasing if AI not yet ready
+  const fallbackScenario = (kind: "above" | "on" | "below"): string => {
+    const c = ev.country;
+    if (kind === "on") return "Neutral";
+    if (kind === "above") return `Bullish ${c}`;
+    return `Bearish ${c}`;
+  };
+  const aboveText = analysis?.above || fallbackScenario("above");
+  const onText = analysis?.on || fallbackScenario("on");
+  const belowText = analysis?.below || fallbackScenario("below");
+  const sentimentTone = (s: string): "bullish" | "bearish" | "neutral" => {
+    const v = s.toLowerCase();
+    if (v.includes("bull")) return "bullish";
+    if (v.includes("bear")) return "bearish";
+    return "neutral";
+  };
 
   return (
     <motion.article
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, delay: index * 0.04, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.45, delay: Math.min(index, 8) * 0.04, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
         "relative rounded-xl border border-border bg-card border-l-4 p-4 overflow-hidden",
         leftBorder,
+        released && "opacity-90",
       )}
     >
-      {ev.impact === "HIGH" && (
+      {ev.impact === "HIGH" && !released && (
         <div className="pointer-events-none absolute inset-0 mi-shimmer" aria-hidden />
       )}
       <div className="relative flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <span
               className={cn(
                 "text-[10px] uppercase tracking-[0.16em] px-2 py-0.5 rounded border font-semibold inline-flex items-center gap-1",
                 impactBadge,
               )}
             >
-              {ev.impact === "HIGH" && <Flame className="size-3" />}
+              <span aria-hidden>{impactIcon(ev.impact)}</span>
               {ev.impact}
             </span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent/40 text-soft border border-border">
-              {ev.currency}
-            </span>
-            <span className="text-[11px] text-faint font-mono">{time}</span>
-            {!released && minutesAway > 0 && minutesAway <= 240 && (
-              <span className="text-[10px] text-champagne">in {minutesAway}m</span>
-            )}
-            {released && (
-              <span className="text-[10px] text-pos">released</span>
+            {status.label && (
+              <span
+                className={cn(
+                  "text-[10px] uppercase tracking-[0.16em] px-2 py-0.5 rounded border font-semibold",
+                  status.cls,
+                )}
+              >
+                {status.label}
+              </span>
             )}
           </div>
           <h3 className="mt-1.5 text-sm md:text-base font-medium leading-snug">
-            {ev.name}
+            {ev.title}
           </h3>
         </div>
-        <Sparkline values={ev.history} tone={trendTone} />
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent/40 text-soft border border-border">
+            {ev.country}
+          </span>
+          <span className="text-[11px] text-faint font-mono">{time}</span>
+          {!released && cd && (
+            <span className="text-[10px] text-champagne font-mono">{cd}</span>
+          )}
+        </div>
       </div>
 
       {/* Previous | Forecast | Actual */}
       <div className="relative mt-3 grid grid-cols-3 gap-2">
-        <Stat label="Previous" value={ev.previous} />
-        <Stat label="Forecast" value={ev.forecast} highlight />
+        <Stat label="Previous" value={ev.previous || "—"} />
+        <Stat label="Forecast" value={ev.forecast || "—"} highlight />
         <Stat
           label="Actual"
-          value={released ? `${ev.actualNumber}${ev.unit ?? ""}` : "—"}
-          tone={
-            active === "above" ? "pos" : active === "below" ? "neg" : undefined
-          }
+          value={ev.actual || "—"}
+          tone={active === "above" ? "pos" : active === "below" ? "neg" : undefined}
           big
         />
       </div>
 
       {/* Playbook scenarios */}
-      <div className="relative mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
-        <Scenario data={ev.playbook.above} active={active === "above"} />
-        <Scenario data={ev.playbook.on} active={active === "on"} />
-        <Scenario data={ev.playbook.below} active={active === "below"} />
-      </div>
+      {ev.impact !== "HOLIDAY" && (
+        <div className="relative mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <Scenario
+            data={{ label: "Above forecast", outcome: aboveText, tone: sentimentTone(aboveText) }}
+            active={active === "above"}
+          />
+          <Scenario
+            data={{ label: "On forecast", outcome: onText, tone: sentimentTone(onText) }}
+            active={active === "on"}
+          />
+          <Scenario
+            data={{ label: "Below forecast", outcome: belowText, tone: sentimentTone(belowText) }}
+            active={active === "below"}
+          />
+        </div>
+      )}
 
-      <p className="relative mt-3 text-[12px] text-soft leading-relaxed">
-        <span className="text-faint">What this means: </span>
-        {ev.meaning}
-      </p>
+      {/* AI analysis expandable */}
+      {ev.impact !== "HOLIDAY" && (
+        <>
+          <button
+            onClick={onToggle}
+            className="relative mt-3 inline-flex items-center gap-1 text-[11px] text-soft hover:text-champagne"
+          >
+            {expanded ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
+            AI analysis {analysis ? "" : "(loading…)"}
+          </button>
+          <AnimatePresence initial={false}>
+            {expanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="mt-3 grid gap-3 text-sm">
+                  <AnalysisRow
+                    label="⚡ Short Term (1–4 hours)"
+                    body={analysis?.shortTerm || "Analysis pending…"}
+                  />
+                  <AnalysisRow
+                    label="📅 Long Term (1–7 days)"
+                    body={analysis?.longTerm || "Analysis pending…"}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </>
+      )}
     </motion.article>
   );
 }
