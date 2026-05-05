@@ -623,7 +623,7 @@ function BiasCard({
     tone === "bullish"
       ? "text-pos border-pos/30 bg-pos/5"
       : tone === "bearish"
-        ? "text-neg border-neg/30 bg-neg/5"
+        ? "text-champagne border-border bg-champagne/5"
         : "text-soft border-border bg-accent/20";
   return (
     <motion.div
@@ -675,14 +675,14 @@ function NewsCard({
     sentiment === "bullish"
       ? "bg-pos/10 text-pos border-pos/30"
       : sentiment === "bearish"
-        ? "bg-neg/10 text-neg border-neg/30"
+        ? "bg-neg/5 text-neg/80 border-neg/20"
         : "bg-accent/30 text-soft border-border";
 
   const impactBadge =
     item.impact === "HIGH"
-      ? "bg-neg/15 text-neg border-neg/40 mi-glow-red"
+      ? "bg-champagne/10 text-champagne border-champagne/30"
       : item.impact === "MEDIUM"
-        ? "bg-champagne/10 text-champagne border-champagne/30"
+        ? "bg-accent/30 text-soft border-border"
         : "bg-accent/30 text-soft border-border";
 
   return (
@@ -691,7 +691,7 @@ function NewsCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: Math.min(index, 8) * 0.03, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "rounded-xl border border-border bg-card border-l-4 p-4",
+        "rounded-xl border border-border bg-card border-l-2 p-4",
         borderTone,
       )}
     >
@@ -717,6 +717,13 @@ function NewsCard({
           </div>
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
+          {item.impact === "HIGH" && (
+            <span
+              aria-hidden
+              className="size-1.5 rounded-full bg-champagne"
+              title="High impact"
+            />
+          )}
           <span
             className={cn(
               "text-[10px] uppercase tracking-[0.16em] px-2 py-0.5 rounded border font-semibold",
@@ -772,8 +779,9 @@ function NewsCard({
         </>
       )}
       {!a && (
-        <div className="mt-2 text-[11px] text-faint italic">
-          AI analysis pending…
+        <div className="mt-2 text-[11px] text-faint italic inline-flex items-center gap-1.5">
+          <Loader2 className="size-3 animate-spin" />
+          Analyzing…
         </div>
       )}
     </motion.article>
@@ -898,20 +906,20 @@ function EventCard({
 
   const leftBorder =
     ev.impact === "HIGH"
-      ? "border-l-neg"
+      ? "border-l-champagne"
       : ev.impact === "MEDIUM"
-        ? "border-l-champagne"
+        ? "border-l-border"
         : ev.impact === "HOLIDAY"
-          ? "border-l-chart-4"
+          ? "border-l-border"
           : "border-l-border";
 
   const impactBadge =
     ev.impact === "HIGH"
-      ? "bg-neg/15 text-neg border-neg/40 mi-glow-red"
+      ? "bg-champagne/10 text-champagne border-champagne/30"
       : ev.impact === "MEDIUM"
-        ? "bg-champagne/10 text-champagne border-champagne/30"
+        ? "bg-accent/30 text-soft border-border"
         : ev.impact === "HOLIDAY"
-          ? "bg-chart-4/10 text-soft border-border"
+          ? "bg-accent/30 text-soft border-border"
           : "bg-accent/30 text-soft border-border";
 
   // Default scenario phrasing if AI not yet ready
@@ -937,14 +945,11 @@ function EventCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay: Math.min(index, 8) * 0.04, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "relative rounded-xl border border-border bg-card border-l-4 p-4 overflow-hidden",
+        "relative rounded-xl border border-border bg-card border-l-2 p-4 overflow-hidden",
         leftBorder,
         released && "opacity-90",
       )}
     >
-      {ev.impact === "HIGH" && !released && (
-        <div className="pointer-events-none absolute inset-0 mi-shimmer" aria-hidden />
-      )}
       <div className="relative flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
