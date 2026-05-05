@@ -285,6 +285,7 @@ function RiskEngineTab() {
             </Button>
           </DialogTrigger>
           <PresetDialog
+            key={editing?.id ?? "new"}
             edit={editing}
             accounts={accounts}
             defaultAccountId={defaultAccount?.id ?? null}
