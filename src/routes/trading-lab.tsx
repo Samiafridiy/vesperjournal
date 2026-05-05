@@ -285,6 +285,7 @@ function RiskEngineTab() {
             </Button>
           </DialogTrigger>
           <PresetDialog
+            key={editing?.id ?? "new"}
             edit={editing}
             accounts={accounts}
             defaultAccountId={defaultAccount?.id ?? null}
@@ -524,7 +525,9 @@ function PresetDialog({
         {/* Live preview */}
         <div className="rounded-xl border border-border bg-surface-2/30 p-5 flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <div className="text-[11px] uppercase tracking-wider text-faint">Live preview</div>
+            <div className="text-[11px] uppercase tracking-wider text-faint">
+              Live preview · {fundedEnabled ? "Funded Account" : "Live Account"}
+            </div>
             <span
               className={cn(
                 "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-medium",
@@ -537,25 +540,52 @@ function PresetDialog({
               {profile.label}
             </span>
           </div>
-          <div>
-            <div className="text-xs text-soft">Risk per trade</div>
-            <div className="text-3xl font-mono">{fmtMoney(riskAmt)}</div>
-            <div className="text-xs text-faint">{riskN.toFixed(2)}% of {fmtMoney(balance)}</div>
-          </div>
-          {rr && (
+          {(() => {
+            const ddNum = Number(maxDD) || 0;
+            const useFunded = fundedEnabled && ddNum > 0;
+            const baseAmt = useFunded ? ddNum : balance;
+            const perTrade = baseAmt * (riskN / 100);
+            const baseLabel = useFunded ? "drawdown limit" : "account balance";
+            return (
+              <div>
+                <div className="text-xs text-soft">Risk per trade</div>
+                <div className="text-3xl font-mono">{fmtMoney(perTrade)}</div>
+                <div className="text-xs text-faint">
+                  {riskN.toFixed(2)}% of {fmtMoney(baseAmt)} {baseLabel}
+                </div>
+                {useFunded && (
+                  <div className="mt-3 space-y-1.5 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-soft">Losses until account breach</span>
+                      <span className="font-mono text-neg">
+                        {perTrade > 0 ? Math.floor(ddNum / perTrade) : "—"} trades
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-soft">Remaining drawdown after 5 losses</span>
+                      <span className="font-mono">
+                        {fmtMoney(Math.max(0, ddNum - perTrade * 5))}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+          {rr && !fundedEnabled && (
             <div>
               <div className="text-xs text-soft">Reward at {rr}R</div>
               <div className="text-xl font-mono text-pos">{fmtMoney(riskAmt * Number(rr), { sign: true })}</div>
             </div>
           )}
-          <div className="border-t border-border pt-3">
+          {!fundedEnabled && <div className="border-t border-border pt-3">
             <div className="text-[11px] uppercase tracking-wider text-faint mb-2">Drawdown projection</div>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between"><span className="text-soft">After 5 losses</span><span className="font-mono text-neg">−{fmtPct(dd5.lostPct)} · {fmtMoney(-dd5.lost, { sign: true })}</span></div>
               <div className="flex justify-between"><span className="text-soft">After 10 losses</span><span className="font-mono text-neg">−{fmtPct(dd10.lostPct)} · {fmtMoney(-dd10.lost, { sign: true })}</span></div>
               <div className="flex justify-between border-t border-border pt-2"><span className="text-soft">Balance after 10 losses</span><span className="font-mono">{fmtMoney(dd10.remaining)}</span></div>
             </div>
-          </div>
+          </div>}
           {fundedEnabled && (() => {
             const startBal = Number(startingBal) || balance;
             const dd = Number(maxDD) || 0;

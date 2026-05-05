@@ -96,11 +96,6 @@ function Dashboard() {
           <CoachSaysToday trades={trades} />
           <DailyTipModal trades={trades} />
 
-          {/* Funded account tracker */}
-          <section className="mb-6">
-            <FundedAccountTracker trades={trades} />
-          </section>
-
           {/* Coach row: Trader Score + Daily Coach + Mistake Alerts */}
           <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-6">
             <div className="lg:col-span-5">
@@ -208,6 +203,11 @@ function Dashboard() {
               }
               sub="Single trade"
             />
+          </section>
+
+          {/* Funded account tracker — between stats and equity */}
+          <section className="mb-6">
+            <FundedAccountTracker trades={trades} />
           </section>
 
           {/* Chart + insights */}
