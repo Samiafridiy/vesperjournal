@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { TrendingUp, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { PasswordField } from "@/components/auth/PasswordField";
+import { lovable } from "@/integrations/lovable/index";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -25,6 +26,21 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  async function onGoogle() {
+    setGoogleLoading(true);
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin + "/dashboard",
+    });
+    if (result.error) {
+      setGoogleLoading(false);
+      toast.error(result.error.message || "Google sign-in failed.");
+      return;
+    }
+    if (result.redirected) return;
+    navigate({ to: "/dashboard" });
+  }
 
   useEffect(() => {
     if (!loading && user) navigate({ to: "/dashboard" });
@@ -49,6 +65,13 @@ function LoginPage() {
 
   return <AuthShell title="Welcome back" subtitle="Sign in to your Vesper Journal journal.">
     <form onSubmit={onSubmit} className="flex flex-col gap-5">
+      <Button type="button" variant="outline" onClick={onGoogle} disabled={googleLoading} className="h-11 bg-surface-2 border-border hover:bg-accent">
+        {googleLoading ? <Loader2 className="size-4 mr-2 animate-spin" /> : <GoogleIcon />}
+        Continue with Google
+      </Button>
+      <div className="flex items-center gap-3 text-[10px] uppercase tracking-[0.18em] text-faint">
+        <div className="h-px flex-1 bg-border" /> or <div className="h-px flex-1 bg-border" />
+      </div>
       <Field label="Email">
         <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="bg-surface-2 border-border h-11" />
       </Field>
