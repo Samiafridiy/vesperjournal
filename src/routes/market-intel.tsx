@@ -858,9 +858,9 @@ function statusOf(ev: CalendarEvent): {
   if (ev.actual) return { label: "Released", cls: "bg-accent/40 text-soft border-border" };
   if (minutes < -5) return { label: "Released", cls: "bg-accent/40 text-soft border-border" };
   if (minutes >= -5 && minutes <= 5)
-    return { label: "LIVE", cls: "bg-neg/20 text-neg border-neg/50 mi-glow-red" };
+    return { label: "LIVE", cls: "bg-champagne/15 text-champagne border-champagne/40" };
   if (minutes > 5 && minutes <= 60)
-    return { label: "Soon", cls: "bg-champagne/15 text-champagne border-champagne/40 mi-pulse" };
+    return { label: "Soon", cls: "bg-champagne/10 text-champagne border-champagne/30" };
   return { label: "", cls: "" };
 }
 
@@ -874,10 +874,10 @@ function countdown(iso: string): string {
 }
 
 function impactIcon(i: CalendarEvent["impact"]): string {
-  if (i === "HIGH") return "🔥";
-  if (i === "MEDIUM") return "🟡";
-  if (i === "HOLIDAY") return "🔵";
-  return "⚪";
+  if (i === "HIGH") return "🔸";
+  if (i === "MEDIUM") return "•";
+  if (i === "HOLIDAY") return "•";
+  return "•";
 }
 
 function EventCard({
