@@ -1103,13 +1103,13 @@ function Scenario({
     data.tone === "bullish"
       ? "border-pos/30 text-pos"
       : data.tone === "bearish"
-        ? "border-neg/30 text-neg"
+        ? "border-neg/20 text-neg/80"
         : "border-border text-soft";
   const activeBg =
     data.tone === "bullish"
       ? "bg-pos/15 border-pos/60"
       : data.tone === "bearish"
-        ? "bg-neg/15 border-neg/60"
+        ? "bg-neg/10 border-neg/40"
         : "bg-accent/40 border-border";
   return (
     <div
