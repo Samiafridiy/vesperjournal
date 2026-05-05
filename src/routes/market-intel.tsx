@@ -12,9 +12,8 @@ import {
   ChevronDown,
   ChevronUp,
   ExternalLink,
-  AlertTriangle,
+  Loader2,
   CalendarClock,
-  Flame,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -137,7 +136,34 @@ function MarketIntelPage() {
       setError(null);
       const r = await fetchNews({ data: { filter: f } });
       if (r.error) setError(r.error);
-      const base: Enriched[] = (r.items ?? []).map((i) => ({
+      // Deduplicate news: by exact title and by 80% token overlap
+      const tokenize = (s: string) =>
+        new Set(
+          s
+            .toLowerCase()
+            .replace(/[^a-z0-9 ]/g, " ")
+            .split(/\s+/)
+            .filter((w) => w.length > 3),
+        );
+      const overlap = (a: Set<string>, b: Set<string>) => {
+        if (a.size === 0 || b.size === 0) return 0;
+        let inter = 0;
+        for (const t of a) if (b.has(t)) inter++;
+        return inter / Math.min(a.size, b.size);
+      };
+      const seen: { tokens: Set<string>; key: string }[] = [];
+      const unique: NewsItem[] = [];
+      for (const item of r.items ?? []) {
+        const key = item.title.trim().toLowerCase();
+        const toks = tokenize(item.title);
+        const dup = seen.some(
+          (s) => s.key === key || overlap(s.tokens, toks) >= 0.8,
+        );
+        if (dup) continue;
+        seen.push({ tokens: toks, key });
+        unique.push(item);
+      }
+      const base: Enriched[] = unique.map((i) => ({
         ...i,
         impact: classifyHeadlineImpact(i.title),
       }));
@@ -225,7 +251,8 @@ function MarketIntelPage() {
   useEffect(() => {
     setCalAnalysis({});
     loadCalendar(range);
-    const t = setInterval(() => loadCalendar(range), 5 * 60_000);
+    // Cache calendar — refresh once per hour to avoid rate limits
+    const t = setInterval(() => loadCalendar(range), 60 * 60_000);
     return () => clearInterval(t);
   }, [range, loadCalendar]);
 
@@ -274,7 +301,7 @@ function MarketIntelPage() {
 
   // "How this affects your trades" — recently traded pairs vs today's high-impact events + news
   const personalAlerts = useMemo(() => {
-    const since = Date.now() - 14 * 86_400_000;
+    const since = Date.now() - 7 * 86_400_000;
     const recentPairs = new Set(
       (trades ?? [])
         .filter((t) => t.trade_date && new Date(t.trade_date).getTime() >= since)
@@ -333,7 +360,15 @@ function MarketIntelPage() {
       }
     }
 
-    return alerts.slice(0, 5);
+    const sorted = alerts.sort((a, b) => {
+      const u = (x: Alert) => (x.urgency === "high" ? 0 : 1);
+      const ud = u(a) - u(b);
+      if (ud !== 0) return ud;
+      const am = a.minutesUntil ?? 9999;
+      const bm = b.minutesUntil ?? 9999;
+      return Math.abs(am) - Math.abs(bm);
+    });
+    return sorted.slice(0, 2);
   }, [items, trades, events]);
 
   // Sort news: HIGH first, then MEDIUM, LOW; within group most recent first
@@ -414,22 +449,15 @@ function MarketIntelPage() {
               key={a.id}
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
-              className={cn(
-                "rounded-xl border p-3 flex items-start gap-2 text-sm",
-                a.urgency === "high"
-                  ? "border-neg/40 bg-neg/10 text-foreground mi-glow-red"
-                  : "border-champagne/30 bg-champagne/5 text-foreground",
-              )}
+              className="rounded-xl border border-border bg-card p-3 flex items-start gap-2 text-sm"
             >
-              <AlertTriangle
-                className={cn(
-                  "size-4 mt-0.5 shrink-0",
-                  a.urgency === "high" ? "text-neg" : "text-champagne",
-                )}
+              <span
+                aria-hidden
+                className="mt-1.5 size-2 rounded-full bg-champagne shrink-0"
               />
               <div className="flex-1 min-w-0">
                 <div className="text-[10px] uppercase tracking-[0.2em] text-faint mb-0.5">
-                  {a.urgency === "high" ? "High urgency" : "Heads up"} · {a.pair}
+                  Heads up · {a.pair}
                 </div>
                 <div className="leading-snug">{a.title}</div>
               </div>
@@ -484,7 +512,7 @@ function MarketIntelPage() {
             </button>
           ))}
           {calError && (
-            <span className="ml-auto text-[11px] text-neg">{calError}</span>
+            <span className="ml-auto text-[11px] text-faint">Calendar updating…</span>
           )}
         </div>
         {calLoading && events.length === 0 ? (
@@ -536,14 +564,15 @@ function MarketIntelPage() {
           </button>
         ))}
         {analyzing && (
-          <span className="ml-auto text-[11px] text-faint self-center">
-            AI analyzing headlines…
+          <span className="ml-auto text-[11px] text-faint self-center inline-flex items-center gap-1.5">
+            <Loader2 className="size-3 animate-spin" />
+            Analyzing…
           </span>
         )}
       </div>
 
       {error && (
-        <div className="rounded-lg border border-neg/40 bg-neg/10 px-3 py-2 text-sm text-neg">
+        <div className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-faint">
           {error}
         </div>
       )}
@@ -594,7 +623,7 @@ function BiasCard({
     tone === "bullish"
       ? "text-pos border-pos/30 bg-pos/5"
       : tone === "bearish"
-        ? "text-neg border-neg/30 bg-neg/5"
+        ? "text-champagne border-border bg-champagne/5"
         : "text-soft border-border bg-accent/20";
   return (
     <motion.div
@@ -646,14 +675,14 @@ function NewsCard({
     sentiment === "bullish"
       ? "bg-pos/10 text-pos border-pos/30"
       : sentiment === "bearish"
-        ? "bg-neg/10 text-neg border-neg/30"
+        ? "bg-neg/5 text-neg/80 border-neg/20"
         : "bg-accent/30 text-soft border-border";
 
   const impactBadge =
     item.impact === "HIGH"
-      ? "bg-neg/15 text-neg border-neg/40 mi-glow-red"
+      ? "bg-champagne/10 text-champagne border-champagne/30"
       : item.impact === "MEDIUM"
-        ? "bg-champagne/10 text-champagne border-champagne/30"
+        ? "bg-accent/30 text-soft border-border"
         : "bg-accent/30 text-soft border-border";
 
   return (
@@ -662,7 +691,7 @@ function NewsCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: Math.min(index, 8) * 0.03, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "rounded-xl border border-border bg-card border-l-4 p-4",
+        "rounded-xl border border-border bg-card border-l-2 p-4",
         borderTone,
       )}
     >
@@ -688,6 +717,13 @@ function NewsCard({
           </div>
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
+          {item.impact === "HIGH" && (
+            <span
+              aria-hidden
+              className="size-1.5 rounded-full bg-champagne"
+              title="High impact"
+            />
+          )}
           <span
             className={cn(
               "text-[10px] uppercase tracking-[0.16em] px-2 py-0.5 rounded border font-semibold",
@@ -743,8 +779,9 @@ function NewsCard({
         </>
       )}
       {!a && (
-        <div className="mt-2 text-[11px] text-faint italic">
-          AI analysis pending…
+        <div className="mt-2 text-[11px] text-faint italic inline-flex items-center gap-1.5">
+          <Loader2 className="size-3 animate-spin" />
+          Analyzing…
         </div>
       )}
     </motion.article>
@@ -821,9 +858,9 @@ function statusOf(ev: CalendarEvent): {
   if (ev.actual) return { label: "Released", cls: "bg-accent/40 text-soft border-border" };
   if (minutes < -5) return { label: "Released", cls: "bg-accent/40 text-soft border-border" };
   if (minutes >= -5 && minutes <= 5)
-    return { label: "LIVE", cls: "bg-neg/20 text-neg border-neg/50 mi-glow-red" };
+    return { label: "LIVE", cls: "bg-champagne/15 text-champagne border-champagne/40" };
   if (minutes > 5 && minutes <= 60)
-    return { label: "Soon", cls: "bg-champagne/15 text-champagne border-champagne/40 mi-pulse" };
+    return { label: "Soon", cls: "bg-champagne/10 text-champagne border-champagne/30" };
   return { label: "", cls: "" };
 }
 
@@ -837,10 +874,10 @@ function countdown(iso: string): string {
 }
 
 function impactIcon(i: CalendarEvent["impact"]): string {
-  if (i === "HIGH") return "🔥";
-  if (i === "MEDIUM") return "🟡";
-  if (i === "HOLIDAY") return "🔵";
-  return "⚪";
+  if (i === "HIGH") return "🔸";
+  if (i === "MEDIUM") return "•";
+  if (i === "HOLIDAY") return "•";
+  return "•";
 }
 
 function EventCard({
@@ -869,20 +906,20 @@ function EventCard({
 
   const leftBorder =
     ev.impact === "HIGH"
-      ? "border-l-neg"
+      ? "border-l-champagne"
       : ev.impact === "MEDIUM"
-        ? "border-l-champagne"
+        ? "border-l-border"
         : ev.impact === "HOLIDAY"
-          ? "border-l-chart-4"
+          ? "border-l-border"
           : "border-l-border";
 
   const impactBadge =
     ev.impact === "HIGH"
-      ? "bg-neg/15 text-neg border-neg/40 mi-glow-red"
+      ? "bg-champagne/10 text-champagne border-champagne/30"
       : ev.impact === "MEDIUM"
-        ? "bg-champagne/10 text-champagne border-champagne/30"
+        ? "bg-accent/30 text-soft border-border"
         : ev.impact === "HOLIDAY"
-          ? "bg-chart-4/10 text-soft border-border"
+          ? "bg-accent/30 text-soft border-border"
           : "bg-accent/30 text-soft border-border";
 
   // Default scenario phrasing if AI not yet ready
@@ -908,14 +945,11 @@ function EventCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay: Math.min(index, 8) * 0.04, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "relative rounded-xl border border-border bg-card border-l-4 p-4 overflow-hidden",
+        "relative rounded-xl border border-border bg-card border-l-2 p-4 overflow-hidden",
         leftBorder,
         released && "opacity-90",
       )}
     >
-      {ev.impact === "HIGH" && !released && (
-        <div className="pointer-events-none absolute inset-0 mi-shimmer" aria-hidden />
-      )}
       <div className="relative flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
@@ -1069,13 +1103,13 @@ function Scenario({
     data.tone === "bullish"
       ? "border-pos/30 text-pos"
       : data.tone === "bearish"
-        ? "border-neg/30 text-neg"
+        ? "border-neg/20 text-neg/80"
         : "border-border text-soft";
   const activeBg =
     data.tone === "bullish"
       ? "bg-pos/15 border-pos/60"
       : data.tone === "bearish"
-        ? "bg-neg/15 border-neg/60"
+        ? "bg-neg/10 border-neg/40"
         : "bg-accent/40 border-border";
   return (
     <div
