@@ -426,10 +426,11 @@ function NewTrade() {
 
           <FormField label="Mistakes (multi-select)">
             <div className="flex flex-wrap gap-2">
-              {MISTAKES.map((m) => (
+              {MISTAKES.map((m, i) => (
                 <button key={m} type="button" onClick={() => toggleMistake(m)}
+                  style={{ animationDelay: `${0.2 + i * 0.04}s` }}
                   className={cn(
-                    "px-3 py-1.5 rounded-full text-xs font-medium border transition-colors",
+                    "px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 hover:scale-105 tl-fade-up",
                     mistakes.includes(m)
                       ? "bg-neg/15 border-neg/40 text-neg"
                       : "border-border text-soft hover:bg-accent",
@@ -441,7 +442,7 @@ function NewTrade() {
           </FormField>
         </section>
 
-        <aside className="flex flex-col gap-5 h-fit lg:sticky lg:top-6">
+        <aside className="flex flex-col gap-5 h-fit lg:sticky lg:top-6 tl-slide-right" style={{ animationDelay: "0.15s" }}>
           <div className="surface-card p-5 flex flex-col gap-4">
             <div className="text-sm font-semibold">Trade Progress</div>
             <div>
@@ -472,7 +473,16 @@ function NewTrade() {
             <SummaryRow label="Size" value={isNaN(lotN) ? "—" : `${lotN} lot`} mono />
             <SummaryRow
               label="Pips"
-              value={livePips == null ? "—" : `${livePips >= 0 ? "+" : ""}${livePips.toFixed(1)} pips`}
+              value={
+                livePips == null ? "—" : (
+                  <span className="inline-flex items-center gap-1">
+                    {livePips >= 0
+                      ? <ArrowUp className="size-3" />
+                      : <ArrowDown className="size-3" />}
+                    {`${livePips >= 0 ? "+" : ""}${livePips.toFixed(1)} pips`}
+                  </span>
+                )
+              }
               tone={livePips == null ? undefined : livePips >= 0 ? "pos" : "neg"}
               mono
             />
@@ -656,7 +666,10 @@ function NewTrade() {
             <Button
               type="submit"
               disabled={submitting}
-              className="flex-1 bg-champagne text-primary-foreground hover:bg-champagne/90 h-11"
+              className={cn(
+                "flex-1 bg-champagne text-primary-foreground hover:bg-champagne/90 h-11 transition-all",
+                progress === 100 && !submitting && "tl-pulse-champagne"
+              )}
             >
               {submitting && <Loader2 className="size-4 mr-2 animate-spin" />}
               {isEdit ? "Update Trade" : "Save trade"}
