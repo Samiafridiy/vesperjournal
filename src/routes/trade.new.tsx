@@ -32,7 +32,7 @@ import {
   fmtPct,
 } from "@/lib/trade-utils";
 import { toast } from "sonner";
-import { Loader2, Upload, ArrowLeft, AlertTriangle, BarChart3, Target, ChevronDown, Beaker } from "lucide-react";
+import { Loader2, Upload, ArrowLeft, AlertTriangle, BarChart3, Target, ChevronDown, Beaker, ArrowUp, ArrowDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { useRiskPresets, useTradingAccounts, riskProfileLabel, suggestLotSize } from "@/hooks/use-risk";
@@ -42,6 +42,7 @@ import {
   Popover, PopoverTrigger, PopoverContent,
 } from "@/components/ui/popover";
 import { Link } from "@tanstack/react-router";
+import { PairSelector, pushRecentPair } from "@/components/PairSelector";
 
 export const Route = createFileRoute("/trade/new")({
   validateSearch: z.object({
