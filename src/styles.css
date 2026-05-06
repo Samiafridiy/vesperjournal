@@ -289,3 +289,26 @@
   }
   .tl-success-flash { animation: tl-success-flash 0.9s ease-out forwards; }
 }
+
+@layer utilities {
+  /* Psychology — emotion / mistake / win animations */
+  @keyframes tl-emotion-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1.04); }
+  }
+  .tl-emotion-pop { animation: tl-emotion-pop 0.18s ease-out both; }
+
+  @keyframes tl-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+  }
+  .tl-shake { animation: tl-shake 0.2s ease-in-out; }
+
+  @keyframes tl-pulse-green {
+    0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--pos) 0%, transparent); }
+    50% { box-shadow: 0 0 10px 0 color-mix(in oklab, var(--pos) 40%, transparent); }
+  }
+  .tl-pulse-green { animation: tl-pulse-green 1.6s ease-in-out infinite; }
+}
