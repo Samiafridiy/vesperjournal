@@ -68,6 +68,7 @@ function NewTrade() {
   const { id: editId } = Route.useSearch();
   const isEdit = Boolean(editId);
   const [submitting, setSubmitting] = useState(false);
+  const [savedFlash, setSavedFlash] = useState(false);
   const [loadingTrade, setLoadingTrade] = useState(isEdit);
   const [existingScreenshot, setExistingScreenshot] = useState<string | null>(null);
 
@@ -297,7 +298,9 @@ function NewTrade() {
       return;
     }
     toast.success(isEdit ? "Trade updated successfully" : "Trade logged.");
-    navigate({ to: isEdit ? "/trades" : "/dashboard" });
+    pushRecentPair(pair);
+    setSavedFlash(true);
+    setTimeout(() => navigate({ to: isEdit ? "/trades" : "/dashboard" }), 700);
   }
 
   if (loadingTrade) {
@@ -309,15 +312,22 @@ function NewTrade() {
   }
 
   return (
-    <div className="px-5 md:px-10 py-8 md:py-10 max-w-[1400px] mx-auto">
+    <div className="px-5 md:px-10 py-8 md:py-10 max-w-[1400px] mx-auto tl-bg relative">
+      {savedFlash && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+          <div className="tl-success-flash size-20 rounded-full bg-pos/20 border border-pos/60 flex items-center justify-center">
+            <Check className="size-10 text-pos" strokeWidth={3} />
+          </div>
+        </div>
+      )}
       <button
         onClick={() => navigate({ to: isEdit ? "/trades" : "/dashboard" })}
-        className="flex items-center gap-2 text-sm text-soft hover:text-foreground transition-colors mb-6"
+        className="flex items-center gap-2 text-sm text-soft hover:text-foreground transition-colors mb-6 tl-fade-up"
       >
         <ArrowLeft className="size-4" /> Back
       </button>
 
-      <header className="border-b border-border pb-6 mb-8">
+      <header className="border-b border-border pb-6 mb-8 tl-fade-up" style={{ animationDelay: "0.05s" }}>
         <div className="text-[11px] uppercase tracking-[0.18em] text-soft mb-2">
           {isEdit ? "Edit entry" : "New entry"}
         </div>
@@ -328,28 +338,23 @@ function NewTrade() {
       </header>
 
       <form onSubmit={onSubmit} className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-5">
-        <section className="surface-card p-6 md:p-8 flex flex-col gap-6">
+        <section className="surface-card p-6 md:p-8 flex flex-col gap-6 tl-fade-up" style={{ animationDelay: "0.1s" }}>
           <SectionTitle>Trade</SectionTitle>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <FormField label="Pair">
-              <Select value={pair} onValueChange={setPair}>
-                <SelectTrigger className="bg-surface-2 border-border h-11"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {PAIRS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <PairSelector value={pair} onChange={setPair} />
             </FormField>
             <FormField label="Direction">
               <div className="flex gap-2 h-11">
                 <button type="button" onClick={() => setDirection("buy")}
-                  className={cn("flex-1 rounded-md text-sm font-medium border transition-colors",
-                    direction === "buy" ? "bg-pos/15 border-pos/40 text-pos" : "border-border text-soft hover:bg-accent")}>
+                  className={cn("flex-1 rounded-md text-sm font-medium border transition-all duration-200",
+                    direction === "buy" ? "bg-pos/15 border-pos/40 text-pos tl-pulse-pos" : "border-border text-soft hover:bg-accent")}>
                   Buy
                 </button>
                 <button type="button" onClick={() => setDirection("sell")}
-                  className={cn("flex-1 rounded-md text-sm font-medium border transition-colors",
-                    direction === "sell" ? "bg-neg/15 border-neg/40 text-neg" : "border-border text-soft hover:bg-accent")}>
+                  className={cn("flex-1 rounded-md text-sm font-medium border transition-all duration-200",
+                    direction === "sell" ? "bg-neg/15 border-neg/40 text-neg tl-pulse-neg" : "border-border text-soft hover:bg-accent")}>
                   Sell
                 </button>
               </div>
