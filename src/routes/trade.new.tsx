@@ -28,7 +28,6 @@ import {
   pipDistance,
   pipSize,
   pipValuePerLot,
-  fmtPct,
 } from "@/lib/trade-utils";
 import { toast } from "sonner";
 import { WINS_WELL, EMOTION_COLORS } from "@/lib/trade-utils";
@@ -788,6 +787,160 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: "po
         tone === "pos" && "text-pos",
         tone === "neg" && "text-neg",
       )}>{value}</div>
+    </div>
+  );
+}
+
+function EmotionGrid({
+  options,
+  value,
+  onChange,
+}: {
+  options: readonly string[];
+  value: string | undefined;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="grid grid-cols-4 gap-2">
+      {options.map((o, i) => {
+        const color = EMOTION_COLORS[o] ?? "#6B7280";
+        const selected = value === o;
+        return (
+          <button
+            key={o}
+            type="button"
+            onClick={() => onChange(o)}
+            style={{
+              animationDelay: `${0.05 * i}s`,
+              ...(selected
+                ? {
+                    background: `color-mix(in oklab, ${color} 18%, transparent)`,
+                    borderColor: `color-mix(in oklab, ${color} 55%, transparent)`,
+                    color,
+                    boxShadow: `0 0 12px 0 color-mix(in oklab, ${color} 35%, transparent)`,
+                  }
+                : {}),
+            }}
+            className={cn(
+              "px-2 py-2 rounded-md text-xs font-medium border transition-all duration-150 tl-fade-up text-center",
+              selected
+                ? "tl-emotion-pop"
+                : "border-border text-soft hover:bg-accent hover:scale-[1.03]",
+            )}
+          >
+            {o}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function EdgeInsights({
+  overall,
+  expanded,
+  onToggle,
+}: {
+  overall: ReturnType<typeof computeOverallEdge>;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  const rows: { tone: "good" | "warn" | "neutral"; title: string; detail?: string }[] = [];
+
+  if (overall.bestPair) {
+    rows.push({
+      tone: "good",
+      title: `Your best pair: ${overall.bestPair.pair} (${overall.bestPair.avgPnl >= 0 ? "+" : ""}$${overall.bestPair.avgPnl.toFixed(0)} avg)`,
+      detail: `${overall.bestPair.winRate.toFixed(0)}% win rate · ${overall.bestPair.sample} trades`,
+    });
+  }
+  if (overall.bestSession) {
+    rows.push({
+      tone: "good",
+      title: `Your best session: ${overall.bestSession.session} (${overall.bestSession.winRate.toFixed(0)}% win rate)`,
+      detail: `${overall.bestSession.avgPnl >= 0 ? "+" : ""}$${overall.bestSession.avgPnl.toFixed(0)} avg per trade`,
+    });
+  }
+  if (overall.highRR) {
+    rows.push({
+      tone: "good",
+      title: `Trades with R:R above 2 win ${overall.highRR.winRate.toFixed(0)}% of the time`,
+      detail: `Across ${overall.highRR.sample} trades — lean on patient targets.`,
+    });
+  }
+  // Current setup
+  if (overall.current.winRate != null) {
+    const wr = overall.current.winRate;
+    rows.push({
+      tone: wr < 50 ? "warn" : "good",
+      title: `${overall.current.label}: ${wr.toFixed(0)}% win rate${wr < 50 ? " — trade carefully" : ""}`,
+      detail: `${overall.current.sample} trades in last 90d`,
+    });
+  } else {
+    rows.push({
+      tone: "neutral",
+      title: `Building edge data for ${overall.current.label}`,
+      detail: `Need ${overall.current.needs} more trade${overall.current.needs === 1 ? "" : "s"} to compute.`,
+    });
+  }
+  if (overall.emotion) {
+    rows.push({
+      tone: overall.emotion.bestWin - overall.emotion.worstWin >= 15 ? "warn" : "neutral",
+      title: `When ${overall.emotion.bestName} you win ${overall.emotion.bestWin.toFixed(0)}% — when ${overall.emotion.worstName} only ${overall.emotion.worstWin.toFixed(0)}%`,
+      detail: "Psychology drives your edge in real time.",
+    });
+  }
+
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-lg bg-surface-2 border border-border p-4 text-center">
+        <div className="text-xs text-soft">Log a few more trades to unlock edge insights.</div>
+      </div>
+    );
+  }
+
+  const visible = expanded ? rows : rows.slice(0, 2);
+
+  return (
+    <div className="flex flex-col gap-2">
+      {visible.map((r, i) => (
+        <div
+          key={i}
+          className={cn(
+            "rounded-lg border bg-surface-2 p-3 tl-fade-up",
+            r.tone === "good" && "border-pos/30",
+            r.tone === "warn" && "border-champagne/30",
+            r.tone === "neutral" && "border-border",
+          )}
+          style={{ animationDelay: `${i * 0.05}s` }}
+        >
+          <div className="flex items-start gap-2">
+            {r.tone === "good" && <TrendingUp className="size-3.5 text-pos mt-0.5 shrink-0" />}
+            {r.tone === "warn" && <AlertTriangle className="size-3.5 text-champagne mt-0.5 shrink-0" />}
+            {r.tone === "neutral" && <Brain className="size-3.5 text-soft mt-0.5 shrink-0" />}
+            <div className="flex-1 min-w-0">
+              <div className={cn(
+                "text-xs font-medium leading-snug",
+                r.tone === "good" && "text-pos",
+                r.tone === "warn" && "text-champagne",
+                r.tone === "neutral" && "text-foreground",
+              )}>
+                {r.title}
+              </div>
+              {r.detail && <div className="text-[11px] text-faint mt-0.5">{r.detail}</div>}
+            </div>
+          </div>
+        </div>
+      ))}
+      {rows.length > 2 && (
+        <button
+          type="button"
+          onClick={onToggle}
+          className="text-[11px] text-soft hover:text-champagne transition-colors inline-flex items-center justify-center gap-1 pt-1"
+        >
+          {expanded ? <>Show less <ChevronUp className="size-3" /></> : <>Show {rows.length - 2} more insight{rows.length - 2 === 1 ? "" : "s"} <ChevronDown className="size-3" /></>}
+        </button>
+      )}
     </div>
   );
 }
