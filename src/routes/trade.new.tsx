@@ -670,31 +670,7 @@ function NewTrade() {
               <BarChart3 className="size-4 text-champagne" />
               Edge Context
             </div>
-            {edge ? (
-              <div className="rounded-lg bg-surface-2 border border-border p-4 flex flex-col gap-2.5">
-                <div className="text-[10px] uppercase tracking-wider text-faint">
-                  {pair} · {session ?? "Any session"} · last 90d
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <Stat label="Win rate" value={fmtPct(edge.winRate)} tone={edge.winRate >= 50 ? "pos" : "neg"} />
-                  <Stat label="Avg R:R" value={edge.avgRR.toFixed(2)} />
-                  <Stat label="Net" value={fmtMoney(edge.netPnl, { sign: true })} tone={edge.netPnl >= 0 ? "pos" : "neg"} />
-                </div>
-                <div className="text-[11px] text-foreground/80 leading-relaxed border-t border-border pt-2">
-                  💡 {edge.suggestion}
-                </div>
-                <div className="text-[10px] text-faint">Sample: {edge.sample} trades</div>
-              </div>
-            ) : (
-              <div className="rounded-lg bg-surface-2 border border-border p-4 text-center">
-                <div className="text-xs text-soft">
-                  Not enough history for {pair}{session ? ` · ${session}` : ""}.
-                </div>
-                <div className="text-[11px] text-faint mt-1">
-                  Need 3+ closed trades in the last 90 days to compute edge.
-                </div>
-              </div>
-            )}
+            <EdgeInsights overall={overall} expanded={edgeExpanded} onToggle={() => setEdgeExpanded((v) => !v)} />
           </div>
 
           <div className="flex gap-2">
