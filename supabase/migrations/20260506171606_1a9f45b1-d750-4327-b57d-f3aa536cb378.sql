@@ -1,0 +1,1 @@
+ALTER TABLE public.trades ADD COLUMN IF NOT EXISTS wins_well text[] NOT NULL DEFAULT '{}'::text[];

@@ -197,6 +197,7 @@ export type Database = {
           trade_date: string
           updated_at: string
           user_id: string
+          wins_well: string[]
         }
         Insert: {
           account_id?: string | null
@@ -223,6 +224,7 @@ export type Database = {
           trade_date?: string
           updated_at?: string
           user_id: string
+          wins_well?: string[]
         }
         Update: {
           account_id?: string | null
@@ -249,6 +251,7 @@ export type Database = {
           trade_date?: string
           updated_at?: string
           user_id?: string
+          wins_well?: string[]
         }
         Relationships: [
           {
