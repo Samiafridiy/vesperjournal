@@ -430,27 +430,59 @@ function NewTrade() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField label="Emotion before">
-              <PillGroup options={EMOTIONS_BEFORE as readonly string[]} value={emotionBefore} onChange={setEmotionBefore} />
+              <EmotionGrid options={EMOTIONS_BEFORE as readonly string[]} value={emotionBefore} onChange={setEmotionBefore} />
             </FormField>
             <FormField label="Emotion after">
-              <PillGroup options={EMOTIONS_AFTER as readonly string[]} value={emotionAfter} onChange={setEmotionAfter} />
+              <EmotionGrid options={EMOTIONS_AFTER as readonly string[]} value={emotionAfter} onChange={setEmotionAfter} />
             </FormField>
           </div>
 
           <FormField label="Mistakes (multi-select)">
-            <div className="flex flex-wrap gap-2">
-              {MISTAKES.map((m, i) => (
-                <button key={m} type="button" onClick={() => toggleMistake(m)}
-                  style={{ animationDelay: `${0.2 + i * 0.04}s` }}
-                  className={cn(
-                    "px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 hover:scale-105 tl-fade-up",
-                    mistakes.includes(m)
-                      ? "bg-neg/15 border-neg/40 text-neg"
-                      : "border-border text-soft hover:bg-accent",
-                  )}>
-                  {m}
-                </button>
-              ))}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {MISTAKES.map((m, i) => {
+                const selected = mistakes.includes(m);
+                return (
+                  <button
+                    key={m + (shakeKey[m] ?? 0)}
+                    type="button"
+                    onClick={() => toggleMistake(m)}
+                    style={{ animationDelay: `${0.15 + i * 0.04}s` }}
+                    className={cn(
+                      "px-3 py-1.5 rounded-md text-xs font-medium border transition-all duration-150 hover:scale-[1.03] tl-fade-up text-center",
+                      selected
+                        ? "bg-neg/15 border-neg/40 text-neg tl-shake"
+                        : "border-border text-soft hover:bg-accent",
+                    )}
+                  >
+                    {m}
+                  </button>
+                );
+              })}
+            </div>
+          </FormField>
+
+          <FormField label="What went well">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {WINS_WELL.map((w, i) => {
+                const selected = winsWell.includes(w);
+                return (
+                  <button
+                    key={w}
+                    type="button"
+                    onClick={() => toggleWin(w)}
+                    style={{ animationDelay: `${0.15 + i * 0.04}s` }}
+                    className={cn(
+                      "px-3 py-1.5 rounded-md text-xs font-medium border transition-all duration-150 hover:scale-[1.03] tl-fade-up text-center inline-flex items-center justify-center gap-1.5",
+                      selected
+                        ? "bg-pos/15 border-pos/40 text-pos tl-pulse-green"
+                        : "border-border text-soft hover:bg-accent",
+                    )}
+                  >
+                    <span>{w}</span>
+                    {selected && <Check className="size-3" />}
+                  </button>
+                );
+              })}
             </div>
           </FormField>
         </section>
