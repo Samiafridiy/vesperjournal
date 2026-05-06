@@ -748,19 +748,6 @@ function SummaryRow({
   );
 }
 
-function Stat({ label, value, tone }: { label: string; value: string; tone?: "pos" | "neg" }) {
-  return (
-    <div className="rounded-md border border-border bg-surface px-2 py-1.5">
-      <div className="text-[9px] uppercase tracking-wider text-faint">{label}</div>
-      <div className={cn(
-        "text-xs font-mono tabular-nums",
-        tone === "pos" && "text-pos",
-        tone === "neg" && "text-neg",
-      )}>{value}</div>
-    </div>
-  );
-}
-
 function EmotionGrid({
   options,
   value,
