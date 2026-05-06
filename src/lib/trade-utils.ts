@@ -4,8 +4,20 @@ export type Trade = Database["public"]["Tables"]["trades"]["Row"];
 export type TradeInsert = Database["public"]["Tables"]["trades"]["Insert"];
 
 export const PAIRS = [
-  "XAUUSD", "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF",
-  "NZDUSD", "EURJPY", "GBPJPY", "BTCUSD", "ETHUSD", "NAS100", "US30", "SPX500",
+  // Majors
+  "EURUSD", "GBPUSD", "USDJPY", "USDCHF", "USDCAD", "AUDUSD", "NZDUSD",
+  // Minors / crosses
+  "EURGBP", "EURJPY", "EURCHF", "EURCAD", "EURAUD", "EURNZD",
+  "GBPJPY", "GBPCHF", "GBPCAD", "GBPAUD", "GBPNZD",
+  "AUDJPY", "AUDCAD", "AUDNZD", "AUDCHF",
+  "NZDJPY", "NZDCAD", "NZDCHF",
+  "CADJPY", "CADCHF", "CHFJPY",
+  // Metals
+  "XAUUSD", "XAGUSD", "XAUEUR", "XAUGBP",
+  // Indices
+  "US30", "US500", "SPX500", "NAS100", "UK100", "GER40", "JPN225",
+  // Crypto
+  "BTCUSD", "ETHUSD", "BNBUSD",
 ];
 export const SESSIONS = ["London", "New York", "Asia", "Sydney"] as const;
 export const EMOTIONS_BEFORE = ["Confident", "Fear", "Greed", "Neutral"] as const;
@@ -23,8 +35,8 @@ export const MISTAKES = ["Overtrading", "FOMO", "Early entry", "No stop loss", "
 export function pipSize(pair: string): number {
   const p = pair.toUpperCase();
   if (p.includes("JPY")) return 0.01;
-  if (p === "XAUUSD" || p === "XAGUSD") return 0.1;
-  if (["BTCUSD", "ETHUSD", "NAS100", "US30", "SPX500", "GER40", "UK100"].includes(p)) return 1;
+  if (p.startsWith("XAU") || p.startsWith("XAG")) return 0.1;
+  if (["BTCUSD", "ETHUSD", "BNBUSD", "NAS100", "US30", "US500", "SPX500", "GER40", "UK100", "JPN225"].includes(p)) return 1;
   return 0.0001;
 }
 
@@ -38,7 +50,7 @@ export function pipSize(pair: string): number {
  */
 export function pipValuePerLot(pair: string): number {
   const p = pair.toUpperCase();
-  if (["NAS100", "US30", "SPX500", "GER40", "UK100", "BTCUSD", "ETHUSD"].includes(p)) return 1;
+  if (["NAS100", "US30", "US500", "SPX500", "GER40", "UK100", "JPN225", "BTCUSD", "ETHUSD", "BNBUSD"].includes(p)) return 1;
   return 10;
 }
 

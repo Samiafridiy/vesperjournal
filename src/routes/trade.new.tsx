@@ -16,7 +16,6 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import {
-  PAIRS,
   SESSIONS,
   EMOTIONS_BEFORE,
   EMOTIONS_AFTER,
@@ -32,7 +31,7 @@ import {
   fmtPct,
 } from "@/lib/trade-utils";
 import { toast } from "sonner";
-import { Loader2, Upload, ArrowLeft, AlertTriangle, BarChart3, Target, ChevronDown, Beaker } from "lucide-react";
+import { Loader2, Upload, ArrowLeft, AlertTriangle, BarChart3, Target, ChevronDown, Beaker, ArrowUp, ArrowDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { useRiskPresets, useTradingAccounts, riskProfileLabel, suggestLotSize } from "@/hooks/use-risk";
@@ -42,6 +41,7 @@ import {
   Popover, PopoverTrigger, PopoverContent,
 } from "@/components/ui/popover";
 import { Link } from "@tanstack/react-router";
+import { PairSelector, pushRecentPair } from "@/components/PairSelector";
 
 export const Route = createFileRoute("/trade/new")({
   validateSearch: z.object({
@@ -68,6 +68,7 @@ function NewTrade() {
   const { id: editId } = Route.useSearch();
   const isEdit = Boolean(editId);
   const [submitting, setSubmitting] = useState(false);
+  const [savedFlash, setSavedFlash] = useState(false);
   const [loadingTrade, setLoadingTrade] = useState(isEdit);
   const [existingScreenshot, setExistingScreenshot] = useState<string | null>(null);
 
@@ -297,7 +298,9 @@ function NewTrade() {
       return;
     }
     toast.success(isEdit ? "Trade updated successfully" : "Trade logged.");
-    navigate({ to: isEdit ? "/trades" : "/dashboard" });
+    pushRecentPair(pair);
+    setSavedFlash(true);
+    setTimeout(() => navigate({ to: isEdit ? "/trades" : "/dashboard" }), 700);
   }
 
   if (loadingTrade) {
@@ -309,15 +312,22 @@ function NewTrade() {
   }
 
   return (
-    <div className="px-5 md:px-10 py-8 md:py-10 max-w-[1400px] mx-auto">
+    <div className="px-5 md:px-10 py-8 md:py-10 max-w-[1400px] mx-auto tl-bg relative">
+      {savedFlash && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+          <div className="tl-success-flash size-20 rounded-full bg-pos/20 border border-pos/60 flex items-center justify-center">
+            <Check className="size-10 text-pos" strokeWidth={3} />
+          </div>
+        </div>
+      )}
       <button
         onClick={() => navigate({ to: isEdit ? "/trades" : "/dashboard" })}
-        className="flex items-center gap-2 text-sm text-soft hover:text-foreground transition-colors mb-6"
+        className="flex items-center gap-2 text-sm text-soft hover:text-foreground transition-colors mb-6 tl-fade-up"
       >
         <ArrowLeft className="size-4" /> Back
       </button>
 
-      <header className="border-b border-border pb-6 mb-8">
+      <header className="border-b border-border pb-6 mb-8 tl-fade-up" style={{ animationDelay: "0.05s" }}>
         <div className="text-[11px] uppercase tracking-[0.18em] text-soft mb-2">
           {isEdit ? "Edit entry" : "New entry"}
         </div>
@@ -328,28 +338,23 @@ function NewTrade() {
       </header>
 
       <form onSubmit={onSubmit} className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-5">
-        <section className="surface-card p-6 md:p-8 flex flex-col gap-6">
+        <section className="surface-card p-6 md:p-8 flex flex-col gap-6 tl-fade-up" style={{ animationDelay: "0.1s" }}>
           <SectionTitle>Trade</SectionTitle>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <FormField label="Pair">
-              <Select value={pair} onValueChange={setPair}>
-                <SelectTrigger className="bg-surface-2 border-border h-11"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {PAIRS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <PairSelector value={pair} onChange={setPair} />
             </FormField>
             <FormField label="Direction">
               <div className="flex gap-2 h-11">
                 <button type="button" onClick={() => setDirection("buy")}
-                  className={cn("flex-1 rounded-md text-sm font-medium border transition-colors",
-                    direction === "buy" ? "bg-pos/15 border-pos/40 text-pos" : "border-border text-soft hover:bg-accent")}>
+                  className={cn("flex-1 rounded-md text-sm font-medium border transition-all duration-200",
+                    direction === "buy" ? "bg-pos/15 border-pos/40 text-pos tl-pulse-pos" : "border-border text-soft hover:bg-accent")}>
                   Buy
                 </button>
                 <button type="button" onClick={() => setDirection("sell")}
-                  className={cn("flex-1 rounded-md text-sm font-medium border transition-colors",
-                    direction === "sell" ? "bg-neg/15 border-neg/40 text-neg" : "border-border text-soft hover:bg-accent")}>
+                  className={cn("flex-1 rounded-md text-sm font-medium border transition-all duration-200",
+                    direction === "sell" ? "bg-neg/15 border-neg/40 text-neg tl-pulse-neg" : "border-border text-soft hover:bg-accent")}>
                   Sell
                 </button>
               </div>
@@ -421,10 +426,11 @@ function NewTrade() {
 
           <FormField label="Mistakes (multi-select)">
             <div className="flex flex-wrap gap-2">
-              {MISTAKES.map((m) => (
+              {MISTAKES.map((m, i) => (
                 <button key={m} type="button" onClick={() => toggleMistake(m)}
+                  style={{ animationDelay: `${0.2 + i * 0.04}s` }}
                   className={cn(
-                    "px-3 py-1.5 rounded-full text-xs font-medium border transition-colors",
+                    "px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 hover:scale-105 tl-fade-up",
                     mistakes.includes(m)
                       ? "bg-neg/15 border-neg/40 text-neg"
                       : "border-border text-soft hover:bg-accent",
@@ -436,7 +442,7 @@ function NewTrade() {
           </FormField>
         </section>
 
-        <aside className="flex flex-col gap-5 h-fit lg:sticky lg:top-6">
+        <aside className="flex flex-col gap-5 h-fit lg:sticky lg:top-6 tl-slide-right" style={{ animationDelay: "0.15s" }}>
           <div className="surface-card p-5 flex flex-col gap-4">
             <div className="text-sm font-semibold">Trade Progress</div>
             <div>
@@ -467,14 +473,23 @@ function NewTrade() {
             <SummaryRow label="Size" value={isNaN(lotN) ? "—" : `${lotN} lot`} mono />
             <SummaryRow
               label="Pips"
-              value={livePips == null ? "—" : `${livePips >= 0 ? "+" : ""}${livePips.toFixed(1)} pips`}
+              value={
+                livePips == null ? "—" : (
+                  <span className="inline-flex items-center gap-1">
+                    {livePips >= 0
+                      ? <ArrowUp className="size-3" />
+                      : <ArrowDown className="size-3" />}
+                    {`${livePips >= 0 ? "+" : ""}${livePips.toFixed(1)} pips`}
+                  </span>
+                )
+              }
               tone={livePips == null ? undefined : livePips >= 0 ? "pos" : "neg"}
               mono
             />
             <SummaryRow
               label="P&L"
               value={previewPnl == null ? "—" : fmtMoney(previewPnl, { sign: true })}
-              tone={previewPnl == null ? undefined : previewPnl >= 0 ? "pos" : "neg"}
+              tone={previewPnl == null ? undefined : previewPnl > 0 ? "pos" : previewPnl < 0 ? "neg" : "champagne"}
               mono
             />
             <div className="h-px bg-border my-1" />
@@ -651,7 +666,10 @@ function NewTrade() {
             <Button
               type="submit"
               disabled={submitting}
-              className="flex-1 bg-champagne text-primary-foreground hover:bg-champagne/90 h-11"
+              className={cn(
+                "flex-1 bg-champagne text-primary-foreground hover:bg-champagne/90 h-11 transition-all",
+                progress === 100 && !submitting && "tl-pulse-champagne"
+              )}
             >
               {submitting && <Loader2 className="size-4 mr-2 animate-spin" />}
               {isEdit ? "Update Trade" : "Save trade"}
@@ -665,7 +683,7 @@ function NewTrade() {
 
 function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <div className="text-[11px] uppercase tracking-[0.18em] text-faint font-medium border-b border-border pb-2">
+    <div className="text-[11px] uppercase tracking-[0.18em] text-faint font-medium border-b border-border pb-2 tl-section-title">
       {children}
     </div>
   );
@@ -718,7 +736,7 @@ function SummaryRow({
 }: {
   label: ReactNode;
   value: ReactNode;
-  tone?: "pos" | "neg";
+  tone?: "pos" | "neg" | "champagne";
   mono?: boolean;
 }) {
   return (
@@ -730,6 +748,7 @@ function SummaryRow({
           mono && "font-mono tabular-nums",
           tone === "pos" && "text-pos",
           tone === "neg" && "text-neg",
+          tone === "champagne" && "text-champagne",
           !tone && "text-foreground",
         )}
       >

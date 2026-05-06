@@ -231,4 +231,61 @@
   /* hide horizontal scrollbar on mobile bias rail */
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Trade Log — premium animations */
+  @keyframes tl-fade-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .tl-fade-up { animation: tl-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+  @keyframes tl-slide-in-right {
+    from { opacity: 0; transform: translateX(16px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .tl-slide-right { animation: tl-slide-in-right 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+  @keyframes tl-pulse-pos {
+    0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--pos) 0%, transparent); }
+    50% { box-shadow: 0 0 14px 0 color-mix(in oklab, var(--pos) 35%, transparent); }
+  }
+  .tl-pulse-pos { animation: tl-pulse-pos 2.4s ease-in-out infinite; }
+
+  @keyframes tl-pulse-neg {
+    0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--neg) 0%, transparent); }
+    50% { box-shadow: 0 0 14px 0 color-mix(in oklab, var(--neg) 30%, transparent); }
+  }
+  .tl-pulse-neg { animation: tl-pulse-neg 2.4s ease-in-out infinite; }
+
+  @keyframes tl-pulse-champagne {
+    0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--champagne) 0%, transparent); }
+    50% { box-shadow: 0 0 18px 0 color-mix(in oklab, var(--champagne) 30%, transparent); }
+  }
+  .tl-pulse-champagne { animation: tl-pulse-champagne 2.6s ease-in-out infinite; }
+
+  .tl-section-title {
+    position: relative;
+    padding-left: 0.625rem;
+  }
+  .tl-section-title::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 10%; bottom: 10%;
+    width: 2px;
+    background: var(--champagne);
+    border-radius: 1px;
+  }
+
+  .tl-bg {
+    background:
+      radial-gradient(ellipse at top right, color-mix(in oklab, var(--champagne) 4%, transparent), transparent 60%),
+      radial-gradient(ellipse at bottom left, color-mix(in oklab, var(--pos) 3%, transparent), transparent 55%);
+  }
+
+  @keyframes tl-success-flash {
+    0% { transform: scale(0.6); opacity: 0; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 0; }
+  }
+  .tl-success-flash { animation: tl-success-flash 0.9s ease-out forwards; }
 }
