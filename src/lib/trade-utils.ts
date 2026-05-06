@@ -20,9 +20,51 @@ export const PAIRS = [
   "BTCUSD", "ETHUSD", "BNBUSD",
 ];
 export const SESSIONS = ["London", "New York", "Asia", "Sydney"] as const;
-export const EMOTIONS_BEFORE = ["Confident", "Fear", "Greed", "Neutral"] as const;
-export const EMOTIONS_AFTER = ["Confident", "Fear", "Greed", "Neutral", "Satisfied", "Frustrated"] as const;
-export const MISTAKES = ["Overtrading", "FOMO", "Early entry", "No stop loss", "Revenge trading", "Moved stop", "Closed early"] as const;
+export const EMOTIONS_BEFORE = [
+  "Calm", "Confident", "Excited", "Anxious",
+  "Rushed", "Tired", "Fear", "Greed",
+  "Neutral", "FOMO", "Revenge", "Bored",
+] as const;
+export const EMOTIONS_AFTER = [
+  "Calm", "Confident", "Excited", "Anxious",
+  "Rushed", "Tired", "Fear", "Greed",
+  "Neutral", "FOMO", "Revenge", "Bored",
+  "Satisfied", "Frustrated",
+] as const;
+export const MISTAKES = [
+  "Overtrading", "FOMO", "Early entry",
+  "No stop loss", "Revenge trading", "Moved stop",
+  "Closed early", "Sized too big", "Ignored news",
+  "Broke trading plan", "Chased entry", "Late entry",
+  "No confluence", "Traded against trend", "Ignored higher timeframe",
+] as const;
+export const WINS_WELL = [
+  "Followed my plan",
+  "Good entry timing",
+  "Respected stop loss",
+  "Waited for confirmation",
+  "Good risk management",
+  "Trusted my analysis",
+  "Patient entry",
+] as const;
+
+/** Subtle color tokens (hex) per emotion — used for soft backgrounds & glows. */
+export const EMOTION_COLORS: Record<string, string> = {
+  Calm: "#3B82F6",       // soft blue
+  Confident: "#22C55E",  // soft green
+  Excited: "#EAB308",    // soft yellow
+  Anxious: "#F97316",    // soft orange
+  Rushed: "#EF6A3A",     // soft orange-red
+  Tired: "#9CA3AF",      // soft grey
+  Fear: "#F87171",       // soft red
+  Greed: "#A855F7",      // soft purple
+  Neutral: "#6B7280",    // grey
+  FOMO: "#F87171",       // soft red
+  Revenge: "#7F1D1D",    // dark red
+  Bored: "#64748B",      // grey-blue
+  Satisfied: "#10B981",  // emerald
+  Frustrated: "#DC2626", // red
+};
 
 /**
  * Pip definitions per instrument. A pip is the smallest "professional" price
