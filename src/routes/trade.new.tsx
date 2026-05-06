@@ -718,36 +718,6 @@ function FormField({ label, children }: { label: string; children: ReactNode }) 
   );
 }
 
-function PillGroup({
-  options,
-  value,
-  onChange,
-}: {
-  options: readonly string[];
-  value: string | undefined;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div className="flex flex-wrap gap-2">
-      {options.map((o) => (
-        <button
-          key={o}
-          type="button"
-          onClick={() => onChange(o)}
-          className={cn(
-            "px-3 py-1.5 rounded-full text-xs font-medium border transition-colors",
-            value === o
-              ? "bg-champagne/15 border-champagne/40 text-champagne"
-              : "border-border text-soft hover:bg-accent",
-          )}
-        >
-          {o}
-        </button>
-      ))}
-    </div>
-  );
-}
-
 function SummaryRow({
   label,
   value,
