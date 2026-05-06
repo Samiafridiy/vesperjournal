@@ -87,6 +87,9 @@ function NewTrade() {
   const [emotionBefore, setEmotionBefore] = useState<string | undefined>("Neutral");
   const [emotionAfter, setEmotionAfter] = useState<string | undefined>(undefined);
   const [mistakes, setMistakes] = useState<string[]>([]);
+  const [winsWell, setWinsWell] = useState<string[]>([]);
+  const [shakeKey, setShakeKey] = useState<Record<string, number>>({});
+  const [edgeExpanded, setEdgeExpanded] = useState(false);
   const [screenshot, setScreenshot] = useState<File | null>(null);
 
   // Risk preset + accounts integration
@@ -140,6 +143,7 @@ function NewTrade() {
       setEmotionBefore(data.emotion_before ?? undefined);
       setEmotionAfter(data.emotion_after ?? undefined);
       setMistakes(data.mistakes ?? []);
+      setWinsWell(((data as unknown as { wins_well?: string[] }).wins_well) ?? []);
       setExistingScreenshot(data.screenshot_url ?? null);
       if (data.risk_preset_id) setPresetId(data.risk_preset_id);
       setLoadingTrade(false);
@@ -230,14 +234,21 @@ function NewTrade() {
     setAutoTpApplied(true);
   }, [presetRR, entryN, stopN, direction, pair, tp, autoTpApplied]);
 
-  // Edge context for this pair + session (90 days)
-  const edge = useMemo(
-    () => computeEdge(allTrades, pair, session ?? null),
+  // Overall trader edge (90d) — always returns useful info
+  const overall = useMemo(
+    () => computeOverallEdge(allTrades, pair, session ?? null),
     [allTrades, pair, session],
   );
 
   function toggleMistake(m: string) {
-    setMistakes((prev) => (prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m]));
+    setMistakes((prev) => {
+      const has = prev.includes(m);
+      if (!has) setShakeKey((s) => ({ ...s, [m]: Date.now() }));
+      return has ? prev.filter((x) => x !== m) : [...prev, m];
+    });
+  }
+  function toggleWin(w: string) {
+    setWinsWell((prev) => (prev.includes(w) ? prev.filter((x) => x !== w) : [...prev, w]));
   }
 
   async function onSubmit(e: FormEvent) {
@@ -282,12 +293,13 @@ function NewTrade() {
       emotion_before: emotionBefore ?? null,
       emotion_after: emotionAfter ?? null,
       mistakes,
+      wins_well: winsWell,
       pnl,
       rr,
       result,
       risk_preset_id: selectedPreset?.id ?? null,
       account_id: selectedAccount?.id ?? null,
-    };
+    } as Record<string, unknown>;
 
     const { error } = isEdit && editId
       ? await supabase.from("trades").update(payload).eq("id", editId)
