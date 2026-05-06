@@ -489,7 +489,7 @@ function NewTrade() {
             <SummaryRow
               label="P&L"
               value={previewPnl == null ? "—" : fmtMoney(previewPnl, { sign: true })}
-              tone={previewPnl == null ? undefined : previewPnl >= 0 ? "pos" : "neg"}
+              tone={previewPnl == null ? undefined : previewPnl > 0 ? "pos" : previewPnl < 0 ? "neg" : "champagne"}
               mono
             />
             <div className="h-px bg-border my-1" />
@@ -683,7 +683,7 @@ function NewTrade() {
 
 function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <div className="text-[11px] uppercase tracking-[0.18em] text-faint font-medium border-b border-border pb-2">
+    <div className="text-[11px] uppercase tracking-[0.18em] text-faint font-medium border-b border-border pb-2 tl-section-title">
       {children}
     </div>
   );
@@ -736,7 +736,7 @@ function SummaryRow({
 }: {
   label: ReactNode;
   value: ReactNode;
-  tone?: "pos" | "neg";
+  tone?: "pos" | "neg" | "champagne";
   mono?: boolean;
 }) {
   return (
@@ -748,6 +748,7 @@ function SummaryRow({
           mono && "font-mono tabular-nums",
           tone === "pos" && "text-pos",
           tone === "neg" && "text-neg",
+          tone === "champagne" && "text-champagne",
           !tone && "text-foreground",
         )}
       >
