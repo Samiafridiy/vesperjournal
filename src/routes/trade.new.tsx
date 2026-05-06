@@ -299,7 +299,7 @@ function NewTrade() {
       result,
       risk_preset_id: selectedPreset?.id ?? null,
       account_id: selectedAccount?.id ?? null,
-    } as Record<string, unknown>;
+    };
 
     const { error } = isEdit && editId
       ? await supabase.from("trades").update(payload).eq("id", editId)
