@@ -31,12 +31,13 @@ import {
   fmtPct,
 } from "@/lib/trade-utils";
 import { toast } from "sonner";
-import { Loader2, Upload, ArrowLeft, AlertTriangle, BarChart3, Target, ChevronDown, Beaker, ArrowUp, ArrowDown, Check } from "lucide-react";
+import { WINS_WELL, EMOTION_COLORS } from "@/lib/trade-utils";
+import { Loader2, Upload, ArrowLeft, AlertTriangle, BarChart3, Target, ChevronDown, Beaker, ArrowUp, ArrowDown, Check, ChevronUp, TrendingUp, Brain } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { useRiskPresets, useTradingAccounts, riskProfileLabel, suggestLotSize } from "@/hooks/use-risk";
 import { useTrades } from "@/hooks/use-trades";
-import { computeEdge } from "@/lib/edge-context";
+import { computeOverallEdge } from "@/lib/edge-context";
 import {
   Popover, PopoverTrigger, PopoverContent,
 } from "@/components/ui/popover";
