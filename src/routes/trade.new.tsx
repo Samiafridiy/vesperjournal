@@ -16,7 +16,6 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import {
-  PAIRS,
   SESSIONS,
   EMOTIONS_BEFORE,
   EMOTIONS_AFTER,
