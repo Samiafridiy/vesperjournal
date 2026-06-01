@@ -297,7 +297,8 @@ export function computeStats(trades: Trade[]) {
   const wins = closed.filter((t) => t.result === "win");
   const losses = closed.filter((t) => t.result === "loss");
   const totalPnl = closed.reduce((a, b) => a + (b.pnl ?? 0), 0);
-  const winRate = closed.length ? (wins.length / closed.length) * 100 : 0;
+  const decided = wins.length + losses.length;
+  const winRate = decided > 0 ? (wins.length / decided) * 100 : 0;
   const avgRR = closed.length
     ? closed.reduce((a, b) => a + (b.rr ?? 0), 0) / closed.length
     : 0;
