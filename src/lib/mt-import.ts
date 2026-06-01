@@ -110,7 +110,7 @@ export function parseMtHtml(html: string): ParsedRow[] {
  *   - openTime / closeTime : two "Time" columns
  */
 function detectHeader(cells: string[]): Record<string, number> | null {
-  const norm = cells.map((c) => c.toLowerCase().replace(/\s+/g, ""));
+  const norm = cells.map((c) => c.toLowerCase().replace(/[\s\/\\_\-]+/g, ""));
   const has = (re: RegExp) => norm.some((c) => re.test(c));
 
   // Must look like an MT statement header
@@ -124,9 +124,9 @@ function detectHeader(cells: string[]): Record<string, number> | null {
     if (c === "symbol" || c === "item") map.symbol = i;
     else if (c === "type") map.type = i;
     else if (c === "size" || c === "volume" || c === "lots") map.size = i;
-    else if (c === "s/l" || c === "sl" || c === "stoploss") map.sl = i;
-    else if (c === "t/p" || c === "tp" || c === "takeprofit") map.tp = i;
-    else if (c === "profit" || c === "netprofit" || c === "p/l") map.profit = i;
+    else if (c === "sl" || c === "stoploss") map.sl = i;
+    else if (c === "tp" || c === "takeprofit") map.tp = i;
+    else if (c === "profit" || c === "netprofit" || c === "pl") map.profit = i;
     else if (c === "price") {
       if (priceCount === 0) map.openPrice = i;
       else map.closePrice = i;
@@ -163,13 +163,15 @@ export function parseCsv(text: string): ParsedRow[] {
     const symbol = pick(row, ["symbol", "pair", "instrument"])?.toUpperCase().replace(/[^A-Z0-9]/g, "");
     const lot = num(pick(row, ["lot", "lots", "lotsize", "volume", "size", "quantity"]));
     const entry = num(pick(row, ["openprice", "entryprice", "entry", "open", "price"]));
-    const closePrice = num(pick(row, ["closeprice", "exitprice", "close", "exit"]));
+    const closePrice = num(pick(row, ["closeprice", "exitprice", "close", "exit", "closedprice", "exit_price", "closeprice(usd)", "close_price"]));
     const sl = num(pick(row, ["sl", "stoploss", "stop"]));
     const tp = num(pick(row, ["tp", "takeprofit", "target"]));
     const profit = num(pick(row, ["profit", "pnl", "netpnl", "pl", "gain"]));
     const dateStr = pick(row, ["opentime", "openat", "date", "time", "tradedate", "datetime"]);
 
     if (!symbol || !entry || !lot || !direction) continue;
+    // Skip open trades — rows without a close price AND no profit are not yet closed.
+    if (closePrice == null && profit == null) continue;
 
     const pnl = profit ?? calcPnl({ pair: symbol, direction, entry, close: closePrice, lot });
     const rr = calcRR({ pair: symbol, direction, entry, stop: sl, takeProfit: tp, close: closePrice });

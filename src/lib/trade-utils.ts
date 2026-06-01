@@ -243,7 +243,9 @@ export function generateInsights(trades: Trade[]): Insight[] {
     for (const m of t.mistakes ?? []) {
       const e = (mistakeCount[m] ??= { count: 0, pnl: 0 });
       e.count += 1;
-      e.pnl += t.pnl ?? 0;
+      // Only count losing trades in the cost — a "mistake" shouldn't be
+      // offset by winning trades that happened to share the same tag.
+      if ((t.pnl ?? 0) < 0) e.pnl += t.pnl ?? 0;
     }
   }
   const topMistake = Object.entries(mistakeCount).sort((a, b) => b[1].count - a[1].count)[0];
@@ -297,7 +299,8 @@ export function computeStats(trades: Trade[]) {
   const wins = closed.filter((t) => t.result === "win");
   const losses = closed.filter((t) => t.result === "loss");
   const totalPnl = closed.reduce((a, b) => a + (b.pnl ?? 0), 0);
-  const winRate = closed.length ? (wins.length / closed.length) * 100 : 0;
+  const decided = wins.length + losses.length;
+  const winRate = decided > 0 ? (wins.length / decided) * 100 : 0;
   const avgRR = closed.length
     ? closed.reduce((a, b) => a + (b.rr ?? 0), 0) / closed.length
     : 0;
