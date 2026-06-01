@@ -163,13 +163,15 @@ export function parseCsv(text: string): ParsedRow[] {
     const symbol = pick(row, ["symbol", "pair", "instrument"])?.toUpperCase().replace(/[^A-Z0-9]/g, "");
     const lot = num(pick(row, ["lot", "lots", "lotsize", "volume", "size", "quantity"]));
     const entry = num(pick(row, ["openprice", "entryprice", "entry", "open", "price"]));
-    const closePrice = num(pick(row, ["closeprice", "exitprice", "close", "exit"]));
+    const closePrice = num(pick(row, ["closeprice", "exitprice", "close", "exit", "closedprice", "exit_price", "closeprice(usd)", "close_price"]));
     const sl = num(pick(row, ["sl", "stoploss", "stop"]));
     const tp = num(pick(row, ["tp", "takeprofit", "target"]));
     const profit = num(pick(row, ["profit", "pnl", "netpnl", "pl", "gain"]));
     const dateStr = pick(row, ["opentime", "openat", "date", "time", "tradedate", "datetime"]);
 
     if (!symbol || !entry || !lot || !direction) continue;
+    // Skip open trades — rows without a close price AND no profit are not yet closed.
+    if (closePrice == null && profit == null) continue;
 
     const pnl = profit ?? calcPnl({ pair: symbol, direction, entry, close: closePrice, lot });
     const rr = calcRR({ pair: symbol, direction, entry, stop: sl, takeProfit: tp, close: closePrice });
