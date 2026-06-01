@@ -110,7 +110,7 @@ export function parseMtHtml(html: string): ParsedRow[] {
  *   - openTime / closeTime : two "Time" columns
  */
 function detectHeader(cells: string[]): Record<string, number> | null {
-  const norm = cells.map((c) => c.toLowerCase().replace(/\s+/g, ""));
+  const norm = cells.map((c) => c.toLowerCase().replace(/[\s\/\\_\-]+/g, ""));
   const has = (re: RegExp) => norm.some((c) => re.test(c));
 
   // Must look like an MT statement header
@@ -124,9 +124,9 @@ function detectHeader(cells: string[]): Record<string, number> | null {
     if (c === "symbol" || c === "item") map.symbol = i;
     else if (c === "type") map.type = i;
     else if (c === "size" || c === "volume" || c === "lots") map.size = i;
-    else if (c === "s/l" || c === "sl" || c === "stoploss") map.sl = i;
-    else if (c === "t/p" || c === "tp" || c === "takeprofit") map.tp = i;
-    else if (c === "profit" || c === "netprofit" || c === "p/l") map.profit = i;
+    else if (c === "sl" || c === "stoploss") map.sl = i;
+    else if (c === "tp" || c === "takeprofit") map.tp = i;
+    else if (c === "profit" || c === "netprofit" || c === "pl") map.profit = i;
     else if (c === "price") {
       if (priceCount === 0) map.openPrice = i;
       else map.closePrice = i;
