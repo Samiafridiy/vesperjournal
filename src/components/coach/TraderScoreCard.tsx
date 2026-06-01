@@ -30,7 +30,7 @@ export function TraderScoreCard({ score }: { score: TraderScore }) {
       <div className="flex items-center gap-2 relative">
         <Sparkles className="size-4 text-champagne" />
         <span className="text-[11px] uppercase tracking-[0.18em] text-champagne font-medium">
-          AI Trader Score
+          Vesper Score
         </span>
       </div>
 
