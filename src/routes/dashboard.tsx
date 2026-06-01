@@ -30,6 +30,14 @@ import { computeTraderScore, generateDailyCoach, detectMistakes } from "@/lib/tr
 import { CoachSaysToday } from "@/components/coach/CoachSaysToday";
 import { DailyTipModal } from "@/components/coach/DailyTipModal";
 import { FundedAccountTracker, FundedAlertBanner } from "@/components/coach/FundedAccountTracker";
+import { ArchetypeCard } from "@/components/behavioral/ArchetypeCard";
+import { PsychPnlMatrix } from "@/components/behavioral/PsychPnlMatrix";
+import { MistakeCostTracker } from "@/components/behavioral/MistakeCostTracker";
+import {
+  computeArchetype,
+  computePsychPnlMatrix,
+  computeMistakeCosts,
+} from "@/lib/behavioral-intel";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -55,6 +63,9 @@ function Dashboard() {
   const traderScore = useMemo(() => computeTraderScore(trades), [trades]);
   const coachMessages = useMemo(() => generateDailyCoach(trades), [trades]);
   const mistakeAlerts = useMemo(() => detectMistakes(trades), [trades]);
+  const archetype = useMemo(() => computeArchetype(trades), [trades]);
+  const psychMatrix = useMemo(() => computePsychPnlMatrix(trades), [trades]);
+  const mistakeCosts = useMemo(() => computeMistakeCosts(trades), [trades]);
 
   const winLossData = [
     { name: "Wins", value: stats.wins, color: "var(--pos)" },
@@ -208,6 +219,27 @@ function Dashboard() {
           {/* Funded account tracker — between stats and equity */}
           <section className="mb-6">
             <FundedAccountTracker trades={trades} />
+          </section>
+
+          {/* Behavioral Intelligence */}
+          <section className="mb-6">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="size-2 bg-champagne rounded-full glow-champagne" />
+              <span className="text-[11px] uppercase tracking-[0.18em] text-soft font-medium">
+                Behavioral Intelligence
+              </span>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+              <div className="lg:col-span-5">
+                <ArchetypeCard archetype={archetype} />
+              </div>
+              <div className="lg:col-span-7">
+                <PsychPnlMatrix matrix={psychMatrix} />
+              </div>
+              <div className="lg:col-span-12">
+                <MistakeCostTracker costs={mistakeCosts} />
+              </div>
+            </div>
           </section>
 
           {/* Chart + insights */}
