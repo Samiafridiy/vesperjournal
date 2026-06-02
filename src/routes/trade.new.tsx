@@ -39,6 +39,16 @@ import { useTrades } from "@/hooks/use-trades";
 import { computeOverallEdge } from "@/lib/edge-context";
 import { detectBehaviorFlags, buildBehaviorFeedback } from "@/lib/behavior-tracking";
 import {
+  computePreTradeWarnings,
+  trailingLossStreak,
+  getDailyLimit,
+  setDailyLimit,
+  setCooldownMinutes,
+  type Warning,
+} from "@/lib/intervention";
+import { BehaviorWarningModal } from "@/components/behavioral/BehaviorWarningModal";
+import { CooldownBanner } from "@/components/behavioral/CooldownBanner";
+import {
   Popover, PopoverTrigger, PopoverContent,
 } from "@/components/ui/popover";
 import { Link } from "@tanstack/react-router";
@@ -93,6 +103,11 @@ function NewTrade() {
   const [shakeKey, setShakeKey] = useState<Record<string, number>>({});
   const [edgeExpanded, setEdgeExpanded] = useState(false);
   const [screenshot, setScreenshot] = useState<File | null>(null);
+
+  // Pre-trade intervention state
+  const [dailyLimit, setDailyLimitState] = useState<number>(3);
+  useEffect(() => { setDailyLimitState(getDailyLimit()); }, []);
+  const [pendingWarnings, setPendingWarnings] = useState<Warning[] | null>(null);
 
   // Risk preset + accounts integration
   const { presets, defaultPreset } = useRiskPresets();
@@ -263,6 +278,25 @@ function NewTrade() {
       toast.error("Entry and lot size are required.");
       return;
     }
+    // Pre-trade intervention: check warnings; block save until user decides
+    const tradeDateObjPre = new Date(date);
+    const warnings = computePreTradeWarnings({
+      tradeDate: tradeDateObjPre,
+      stopLoss: stopN,
+      emotionBefore: emotionBefore ?? null,
+      existingTrades: allTrades,
+      excludeTradeId: isEdit ? editId : undefined,
+      dailyLimit,
+    });
+    if (warnings.length > 0) {
+      setPendingWarnings(warnings);
+      return;
+    }
+    await performSave();
+  }
+
+  async function performSave() {
+    if (!user) return;
     setSubmitting(true);
 
     const pnl = calcPnl({ pair, direction, entry: entryN, close: closeN, lot: lotN });
@@ -334,6 +368,22 @@ function NewTrade() {
     } else {
       toast.success(isEdit ? "Trade updated." : "Trade logged.");
     }
+    // Post-trade intervention messaging + cooldown
+    if (result === "loss") {
+      const priorStreak = trailingLossStreak(allTrades.filter((t) => t.id !== editId));
+      if (priorStreak + 1 >= 2) {
+        setCooldownMinutes(15);
+        toast("Vesper recommends a 15-minute break.", {
+          description: "You've had consecutive losses. Step away before the next trade.",
+        });
+      } else {
+        toast("Do not rush into the next trade.", {
+          description: "Review your plan before re-entering.",
+        });
+      }
+    } else if (result === "win") {
+      toast("Stay disciplined.", { description: "Avoid overconfidence after a win." });
+    }
     pushRecentPair(pair);
     setSavedFlash(true);
     setTimeout(() => navigate({ to: isEdit ? "/trades" : "/dashboard" }), 700);
@@ -362,6 +412,8 @@ function NewTrade() {
       >
         <ArrowLeft className="size-4" /> Back
       </button>
+
+      <CooldownBanner />
 
       <header className="border-b border-border pb-6 mb-8 tl-fade-up" style={{ animationDelay: "0.05s" }}>
         <div className="text-[11px] uppercase tracking-[0.18em] text-soft mb-2">
@@ -575,6 +627,23 @@ function NewTrade() {
                 <div className="text-xs text-soft mt-0.5">{nextStep}</div>
               </div>
             </div>
+            <div className="flex items-center justify-between text-xs text-soft pt-1">
+              <span>Daily trade limit</span>
+              <input
+                type="number"
+                min={1}
+                max={50}
+                value={dailyLimit}
+                onChange={(e) => {
+                  const n = parseInt(e.target.value, 10);
+                  if (Number.isFinite(n)) {
+                    setDailyLimitState(n);
+                    setDailyLimit(n);
+                  }
+                }}
+                className="w-14 h-7 text-center bg-surface-2 border border-border rounded-md font-mono text-xs"
+              />
+            </div>
           </div>
 
           <div className="surface-card p-5 flex flex-col gap-3">
@@ -764,6 +833,16 @@ function NewTrade() {
           </div>
         </aside>
       </form>
+
+      <BehaviorWarningModal
+        open={pendingWarnings != null}
+        warnings={pendingWarnings ?? []}
+        onCancel={() => setPendingWarnings(null)}
+        onContinue={() => {
+          setPendingWarnings(null);
+          void performSave();
+        }}
+      />
     </div>
   );
 }

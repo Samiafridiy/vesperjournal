@@ -34,6 +34,8 @@ import { ArchetypeCard } from "@/components/behavioral/ArchetypeCard";
 import { PsychPnlMatrix } from "@/components/behavioral/PsychPnlMatrix";
 import { MistakeCostTracker } from "@/components/behavioral/MistakeCostTracker";
 import { DisciplineScoreCard } from "@/components/behavioral/DisciplineScoreCard";
+import { SessionInsight } from "@/components/behavioral/SessionInsight";
+import { CooldownBanner } from "@/components/behavioral/CooldownBanner";
 import { computeDisciplineScore } from "@/lib/behavior-tracking";
 import {
   computeArchetype,
@@ -106,6 +108,7 @@ function Dashboard() {
 
       {empty ? <EmptyState /> : (
         <>
+          <CooldownBanner />
           <FundedAlertBanner trades={trades} />
           <CoachSaysToday trades={trades} />
           <DailyTipModal trades={trades} />
@@ -244,6 +247,9 @@ function Dashboard() {
               </div>
               <div className="lg:col-span-12">
                 <MistakeCostTracker costs={mistakeCosts} />
+              </div>
+              <div className="lg:col-span-12">
+                <SessionInsight trades={trades} />
               </div>
             </div>
           </section>
