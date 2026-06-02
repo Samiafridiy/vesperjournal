@@ -7,7 +7,7 @@ import ReactMarkdown from "react-markdown";
 import { Link } from "@tanstack/react-router";
 import type { Trade } from "@/lib/trade-utils";
 import { buildTraderContext } from "@/lib/coach-context";
-import { askVesper } from "@/server/coach.functions";
+import { askVesper } from "@/lib/coach.functions";
 import { useAuth } from "@/lib/auth";
 
 function tipKey(uid: string) {

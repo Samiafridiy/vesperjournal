@@ -4,7 +4,7 @@ import { AppShell } from "@/components/AppShell";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useTrades } from "@/hooks/use-trades";
 import { buildTraderContext } from "@/lib/coach-context";
-import { askVesper } from "@/server/coach.functions";
+import { askVesper } from "@/lib/coach.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
