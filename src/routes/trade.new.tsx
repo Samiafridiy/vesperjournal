@@ -37,6 +37,7 @@ import { z } from "zod";
 import { useRiskPresets, useTradingAccounts, riskProfileLabel, suggestLotSize } from "@/hooks/use-risk";
 import { useTrades } from "@/hooks/use-trades";
 import { computeOverallEdge } from "@/lib/edge-context";
+import { detectBehaviorFlags, buildBehaviorFeedback } from "@/lib/behavior-tracking";
 import {
   Popover, PopoverTrigger, PopoverContent,
 } from "@/components/ui/popover";
@@ -87,6 +88,8 @@ function NewTrade() {
   const [emotionAfter, setEmotionAfter] = useState<string | undefined>(undefined);
   const [mistakes, setMistakes] = useState<string[]>([]);
   const [winsWell, setWinsWell] = useState<string[]>([]);
+  const [followedPlan, setFollowedPlan] = useState<boolean | null>(null);
+  const [confidence, setConfidence] = useState<number>(5);
   const [shakeKey, setShakeKey] = useState<Record<string, number>>({});
   const [edgeExpanded, setEdgeExpanded] = useState(false);
   const [screenshot, setScreenshot] = useState<File | null>(null);
@@ -143,6 +146,9 @@ function NewTrade() {
       setEmotionAfter(data.emotion_after ?? undefined);
       setMistakes(data.mistakes ?? []);
       setWinsWell(((data as unknown as { wins_well?: string[] }).wins_well) ?? []);
+      const ext = data as unknown as { followed_plan?: boolean | null; confidence?: number | null };
+      setFollowedPlan(ext.followed_plan ?? null);
+      if (ext.confidence != null) setConfidence(ext.confidence);
       setExistingScreenshot(data.screenshot_url ?? null);
       if (data.risk_preset_id) setPresetId(data.risk_preset_id);
       setLoadingTrade(false);
@@ -262,6 +268,14 @@ function NewTrade() {
     const pnl = calcPnl({ pair, direction, entry: entryN, close: closeN, lot: lotN });
     const rr = calcRR({ pair, direction, entry: entryN, stop: stopN, takeProfit: tpN, close: closeN });
     const result = calcResult(pnl);
+    const tradeDateObj = new Date(date);
+    const behaviorFlags = detectBehaviorFlags({
+      tradeDate: tradeDateObj,
+      stopLoss: stopN,
+      emotionBefore: emotionBefore ?? null,
+      existingTrades: allTrades,
+      excludeTradeId: isEdit ? editId : undefined,
+    });
 
     let screenshot_url: string | null = existingScreenshot;
     if (screenshot) {
@@ -298,7 +312,10 @@ function NewTrade() {
       result,
       risk_preset_id: selectedPreset?.id ?? null,
       account_id: selectedAccount?.id ?? null,
-    };
+      followed_plan: followedPlan,
+      confidence,
+      behavior_flags: behaviorFlags,
+    } as Record<string, unknown>;
 
     const { error } = isEdit && editId
       ? await supabase.from("trades").update(payload).eq("id", editId)
@@ -309,7 +326,14 @@ function NewTrade() {
       toast.error(error.message);
       return;
     }
-    toast.success(isEdit ? "Trade updated successfully" : "Trade logged.");
+    const feedback = buildBehaviorFeedback({ followedPlan, flags: behaviorFlags });
+    if (feedback.tone === "warn") {
+      toast.warning(feedback.message, { description: isEdit ? "Trade updated." : "Trade logged." });
+    } else if (feedback.tone === "good") {
+      toast.success(feedback.message);
+    } else {
+      toast.success(isEdit ? "Trade updated." : "Trade logged.");
+    }
     pushRecentPair(pair);
     setSavedFlash(true);
     setTimeout(() => navigate({ to: isEdit ? "/trades" : "/dashboard" }), 700);
