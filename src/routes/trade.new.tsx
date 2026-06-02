@@ -315,7 +315,7 @@ function NewTrade() {
       followed_plan: followedPlan,
       confidence,
       behavior_flags: behaviorFlags,
-    } as Record<string, unknown>;
+    };
 
     const { error } = isEdit && editId
       ? await supabase.from("trades").update(payload).eq("id", editId)
