@@ -449,6 +449,49 @@ function NewTrade() {
             <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="What did you see? What was the setup?" className="bg-surface-2 border-border resize-none" />
           </FormField>
 
+          <SectionTitle>Behavior</SectionTitle>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField label="Was this trade part of your plan?">
+              <div className="flex gap-2 h-11">
+                <button
+                  type="button"
+                  onClick={() => setFollowedPlan(true)}
+                  className={cn(
+                    "flex-1 rounded-md text-sm font-medium border transition-all duration-200",
+                    followedPlan === true
+                      ? "bg-pos/15 border-pos/40 text-pos"
+                      : "border-border text-soft hover:bg-accent",
+                  )}
+                >
+                  Yes — followed plan
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFollowedPlan(false)}
+                  className={cn(
+                    "flex-1 rounded-md text-sm font-medium border transition-all duration-200",
+                    followedPlan === false
+                      ? "bg-neg/15 border-neg/40 text-neg"
+                      : "border-border text-soft hover:bg-accent",
+                  )}
+                >
+                  No — off plan
+                </button>
+              </div>
+            </FormField>
+            <FormField label={`Confidence (1–10) · ${confidence}`}>
+              <input
+                type="range"
+                min={1}
+                max={10}
+                step={1}
+                value={confidence}
+                onChange={(e) => setConfidence(parseInt(e.target.value))}
+                className="w-full h-11 accent-[var(--champagne)]"
+              />
+            </FormField>
+          </div>
+
           <SectionTitle>Psychology</SectionTitle>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
