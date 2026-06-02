@@ -627,6 +627,23 @@ function NewTrade() {
                 <div className="text-xs text-soft mt-0.5">{nextStep}</div>
               </div>
             </div>
+            <div className="flex items-center justify-between text-xs text-soft pt-1">
+              <span>Daily trade limit</span>
+              <input
+                type="number"
+                min={1}
+                max={50}
+                value={dailyLimit}
+                onChange={(e) => {
+                  const n = parseInt(e.target.value, 10);
+                  if (Number.isFinite(n)) {
+                    setDailyLimitState(n);
+                    setDailyLimit(n);
+                  }
+                }}
+                className="w-14 h-7 text-center bg-surface-2 border border-border rounded-md font-mono text-xs"
+              />
+            </div>
           </div>
 
           <div className="surface-card p-5 flex flex-col gap-3">
