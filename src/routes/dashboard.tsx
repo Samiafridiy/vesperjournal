@@ -33,6 +33,8 @@ import { FundedAccountTracker, FundedAlertBanner } from "@/components/coach/Fund
 import { ArchetypeCard } from "@/components/behavioral/ArchetypeCard";
 import { PsychPnlMatrix } from "@/components/behavioral/PsychPnlMatrix";
 import { MistakeCostTracker } from "@/components/behavioral/MistakeCostTracker";
+import { DisciplineScoreCard } from "@/components/behavioral/DisciplineScoreCard";
+import { computeDisciplineScore } from "@/lib/behavior-tracking";
 import {
   computeArchetype,
   computePsychPnlMatrix,
@@ -66,6 +68,7 @@ function Dashboard() {
   const archetype = useMemo(() => computeArchetype(trades), [trades]);
   const psychMatrix = useMemo(() => computePsychPnlMatrix(trades), [trades]);
   const mistakeCosts = useMemo(() => computeMistakeCosts(trades), [trades]);
+  const discipline = useMemo(() => computeDisciplineScore(trades), [trades]);
 
   const winLossData = [
     { name: "Wins", value: stats.wins, color: "var(--pos)" },
@@ -113,9 +116,12 @@ function Dashboard() {
               <TraderScoreCard score={traderScore} />
             </div>
             <div className="lg:col-span-3">
+              <DisciplineScoreCard score={discipline} />
+            </div>
+            <div className="lg:col-span-2">
               <DailyCoach messages={coachMessages} />
             </div>
-            <div className="lg:col-span-4">
+            <div className="lg:col-span-2">
               <MistakeAlerts alerts={mistakeAlerts} />
             </div>
           </section>

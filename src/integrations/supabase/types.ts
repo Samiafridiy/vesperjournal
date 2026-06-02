@@ -174,12 +174,15 @@ export type Database = {
       trades: {
         Row: {
           account_id: string | null
+          behavior_flags: string[]
           close_price: number | null
+          confidence: number | null
           created_at: string
           direction: string
           emotion_after: string | null
           emotion_before: string | null
           entry_price: number
+          followed_plan: boolean | null
           id: string
           lot_size: number
           mistakes: string[] | null
@@ -201,12 +204,15 @@ export type Database = {
         }
         Insert: {
           account_id?: string | null
+          behavior_flags?: string[]
           close_price?: number | null
+          confidence?: number | null
           created_at?: string
           direction: string
           emotion_after?: string | null
           emotion_before?: string | null
           entry_price: number
+          followed_plan?: boolean | null
           id?: string
           lot_size: number
           mistakes?: string[] | null
@@ -228,12 +234,15 @@ export type Database = {
         }
         Update: {
           account_id?: string | null
+          behavior_flags?: string[]
           close_price?: number | null
+          confidence?: number | null
           created_at?: string
           direction?: string
           emotion_after?: string | null
           emotion_before?: string | null
           entry_price?: number
+          followed_plan?: boolean | null
           id?: string
           lot_size?: number
           mistakes?: string[] | null

@@ -37,6 +37,7 @@ import { z } from "zod";
 import { useRiskPresets, useTradingAccounts, riskProfileLabel, suggestLotSize } from "@/hooks/use-risk";
 import { useTrades } from "@/hooks/use-trades";
 import { computeOverallEdge } from "@/lib/edge-context";
+import { detectBehaviorFlags, buildBehaviorFeedback } from "@/lib/behavior-tracking";
 import {
   Popover, PopoverTrigger, PopoverContent,
 } from "@/components/ui/popover";
@@ -87,6 +88,8 @@ function NewTrade() {
   const [emotionAfter, setEmotionAfter] = useState<string | undefined>(undefined);
   const [mistakes, setMistakes] = useState<string[]>([]);
   const [winsWell, setWinsWell] = useState<string[]>([]);
+  const [followedPlan, setFollowedPlan] = useState<boolean | null>(null);
+  const [confidence, setConfidence] = useState<number>(5);
   const [shakeKey, setShakeKey] = useState<Record<string, number>>({});
   const [edgeExpanded, setEdgeExpanded] = useState(false);
   const [screenshot, setScreenshot] = useState<File | null>(null);
@@ -143,6 +146,9 @@ function NewTrade() {
       setEmotionAfter(data.emotion_after ?? undefined);
       setMistakes(data.mistakes ?? []);
       setWinsWell(((data as unknown as { wins_well?: string[] }).wins_well) ?? []);
+      const ext = data as unknown as { followed_plan?: boolean | null; confidence?: number | null };
+      setFollowedPlan(ext.followed_plan ?? null);
+      if (ext.confidence != null) setConfidence(ext.confidence);
       setExistingScreenshot(data.screenshot_url ?? null);
       if (data.risk_preset_id) setPresetId(data.risk_preset_id);
       setLoadingTrade(false);
@@ -262,6 +268,14 @@ function NewTrade() {
     const pnl = calcPnl({ pair, direction, entry: entryN, close: closeN, lot: lotN });
     const rr = calcRR({ pair, direction, entry: entryN, stop: stopN, takeProfit: tpN, close: closeN });
     const result = calcResult(pnl);
+    const tradeDateObj = new Date(date);
+    const behaviorFlags = detectBehaviorFlags({
+      tradeDate: tradeDateObj,
+      stopLoss: stopN,
+      emotionBefore: emotionBefore ?? null,
+      existingTrades: allTrades,
+      excludeTradeId: isEdit ? editId : undefined,
+    });
 
     let screenshot_url: string | null = existingScreenshot;
     if (screenshot) {
@@ -298,6 +312,9 @@ function NewTrade() {
       result,
       risk_preset_id: selectedPreset?.id ?? null,
       account_id: selectedAccount?.id ?? null,
+      followed_plan: followedPlan,
+      confidence,
+      behavior_flags: behaviorFlags,
     };
 
     const { error } = isEdit && editId
@@ -309,7 +326,14 @@ function NewTrade() {
       toast.error(error.message);
       return;
     }
-    toast.success(isEdit ? "Trade updated successfully" : "Trade logged.");
+    const feedback = buildBehaviorFeedback({ followedPlan, flags: behaviorFlags });
+    if (feedback.tone === "warn") {
+      toast.warning(feedback.message, { description: isEdit ? "Trade updated." : "Trade logged." });
+    } else if (feedback.tone === "good") {
+      toast.success(feedback.message);
+    } else {
+      toast.success(isEdit ? "Trade updated." : "Trade logged.");
+    }
     pushRecentPair(pair);
     setSavedFlash(true);
     setTimeout(() => navigate({ to: isEdit ? "/trades" : "/dashboard" }), 700);
@@ -424,6 +448,49 @@ function NewTrade() {
           <FormField label="Notes">
             <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="What did you see? What was the setup?" className="bg-surface-2 border-border resize-none" />
           </FormField>
+
+          <SectionTitle>Behavior</SectionTitle>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField label="Was this trade part of your plan?">
+              <div className="flex gap-2 h-11">
+                <button
+                  type="button"
+                  onClick={() => setFollowedPlan(true)}
+                  className={cn(
+                    "flex-1 rounded-md text-sm font-medium border transition-all duration-200",
+                    followedPlan === true
+                      ? "bg-pos/15 border-pos/40 text-pos"
+                      : "border-border text-soft hover:bg-accent",
+                  )}
+                >
+                  Yes — followed plan
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFollowedPlan(false)}
+                  className={cn(
+                    "flex-1 rounded-md text-sm font-medium border transition-all duration-200",
+                    followedPlan === false
+                      ? "bg-neg/15 border-neg/40 text-neg"
+                      : "border-border text-soft hover:bg-accent",
+                  )}
+                >
+                  No — off plan
+                </button>
+              </div>
+            </FormField>
+            <FormField label={`Confidence (1–10) · ${confidence}`}>
+              <input
+                type="range"
+                min={1}
+                max={10}
+                step={1}
+                value={confidence}
+                onChange={(e) => setConfidence(parseInt(e.target.value))}
+                className="w-full h-11 accent-[var(--champagne)]"
+              />
+            </FormField>
+          </div>
 
           <SectionTitle>Psychology</SectionTitle>
 
