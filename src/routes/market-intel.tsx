@@ -27,7 +27,7 @@ import {
   type NewsAnalysis,
   type CalendarEvent,
   type CalendarAnalysis,
-} from "@/server/market.functions";
+} from "@/lib/market.functions";
 import { useTrades } from "@/hooks/use-trades";
 import { cn } from "@/lib/utils";
 import {
