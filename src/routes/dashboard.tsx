@@ -108,6 +108,7 @@ function Dashboard() {
 
       {empty ? <EmptyState /> : (
         <>
+          <CooldownBanner />
           <FundedAlertBanner trades={trades} />
           <CoachSaysToday trades={trades} />
           <DailyTipModal trades={trades} />
