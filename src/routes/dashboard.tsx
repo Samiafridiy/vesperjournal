@@ -178,56 +178,19 @@ function Dashboard() {
             </div>
           </section>
 
-          {/* Equity curve (compact) */}
-          <section className="surface-card p-6 min-h-[260px] flex flex-col">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-faint font-medium">
-                    Equity Curve
-                  </div>
-                  <div className="text-sm text-soft mt-0.5">Cumulative P&L over time</div>
-                </div>
-                <div className="font-mono text-xs text-soft">{curve.length} trades</div>
+          {/* Deep analytics link */}
+          <section className="surface-card p-6 flex items-center justify-between">
+            <div>
+              <div className="text-[11px] uppercase tracking-[0.18em] text-faint font-medium">
+                Want the why?
               </div>
-              <div className="flex-1 min-h-[200px] -ml-2">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={curve} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
-                    <defs>
-                      <linearGradient id="eq" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="var(--champagne)" stopOpacity={0.35} />
-                        <stop offset="100%" stopColor="var(--champagne)" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="i" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
-                    <YAxis
-                      stroke="var(--muted-foreground)"
-                      fontSize={11}
-                      tickLine={false}
-                      axisLine={false}
-                      tickFormatter={(v) => fmtMoney(v as number)}
-                      width={80}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        background: "var(--surface-2)",
-                        border: "1px solid var(--border)",
-                        borderRadius: 12,
-                        fontSize: 12,
-                      }}
-                      formatter={(v) => [fmtMoney(Number(v), { sign: true }), "Equity"]}
-                      labelFormatter={(l) => `Trade #${l}`}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="equity"
-                      stroke="var(--champagne)"
-                      strokeWidth={2}
-                      fill="url(#eq)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+              <div className="text-sm text-soft mt-1">
+                Equity curve, drawdown, session and emotion breakdowns live in Analytics.
               </div>
+            </div>
+            <Link to="/analytics">
+              <Button variant="outline" className="h-10">Open Analytics</Button>
+            </Link>
           </section>
         </>
       )}
