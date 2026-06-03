@@ -3,7 +3,7 @@ import { RouteGate } from "@/components/RouteGate";
 import { AppShell } from "@/components/AppShell";
 import { StatCard } from "@/components/StatCard";
 import { useTrades } from "@/hooks/use-trades";
-import { computeStats, equityCurve, fmtMoney, fmtPct, generateInsights } from "@/lib/trade-utils";
+import { computeStats, fmtMoney, fmtPct, generateInsights } from "@/lib/trade-utils";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Sparkles } from "lucide-react";
 import { useMemo } from "react";
