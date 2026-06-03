@@ -17,6 +17,7 @@ import { DailyTipModal } from "@/components/coach/DailyTipModal";
 import { DisciplineScoreCard } from "@/components/behavioral/DisciplineScoreCard";
 import { CooldownBanner } from "@/components/behavioral/CooldownBanner";
 import { computeDisciplineScore } from "@/lib/behavior-tracking";
+import { MentorCard } from "@/components/coach/MentorCard";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -123,6 +124,7 @@ function Dashboard() {
                 Behavior
               </span>
             </div>
+            <MentorCard trades={trades} />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <MistakeAlerts alerts={mistakeAlerts} />
               <DisciplineScoreCard score={discipline} />
