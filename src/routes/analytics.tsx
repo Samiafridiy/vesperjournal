@@ -2,12 +2,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { RouteGate } from "@/components/RouteGate";
 import { AppShell } from "@/components/AppShell";
 import { useTrades } from "@/hooks/use-trades";
-import { fmtMoney, fmtPct, generateInsights, type Trade } from "@/lib/trade-utils";
+import { fmtMoney, fmtPct, generateInsights, equityCurve, type Trade } from "@/lib/trade-utils";
 import { useMemo } from "react";
 import {
   ResponsiveContainer,
   BarChart,
   Bar,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   Tooltip,
@@ -15,6 +17,7 @@ import {
   Cell,
 } from "recharts";
 import { Sparkles } from "lucide-react";
+import { DrawdownChart } from "@/components/coach/DrawdownChart";
 
 export const Route = createFileRoute("/analytics")({
   head: () => ({
@@ -54,6 +57,7 @@ function aggregate<K extends string>(trades: Trade[], key: (t: Trade) => K | nul
 function Analytics() {
   const { trades } = useTrades();
   const closed = useMemo(() => trades.filter((t) => t.pnl != null), [trades]);
+  const curve = useMemo(() => equityCurve(trades), [trades]);
 
   const byPair = useMemo(() => aggregate(closed, (t) => t.pair).sort((a, b) => b.pnl - a.pnl), [closed]);
   const bySession = useMemo(() => aggregate(closed, (t) => t.session).sort((a, b) => b.pnl - a.pnl), [closed]);
@@ -105,6 +109,35 @@ function Analytics() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Equity + Drawdown */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+        <ChartCard title="Equity curve" subtitle="Cumulative P&L over time">
+          {curve.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={curve} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
+                <defs>
+                  <linearGradient id="eq-an" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--champagne)" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="var(--champagne)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="i" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false}
+                  tickFormatter={(v) => fmtMoney(v as number)} width={80} />
+                <Tooltip
+                  contentStyle={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12 }}
+                  formatter={(v) => [fmtMoney(Number(v), { sign: true }), "Equity"]}
+                  labelFormatter={(l) => `Trade #${l}`}
+                />
+                <Area type="monotone" dataKey="equity" stroke="var(--champagne)" strokeWidth={2} fill="url(#eq-an)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
+        </ChartCard>
+        <DrawdownChart trades={trades} />
       </section>
 
       {/* Charts grid */}
