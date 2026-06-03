@@ -5,7 +5,7 @@ import { StatCard } from "@/components/StatCard";
 import { useTrades } from "@/hooks/use-trades";
 import { computeStats, equityCurve, fmtMoney, fmtPct, generateInsights } from "@/lib/trade-utils";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Sparkles, TrendingUp, TrendingDown, Activity } from "lucide-react";
+import { PlusCircle, Sparkles } from "lucide-react";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -14,34 +14,18 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  PieChart,
-  Pie,
-  Cell,
 } from "recharts";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
-import { CalendarHeatmap } from "@/components/CalendarHeatmap";
 import { TraderScoreCard } from "@/components/coach/TraderScoreCard";
 import { DailyCoach } from "@/components/coach/DailyCoach";
 import { MistakeAlerts } from "@/components/coach/MistakeAlerts";
-import { DrawdownChart } from "@/components/coach/DrawdownChart";
 import { computeTraderScore, generateDailyCoach, detectMistakes } from "@/lib/trader-coach";
-import { CoachSaysToday } from "@/components/coach/CoachSaysToday";
 import { DailyTipModal } from "@/components/coach/DailyTipModal";
-import { FundedAccountTracker, FundedAlertBanner } from "@/components/coach/FundedAccountTracker";
-import { ArchetypeCard } from "@/components/behavioral/ArchetypeCard";
-import { PsychPnlMatrix } from "@/components/behavioral/PsychPnlMatrix";
-import { MistakeCostTracker } from "@/components/behavioral/MistakeCostTracker";
 import { DisciplineScoreCard } from "@/components/behavioral/DisciplineScoreCard";
-import { SessionInsight } from "@/components/behavioral/SessionInsight";
 import { CooldownBanner } from "@/components/behavioral/CooldownBanner";
 import { computeDisciplineScore } from "@/lib/behavior-tracking";
-import {
-  computeArchetype,
-  computePsychPnlMatrix,
-  computeMistakeCosts,
-} from "@/lib/behavioral-intel";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -67,17 +51,10 @@ function Dashboard() {
   const traderScore = useMemo(() => computeTraderScore(trades), [trades]);
   const coachMessages = useMemo(() => generateDailyCoach(trades), [trades]);
   const mistakeAlerts = useMemo(() => detectMistakes(trades), [trades]);
-  const archetype = useMemo(() => computeArchetype(trades), [trades]);
-  const psychMatrix = useMemo(() => computePsychPnlMatrix(trades), [trades]);
-  const mistakeCosts = useMemo(() => computeMistakeCosts(trades), [trades]);
   const discipline = useMemo(() => computeDisciplineScore(trades), [trades]);
 
-  const winLossData = [
-    { name: "Wins", value: stats.wins, color: "var(--pos)" },
-    { name: "Losses", value: stats.losses, color: "var(--neg)" },
-  ];
-
   const empty = !loading && trades.length === 0;
+  const heroInsight = insights[0];
 
   return (
     <motion.div
@@ -109,28 +86,69 @@ function Dashboard() {
       {empty ? <EmptyState /> : (
         <>
           <CooldownBanner />
-          <FundedAlertBanner trades={trades} />
-          <CoachSaysToday trades={trades} />
           <DailyTipModal trades={trades} />
 
-          {/* Coach row: Trader Score + Daily Coach + Mistake Alerts */}
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-6">
-            <div className="lg:col-span-5">
+          {/* HERO — Vesper Score + one insight + action */}
+          <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-8">
+            <div className="lg:col-span-7">
               <TraderScoreCard score={traderScore} />
             </div>
-            <div className="lg:col-span-3">
-              <DisciplineScoreCard score={discipline} />
-            </div>
-            <div className="lg:col-span-2">
-              <DailyCoach messages={coachMessages} />
-            </div>
-            <div className="lg:col-span-2">
-              <MistakeAlerts alerts={mistakeAlerts} />
+            <div className="lg:col-span-5 surface-card-elevated top-accent p-6 flex flex-col">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="size-4 text-champagne" />
+                <span className="text-[11px] uppercase tracking-[0.18em] text-champagne font-medium">
+                  Today's insight
+                </span>
+              </div>
+              {heroInsight ? (
+                <div
+                  className={
+                    "rounded-lg p-4 border flex-1 " +
+                    (heroInsight.tone === "warn"
+                      ? "border-neg/20 bg-neg/10"
+                      : heroInsight.tone === "good"
+                      ? "border-pos/20 bg-pos/10"
+                      : "border-border bg-surface")
+                  }
+                >
+                  <div className="text-sm font-medium">{heroInsight.title}</div>
+                  <div className="text-xs text-soft mt-1 leading-relaxed">{heroInsight.detail}</div>
+                </div>
+              ) : (
+                <div className="text-xs text-soft flex-1">Log a few trades to unlock insights.</div>
+              )}
+              <Link to="/trade/new" className="mt-4">
+                <Button className="w-full bg-champagne text-primary-foreground hover:bg-champagne/90 gap-2 h-11">
+                  <PlusCircle className="size-4" /> Log a trade
+                </Button>
+              </Link>
             </div>
           </section>
 
-          {/* Stats */}
-          <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          {/* BEHAVIOR */}
+          <section className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="size-2 bg-champagne rounded-full glow-champagne" />
+              <span className="text-[11px] uppercase tracking-[0.18em] text-soft font-medium">
+                Behavior
+              </span>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <MistakeAlerts alerts={mistakeAlerts} />
+              <DisciplineScoreCard score={discipline} />
+              <DailyCoach messages={coachMessages} />
+            </div>
+          </section>
+
+          {/* PERFORMANCE */}
+          <section className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="size-2 bg-champagne rounded-full glow-champagne" />
+              <span className="text-[11px] uppercase tracking-[0.18em] text-soft font-medium">
+                Performance
+              </span>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
               label="Net P&L"
               tone={stats.totalPnl >= 0 ? "pos" : "neg"}
@@ -157,35 +175,6 @@ function Dashboard() {
               sub="Risk multiple per trade"
             />
             <StatCard
-              label="Streak"
-              tone={stats.streakType === "win" ? "pos" : stats.streakType === "loss" ? "neg" : "neutral"}
-              value={stats.streak === 0 ? "—" : `${stats.streak}`}
-              sub={
-                <span className="flex items-center gap-1.5">
-                  {stats.streakType === "win" && <TrendingUp className="size-3.5 text-pos" />}
-                  {stats.streakType === "loss" && <TrendingDown className="size-3.5 text-neg" />}
-                  {stats.streakType ? `${stats.streakType} streak` : "No active streak"}
-                </span>
-              }
-            />
-          </section>
-
-          {/* Secondary stats */}
-          <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <StatCard
-              label="Profit Factor"
-              tone={stats.profitFactor >= 1 ? "pos" : "neg"}
-              value={
-                <AnimatedNumber
-                  value={Number.isFinite(stats.profitFactor) ? stats.profitFactor : 0}
-                  format={(n) =>
-                    !Number.isFinite(stats.profitFactor) ? "∞" : n.toFixed(2)
-                  }
-                />
-              }
-              sub="Gross profit / loss"
-            />
-            <StatCard
               label="Expectancy"
               tone={stats.expectancy >= 0 ? "pos" : "neg"}
               value={
@@ -196,67 +185,11 @@ function Dashboard() {
               }
               sub="Avg per trade"
             />
-            <StatCard
-              label="Max Drawdown"
-              tone={stats.maxDrawdown > 0 ? "neg" : "neutral"}
-              value={
-                <AnimatedNumber
-                  value={-stats.maxDrawdown}
-                  format={(n) => fmtMoney(n, { sign: true })}
-                />
-              }
-              sub="Peak-to-trough"
-            />
-            <StatCard
-              label="Best / Worst"
-              value={
-                <span className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2 leading-tight">
-                  <span className="text-pos text-lg sm:text-2xl tabular-nums">
-                    {fmtMoney(stats.bestTrade?.pnl ?? null, { sign: true })}
-                  </span>
-                  <span className="text-faint text-sm sm:text-base hidden sm:inline">/</span>
-                  <span className="text-neg text-lg sm:text-2xl tabular-nums">
-                    <span className="sm:hidden">/ </span>
-                    {fmtMoney(stats.worstTrade?.pnl ?? null, { sign: true })}
-                  </span>
-                </span>
-              }
-              sub="Single trade"
-            />
-          </section>
-
-          {/* Funded account tracker — between stats and equity */}
-          <section className="mb-6">
-            <FundedAccountTracker trades={trades} />
-          </section>
-
-          {/* Behavioral Intelligence */}
-          <section className="mb-6">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="size-2 bg-champagne rounded-full glow-champagne" />
-              <span className="text-[11px] uppercase tracking-[0.18em] text-soft font-medium">
-                Behavioral Intelligence
-              </span>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-              <div className="lg:col-span-5">
-                <ArchetypeCard archetype={archetype} />
-              </div>
-              <div className="lg:col-span-7">
-                <PsychPnlMatrix matrix={psychMatrix} />
-              </div>
-              <div className="lg:col-span-12">
-                <MistakeCostTracker costs={mistakeCosts} />
-              </div>
-              <div className="lg:col-span-12">
-                <SessionInsight trades={trades} />
-              </div>
             </div>
           </section>
 
-          {/* Chart + insights */}
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-6">
-            <div className="lg:col-span-8 surface-card p-6 min-h-[360px] flex flex-col">
+          {/* Equity curve (compact) */}
+          <section className="surface-card p-6 min-h-[260px] flex flex-col">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <div className="text-[11px] uppercase tracking-[0.18em] text-faint font-medium">
@@ -266,7 +199,7 @@ function Dashboard() {
                 </div>
                 <div className="font-mono text-xs text-soft">{curve.length} trades</div>
               </div>
-              <div className="flex-1 min-h-[260px] -ml-2">
+              <div className="flex-1 min-h-[200px] -ml-2">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={curve} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
                     <defs>
@@ -305,142 +238,6 @@ function Dashboard() {
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
-            </div>
-
-            <div className="lg:col-span-4 surface-card-elevated top-accent p-6 flex flex-col">
-              <div className="flex items-center gap-2 mb-5">
-                <Sparkles className="size-4 text-champagne" />
-                <span className="text-[11px] uppercase tracking-[0.18em] text-champagne font-medium">
-                  Smart insights
-                </span>
-              </div>
-              <div className="flex flex-col gap-3 flex-1">
-                {insights.map((ins, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: i * 0.07 }}
-                    className={
-                      "rounded-lg p-4 border " +
-                      (ins.tone === "warn"
-                        ? "border-neg/20 bg-neg/10"
-                        : ins.tone === "good"
-                        ? "border-pos/20 bg-pos/10"
-                        : "border-border bg-surface")
-                    }
-                  >
-                    <div className="text-sm font-medium">{ins.title}</div>
-                    <div className="text-xs text-soft mt-1 leading-relaxed">{ins.detail}</div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* Calendar heatmap */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-            <DrawdownChart trades={trades} />
-            <div className="surface-card p-6">
-              <div className="flex items-center justify-between mb-5">
-                <div>
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-faint font-medium">
-                    Activity heatmap
-                  </div>
-                  <div className="text-sm text-soft mt-0.5">Daily P&L over the last 16 weeks</div>
-                </div>
-              </div>
-              <CalendarHeatmap trades={trades} />
-            </div>
-          </section>
-
-          {/* (old heatmap block removed — now inline above) */}
-
-          {/* Win/Loss + recent */}
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-            <div className="lg:col-span-4 surface-card p-6">
-              <div className="text-[11px] uppercase tracking-[0.18em] text-faint font-medium mb-4">
-                Win / Loss split
-              </div>
-              <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={winLossData}
-                      dataKey="value"
-                      innerRadius={55}
-                      outerRadius={80}
-                      paddingAngle={3}
-                      stroke="var(--background)"
-                      strokeWidth={3}
-                    >
-                      {winLossData.map((d, i) => (
-                        <Cell key={i} fill={d.color} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="flex justify-around mt-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="size-2 rounded-full bg-pos" />
-                  <span className="text-soft">Wins</span>
-                  <span className="font-mono">{stats.wins}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="size-2 rounded-full bg-neg" />
-                  <span className="text-soft">Losses</span>
-                  <span className="font-mono">{stats.losses}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-8 surface-card p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="text-[11px] uppercase tracking-[0.18em] text-faint font-medium">
-                  Recent trades
-                </div>
-                <Link to="/trades" className="text-xs text-champagne hover:underline">
-                  View all →
-                </Link>
-              </div>
-              <div className="flex flex-col divide-y divide-border">
-                {trades.slice(0, 6).map((t) => (
-                  <div key={t.id} className="flex items-center justify-between py-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div
-                        className={
-                          "size-8 rounded-md flex items-center justify-center shrink-0 " +
-                          (t.result === "win"
-                            ? "bg-pos/10 text-pos"
-                            : t.result === "loss"
-                            ? "bg-neg/10 text-neg"
-                            : "bg-accent text-soft")
-                        }
-                      >
-                        <Activity className="size-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="font-medium truncate">
-                          {t.pair} <span className="text-soft uppercase text-xs">· {t.direction}</span>
-                        </div>
-                        <div className="text-xs text-faint truncate">
-                          {new Date(t.trade_date).toLocaleDateString()} · {t.session ?? "—"}
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className={
-                        "font-mono text-sm tabular-nums " +
-                        ((t.pnl ?? 0) >= 0 ? "text-pos" : "text-neg")
-                      }
-                    >
-                      {fmtMoney(t.pnl, { sign: true })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </section>
         </>
       )}
