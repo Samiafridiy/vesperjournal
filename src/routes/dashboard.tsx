@@ -6,15 +6,6 @@ import { useTrades } from "@/hooks/use-trades";
 import { computeStats, equityCurve, fmtMoney, fmtPct, generateInsights } from "@/lib/trade-utils";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Sparkles } from "lucide-react";
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-} from "recharts";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
@@ -46,7 +37,6 @@ export const Route = createFileRoute("/dashboard")({
 function Dashboard() {
   const { trades, loading } = useTrades();
   const stats = useMemo(() => computeStats(trades), [trades]);
-  const curve = useMemo(() => equityCurve(trades), [trades]);
   const insights = useMemo(() => generateInsights(trades), [trades]);
   const traderScore = useMemo(() => computeTraderScore(trades), [trades]);
   const coachMessages = useMemo(() => generateDailyCoach(trades), [trades]);
