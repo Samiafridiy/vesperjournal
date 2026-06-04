@@ -3,7 +3,7 @@ import { RouteGate } from "@/components/RouteGate";
 import { AppShell } from "@/components/AppShell";
 import { useTrades } from "@/hooks/use-trades";
 import { fmtMoney, fmtPct, generateInsights, equityCurve, type Trade } from "@/lib/trade-utils";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -18,6 +18,10 @@ import {
 } from "recharts";
 import { Sparkles } from "lucide-react";
 import { DrawdownChart } from "@/components/coach/DrawdownChart";
+import { HorizontalPnlBars } from "@/components/analytics/HorizontalPnlBars";
+import { SessionBoxes } from "@/components/analytics/SessionBoxes";
+import { DayOfWeekHeatmap } from "@/components/analytics/DayOfWeekHeatmap";
+import { BehaviorImpact } from "@/components/analytics/BehaviorImpact";
 
 export const Route = createFileRoute("/analytics")({
   head: () => ({
@@ -55,7 +59,16 @@ function aggregate<K extends string>(trades: Trade[], key: (t: Trade) => K | nul
 }
 
 function Analytics() {
-  const { trades } = useTrades();
+  const { trades: allTrades } = useTrades();
+  const [range, setRange] = useState<"7" | "30" | "90" | "all">("30");
+
+  const trades = useMemo(() => {
+    if (range === "all") return allTrades;
+    const days = Number(range);
+    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+    return allTrades.filter((t) => new Date(t.trade_date).getTime() >= cutoff);
+  }, [allTrades, range]);
+
   const closed = useMemo(() => trades.filter((t) => t.pnl != null), [trades]);
   const curve = useMemo(() => equityCurve(trades), [trades]);
 
@@ -87,6 +100,30 @@ function Analytics() {
         <p className="text-soft mt-2">What's actually working — and what isn't.</p>
       </header>
 
+      {/* Date range filter */}
+      <div className="mb-6 flex items-center gap-2 flex-wrap">
+        <span className="text-[11px] uppercase tracking-[0.18em] text-faint mr-2">Range</span>
+        {([
+          { v: "7", label: "Last 7 days" },
+          { v: "30", label: "30 days" },
+          { v: "90", label: "90 days" },
+          { v: "all", label: "All time" },
+        ] as const).map((opt) => (
+          <button
+            key={opt.v}
+            onClick={() => setRange(opt.v)}
+            className={
+              "px-3 py-1.5 rounded-md text-xs border transition-colors " +
+              (range === opt.v
+                ? "border-champagne/40 bg-champagne/10 text-champagne"
+                : "border-border bg-surface text-soft hover:text-foreground")
+            }
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+
       {/* Insights */}
       <section className="mb-8 surface-card-elevated top-accent p-6 md:p-7">
         <div className="flex items-center gap-2 mb-5">
@@ -109,6 +146,31 @@ function Analytics() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Horizontal P&L bars: pair + emotion */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+        <HorizontalPnlBars
+          title="P&L by Pair"
+          subtitle="Per instrument over the selected range"
+          data={byPair.map((p) => ({ name: p.name, pnl: p.pnl, n: p.n }))}
+        />
+        <HorizontalPnlBars
+          title="P&L by Emotion"
+          subtitle="What your state of mind costs (or pays)"
+          data={byEmotion.map((p) => ({ name: p.name, pnl: p.pnl, n: p.n }))}
+        />
+      </section>
+
+      {/* Session + Day of Week */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+        <SessionBoxes trades={trades} />
+        <DayOfWeekHeatmap trades={trades} />
+      </section>
+
+      {/* Behavior Impact */}
+      <section className="mb-5">
+        <BehaviorImpact trades={trades} />
       </section>
 
       {/* Equity + Drawdown */}
