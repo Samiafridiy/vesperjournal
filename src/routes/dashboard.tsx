@@ -19,6 +19,9 @@ import { CooldownBanner } from "@/components/behavioral/CooldownBanner";
 import { computeDisciplineScore } from "@/lib/behavior-tracking";
 import { MentorCard } from "@/components/coach/MentorCard";
 import { DailyMissions } from "@/components/coach/DailyMissions";
+import { WinLossSplit } from "@/components/overview/WinLossSplit";
+import { RecentTrades } from "@/components/overview/RecentTrades";
+import { AICoachLastSession } from "@/components/coach/AICoachLastSession";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -182,6 +185,21 @@ function Dashboard() {
               sub="Avg per trade"
             />
             </div>
+          </section>
+
+          {/* SNAPSHOT — Win/Loss Split + Recent Trades */}
+          <section className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-8">
+            <div className="lg:col-span-2">
+              <WinLossSplit trades={trades} />
+            </div>
+            <div className="lg:col-span-3">
+              <RecentTrades trades={trades} />
+            </div>
+          </section>
+
+          {/* AI Coach — Last session */}
+          <section className="mb-8">
+            <AICoachLastSession trades={trades} />
           </section>
 
           {/* Deep analytics link */}
