@@ -11,6 +11,7 @@ const InputSchema = z.object({
   context: z.string().min(1).max(20000),
   messages: z.array(MessageSchema).min(1).max(40),
   mode: z.enum(["chat", "insight"]).default("chat"),
+  extraSystem: z.string().max(4000).optional(),
 });
 
 export const askVesper = createServerFn({ method: "POST" })
@@ -38,6 +39,7 @@ export const askVesper = createServerFn({ method: "POST" })
           messages: [
             { role: "system", content: systemPrompt },
             { role: "system", content: data.context },
+            ...(data.extraSystem ? [{ role: "system", content: data.extraSystem }] : []),
             ...data.messages,
           ],
         }),
