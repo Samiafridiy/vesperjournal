@@ -10,9 +10,8 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 import { TraderScoreCard } from "@/components/coach/TraderScoreCard";
-import { DailyCoach } from "@/components/coach/DailyCoach";
 import { MistakeAlerts } from "@/components/coach/MistakeAlerts";
-import { computeTraderScore, generateDailyCoach, detectMistakes } from "@/lib/trader-coach";
+import { computeTraderScore, detectMistakes } from "@/lib/trader-coach";
 import { DailyTipModal } from "@/components/coach/DailyTipModal";
 import { DisciplineScoreCard } from "@/components/behavioral/DisciplineScoreCard";
 import { CooldownBanner } from "@/components/behavioral/CooldownBanner";
@@ -44,7 +43,6 @@ function Dashboard() {
   const stats = useMemo(() => computeStats(trades), [trades]);
   const insights = useMemo(() => generateInsights(trades), [trades]);
   const traderScore = useMemo(() => computeTraderScore(trades), [trades]);
-  const coachMessages = useMemo(() => generateDailyCoach(trades), [trades]);
   const mistakeAlerts = useMemo(() => detectMistakes(trades), [trades]);
   const discipline = useMemo(() => computeDisciplineScore(trades), [trades]);
 
