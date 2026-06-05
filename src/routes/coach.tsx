@@ -40,6 +40,8 @@ const SUGGESTIONS = [
   "Analyze my last 10 trades.",
   "Which session should I trade more?",
   "Am I overtrading?",
+  "What's the difference between my winning and losing trades?",
+  "How do I replicate my best month?",
 ];
 
 const WELCOME: Msg = {
