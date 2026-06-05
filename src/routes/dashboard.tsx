@@ -120,25 +120,6 @@ function Dashboard() {
             </div>
           </section>
 
-          {/* BEHAVIOR */}
-          <section className="mb-8">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="size-2 bg-champagne rounded-full glow-champagne" />
-              <span className="text-[11px] uppercase tracking-[0.18em] text-soft font-medium">
-                Behavior
-              </span>
-            </div>
-            <MentorCard trades={trades} />
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <MistakeAlerts alerts={mistakeAlerts} />
-              <DailyMissions trades={trades} />
-              <DisciplineScoreCard score={discipline} />
-            </div>
-            <div className="grid grid-cols-1 gap-4 mt-4">
-              <DailyCoach messages={coachMessages} />
-            </div>
-          </section>
-
           {/* PERFORMANCE */}
           <section className="mb-8">
             <div className="flex items-center gap-2 mb-4">
@@ -187,13 +168,21 @@ function Dashboard() {
             </div>
           </section>
 
-          {/* SNAPSHOT — Win/Loss Split + Recent Trades */}
-          <section className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-8">
-            <div className="lg:col-span-2">
-              <WinLossSplit trades={trades} />
+          {/* BEHAVIOR */}
+          <section className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="size-2 bg-champagne rounded-full glow-champagne" />
+              <span className="text-[11px] uppercase tracking-[0.18em] text-soft font-medium">
+                Behavior
+              </span>
             </div>
-            <div className="lg:col-span-3">
-              <RecentTrades trades={trades} />
+            <MentorCard trades={trades} />
+            <div className="mb-4">
+              <MistakeAlerts alerts={mistakeAlerts} />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <DisciplineScoreCard score={discipline} />
+              <DailyMissions trades={trades} />
             </div>
           </section>
 
@@ -202,19 +191,14 @@ function Dashboard() {
             <AICoachLastSession trades={trades} />
           </section>
 
-          {/* Deep analytics link */}
-          <section className="surface-card p-6 flex items-center justify-between">
-            <div>
-              <div className="text-[11px] uppercase tracking-[0.18em] text-faint font-medium">
-                Want the why?
-              </div>
-              <div className="text-sm text-soft mt-1">
-                Equity curve, drawdown, session and emotion breakdowns live in Analytics.
-              </div>
+          {/* SNAPSHOT — Win/Loss Split + Recent Trades */}
+          <section className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-8">
+            <div className="lg:col-span-2">
+              <WinLossSplit trades={trades} />
             </div>
-            <Link to="/analytics">
-              <Button variant="outline" className="h-10">Open Analytics</Button>
-            </Link>
+            <div className="lg:col-span-3">
+              <RecentTrades trades={trades} />
+            </div>
           </section>
         </>
       )}
