@@ -21,6 +21,8 @@ import { DailyMissions } from "@/components/coach/DailyMissions";
 import { WinLossSplit } from "@/components/overview/WinLossSplit";
 import { RecentTrades } from "@/components/overview/RecentTrades";
 import { AICoachLastSession } from "@/components/coach/AICoachLastSession";
+import { TraderIdentity } from "@/components/coach/TraderIdentity";
+import { StreaksCard } from "@/components/coach/StreaksCard";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -116,6 +118,12 @@ function Dashboard() {
                 </Button>
               </Link>
             </div>
+          </section>
+
+          {/* Identity + Streaks */}
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+            <TraderIdentity trades={trades} />
+            <StreaksCard trades={trades} />
           </section>
 
           {/* PERFORMANCE */}
