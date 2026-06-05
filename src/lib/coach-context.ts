@@ -77,3 +77,36 @@ NON-NEGOTIABLE RESPONSE RULES — follow ALL of them in EVERY reply:
 FORMAT: Use markdown. Bold the lead finding. Use the numbered "This week:" list at the end. Keep the body tight — under 250 words unless the trader explicitly asks for deep analysis.
 
 You have deep knowledge of ICT/SMC concepts, risk management, trading psychology, prop firm rules, and funded account challenges — but always anchor advice to THIS trader's specific numbers, not theory.`;
+
+/**
+ * Extra instructions appended to the system prompt for specific preset questions.
+ * Keyed by exact preset string used in the UI.
+ */
+export const PRESET_INSTRUCTIONS: Record<string, string> = {
+  "What's the difference between my winning and losing trades?": `SPECIAL TASK — WINNERS vs LOSERS COMPARISON.
+The trader asked for a direct comparison of winning vs losing trades. Analyze the LAST 10 TRADES and TRADER STATS block and produce a side-by-side comparison on these exact dimensions, using percentages and counts:
+- Average emotion before trade (winners vs losers)
+- Most common session (winners vs losers)
+- Most common pair (winners vs losers)
+- Plan adherence rate (winners vs losers)
+- Most common mistakes tagged on losing trades
+- Most common "what went well" tags on winning trades
+
+Format each line like: "Your winners: 78% were marked Calm or Confident. Your losers: 71% were marked Anxious, Rushed, or Revenge."
+If a dimension has no data, say "Not enough data" for that line rather than inventing numbers. Still end with the "This week:" action list.`,
+
+  "How do I replicate my best month?": `SPECIAL TASK — REPLICATE BEST MONTH PLAYBOOK.
+1. Identify the trader's best performing month (highest net P&L) from the data.
+2. Look at the winning trades in that month and identify what they had in common: session, emotion before trade, pairs traded, plan adherence, mistakes avoided.
+3. Write a simple playbook with 3–4 specific, numbered rules derived from those patterns. Each rule must cite the supporting number.
+
+Format:
+"Your best month was [Month YYYY] (+$X net). Here is what worked:"
+then a numbered list, e.g.:
+1. Trade only London session — 80% of that month's profits came from London.
+2. Only trade when marked Calm or Confident — 0 winning trades were marked Anxious.
+3. Stick to XAUUSD and EURUSD — losing pairs were GBPJPY and CADJPY.
+4. Max 3 trades per day — days with 4+ trades averaged -$45.
+
+If there isn't enough data to identify a best month, say so plainly. The numbered playbook IS the action list — no separate "This week:" list needed for this question.`,
+};
