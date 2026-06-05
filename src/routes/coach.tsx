@@ -3,7 +3,7 @@ import { RouteGate } from "@/components/RouteGate";
 import { AppShell } from "@/components/AppShell";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useTrades } from "@/hooks/use-trades";
-import { buildTraderContext } from "@/lib/coach-context";
+import { buildTraderContext, PRESET_INSTRUCTIONS } from "@/lib/coach-context";
 import { askVesper } from "@/lib/coach.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
@@ -141,7 +141,8 @@ function CoachPage() {
     const convId = await ensureConversation(trimmed);
     if (convId) await persistMessage(convId, userMsg);
     try {
-      const res = await ask({ data: { context, messages: next, mode: "chat" } });
+      const extraSystem = PRESET_INSTRUCTIONS[trimmed];
+      const res = await ask({ data: { context, messages: next, mode: "chat", extraSystem } });
       const reply: Msg = {
         role: "assistant",
         content: res.error ? `⚠️ ${res.error}` : res.reply || "(no response)",
