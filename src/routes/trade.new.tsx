@@ -319,8 +319,10 @@ function NewTrade() {
       if (upErr) {
         toast.error("Screenshot upload failed: " + upErr.message);
       } else {
-        const { data } = await supabase.storage.from("screenshots").createSignedUrl(path, 60 * 60 * 24 * 365);
-        screenshot_url = data?.signedUrl ?? path;
+        // Store only the storage object path. Short-lived signed URLs are
+        // generated on-demand when the screenshot is displayed, so a leak of
+        // the trades table never exposes long-lived public URLs.
+        screenshot_url = path;
       }
     }
 
