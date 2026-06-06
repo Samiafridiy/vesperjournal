@@ -72,7 +72,7 @@ export function AICoachLastSession({ trades }: { trades: Trade[] }) {
   const { paragraph, rows } = useMemo(() => buildSummary(trades), [trades]);
 
   return (
-    <div className="surface-card p-5 flex flex-col gap-4">
+    <div className="surface-card p-5 flex flex-col gap-4 hover-glow hover-glow-champagne">
       <div className="flex items-center gap-2">
         <Bot className="size-4 text-champagne" />
         <span className="text-[11px] uppercase tracking-[0.18em] text-champagne font-medium">

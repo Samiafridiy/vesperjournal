@@ -88,7 +88,7 @@ function Dashboard() {
             <div className="lg:col-span-7">
               <TraderScoreCard score={traderScore} />
             </div>
-            <div className="lg:col-span-5 surface-card-elevated top-accent p-6 flex flex-col">
+            <div className="lg:col-span-5 surface-card-elevated top-accent p-6 flex flex-col hover-glow hover-glow-champagne">
               <div className="flex items-center gap-2 mb-4">
                 <Sparkles className="size-4 text-champagne" />
                 <span className="text-[11px] uppercase tracking-[0.18em] text-champagne font-medium">

@@ -99,7 +99,7 @@ export function DailyMissions({ trades }: { trades: Trade[] }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
-      className="surface-card p-6 flex flex-col gap-4 h-full"
+      className="surface-card p-6 flex flex-col gap-4 h-full hover-glow hover-glow-champagne"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">

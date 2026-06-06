@@ -38,10 +38,10 @@ export function MistakeAlerts({ alerts }: { alerts: MistakeAlert[] }) {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 + i * 0.06 }}
               className={cn(
-                "rounded-lg p-4 border",
+                "rounded-lg p-4 border hover-glow",
                 a.severity === "high"
-                  ? "border-neg/30 bg-neg/10"
-                  : "border-champagne/25 bg-champagne/5",
+                  ? "border-neg/30 bg-neg/10 hover-glow-neg"
+                  : "border-champagne/25 bg-champagne/5 hover-glow-champagne",
               )}
             >
               <div className="flex items-start gap-3">
