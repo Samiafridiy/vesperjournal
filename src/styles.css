@@ -167,6 +167,34 @@
   .glow-pos { box-shadow: 0 0 24px color-mix(in oklab, var(--pos) 25%, transparent); }
   .glow-champagne { box-shadow: 0 0 32px color-mix(in oklab, var(--champagne) 18%, transparent); }
 
+  /* Atmospheric hover glow — matches Performance StatCard treatment.
+     Adds a tinted shadow + slight lift + brighter border, scoped by tone. */
+  .hover-glow {
+    transition:
+      transform 220ms ease,
+      box-shadow 220ms ease,
+      border-color 220ms ease,
+      background-color 220ms ease;
+  }
+  .hover-glow:hover {
+    transform: translateY(-2px);
+  }
+  .hover-glow-pos:hover {
+    background-color: var(--surface-2);
+    border-color: color-mix(in oklab, var(--pos) 35%, var(--border));
+    box-shadow: 0 0 40px -10px color-mix(in oklab, var(--pos) 35%, transparent);
+  }
+  .hover-glow-neg:hover {
+    background-color: var(--surface-2);
+    border-color: color-mix(in oklab, var(--neg) 35%, var(--border));
+    box-shadow: 0 0 40px -10px color-mix(in oklab, var(--neg) 35%, transparent);
+  }
+  .hover-glow-champagne:hover {
+    background-color: var(--surface-2);
+    border-color: color-mix(in oklab, var(--champagne) 35%, var(--border));
+    box-shadow: 0 0 40px -10px color-mix(in oklab, var(--champagne) 28%, transparent);
+  }
+
   .top-accent {
     position: relative;
   }
