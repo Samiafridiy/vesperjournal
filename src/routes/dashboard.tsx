@@ -23,6 +23,8 @@ import { RecentTrades } from "@/components/overview/RecentTrades";
 import { AICoachLastSession } from "@/components/coach/AICoachLastSession";
 import { TraderIdentity } from "@/components/coach/TraderIdentity";
 import { StreaksCard } from "@/components/coach/StreaksCard";
+import { RuleViolationsBadge } from "@/components/rules/RuleViolationsBadge";
+import { WeeklyReviewCard } from "@/components/weekly/WeeklyReviewCard";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -195,6 +197,12 @@ function Dashboard() {
           {/* AI Coach — Last session */}
           <section className="mb-8">
             <AICoachLastSession trades={trades} />
+          </section>
+
+          {/* Rule Violations + Weekly Review */}
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+            <RuleViolationsBadge trades={trades} />
+            <WeeklyReviewCard />
           </section>
 
           {/* SNAPSHOT — Win/Loss Split + Recent Trades */}

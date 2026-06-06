@@ -22,6 +22,7 @@ import { HorizontalPnlBars } from "@/components/analytics/HorizontalPnlBars";
 import { SessionBoxes } from "@/components/analytics/SessionBoxes";
 import { DayOfWeekHeatmap } from "@/components/analytics/DayOfWeekHeatmap";
 import { BehaviorImpact } from "@/components/analytics/BehaviorImpact";
+import { RuleViolationsCard } from "@/components/rules/RuleViolationsCard";
 
 export const Route = createFileRoute("/analytics")({
   head: () => ({
@@ -171,6 +172,11 @@ function Analytics() {
       {/* Behavior Impact */}
       <section className="mb-5">
         <BehaviorImpact trades={trades} />
+      </section>
+
+      {/* Rule Violations */}
+      <section className="mb-5">
+        <RuleViolationsCard trades={trades} />
       </section>
 
       {/* Equity + Drawdown */}
