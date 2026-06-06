@@ -161,7 +161,12 @@ export function TraderIdentity({ trades }: { trades: Trade[] }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.15 }}
-      className="surface-card p-6 flex flex-col gap-4"
+      className={cn(
+        "surface-card p-6 flex flex-col gap-4 hover-glow",
+        identity.tone === "pos" && "hover-glow-pos",
+        identity.tone === "warn" && "hover-glow-champagne",
+        identity.tone === "neg" && "hover-glow-neg",
+      )}
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">

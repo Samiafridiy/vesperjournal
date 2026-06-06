@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import type { Trade } from "@/lib/trade-utils";
+import { cn } from "@/lib/utils";
 
 export function WinLossSplit({ trades }: { trades: Trade[] }) {
   const { wins, losses, winRate } = useMemo(() => {
@@ -18,7 +19,16 @@ export function WinLossSplit({ trades }: { trades: Trade[] }) {
   const lossLen = total ? (losses / total) * C : 0;
 
   return (
-    <div className="surface-card p-5 flex flex-col h-full">
+    <div
+      className={cn(
+        "surface-card p-5 flex flex-col h-full hover-glow",
+        total === 0
+          ? "hover-glow-champagne"
+          : winRate >= 0.5
+          ? "hover-glow-pos"
+          : "hover-glow-neg",
+      )}
+    >
       <div className="text-[11px] uppercase tracking-[0.18em] text-soft font-medium mb-4">
         Win / Loss Split
       </div>

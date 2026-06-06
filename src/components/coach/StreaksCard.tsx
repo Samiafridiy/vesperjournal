@@ -126,7 +126,7 @@ export function StreaksCard({ trades }: { trades: Trade[] }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
-      className="surface-card p-6 flex flex-col gap-4"
+      className="surface-card p-6 flex flex-col gap-4 hover-glow hover-glow-champagne"
     >
       <div className="flex items-center gap-2">
         <Flame className="size-4 text-champagne" />
@@ -139,7 +139,7 @@ export function StreaksCard({ trades }: { trades: Trade[] }) {
         {streaks.map((s) => (
           <div
             key={s.id}
-            className="relative rounded-lg bg-surface/70 border border-border/60 px-3 py-3 flex flex-col gap-1"
+            className="relative rounded-lg bg-surface/70 border border-border/60 px-3 py-3 flex flex-col gap-1 hover-glow hover-glow-champagne"
           >
             {s.brokeToday && (
               <span className="absolute top-2 right-2 size-1.5 rounded-full bg-neg" />

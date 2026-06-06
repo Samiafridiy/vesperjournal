@@ -34,7 +34,17 @@ export function RecentTrades({ trades }: { trades: Trade[] }) {
             const date = new Date(t.trade_date).toLocaleDateString();
             const dir = (t.direction || "").toUpperCase();
             return (
-              <div key={t.id} className="flex items-center gap-3 py-2.5">
+              <div
+                key={t.id}
+                className={cn(
+                  "flex items-center gap-3 py-2.5 px-2 -mx-2 rounded-md border border-transparent hover-glow",
+                  t.pnl == null
+                    ? "hover-glow-champagne"
+                    : isPos
+                    ? "hover-glow-pos"
+                    : "hover-glow-neg",
+                )}
+              >
                 <div className="size-8 rounded-md bg-surface-2 border border-border/60 flex items-center justify-center shrink-0">
                   <Activity
                     className={cn("size-3.5", isPos ? "text-pos" : "text-neg")}
