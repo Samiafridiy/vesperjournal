@@ -231,9 +231,9 @@ function TradesList() {
               </div>
             )}
 
-            {selected.screenshot_url && (
-              <a href={selected.screenshot_url} target="_blank" rel="noreferrer" className="block mb-5">
-                <img src={selected.screenshot_url} alt="Trade screenshot" className="rounded-lg border border-border w-full" />
+            {selected.screenshot_url && screenshotUrl && (
+              <a href={screenshotUrl} target="_blank" rel="noreferrer" className="block mb-5">
+                <img src={screenshotUrl} alt="Trade screenshot" className="rounded-lg border border-border w-full" />
               </a>
             )}
 
