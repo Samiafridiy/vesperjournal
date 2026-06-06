@@ -9,9 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WeeklyReviewRouteImport } from './routes/weekly-review'
 import { Route as TradingLabRouteImport } from './routes/trading-lab'
 import { Route as TradesRouteImport } from './routes/trades'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as RuleBookRouteImport } from './routes/rule-book'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as MarketIntelRouteImport } from './routes/market-intel'
 import { Route as LoginRouteImport } from './routes/login'
@@ -25,6 +27,11 @@ import { Route as TradeNewRouteImport } from './routes/trade.new'
 import { Route as ApiMetaapiSyncRouteImport } from './routes/api.metaapi-sync'
 import { Route as ApiEaWebhookRouteImport } from './routes/api.ea-webhook'
 
+const WeeklyReviewRoute = WeeklyReviewRouteImport.update({
+  id: '/weekly-review',
+  path: '/weekly-review',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TradingLabRoute = TradingLabRouteImport.update({
   id: '/trading-lab',
   path: '/trading-lab',
@@ -38,6 +45,11 @@ const TradesRoute = TradesRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RuleBookRoute = RuleBookRouteImport.update({
+  id: '/rule-book',
+  path: '/rule-book',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -111,9 +123,11 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/market-intel': typeof MarketIntelRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/rule-book': typeof RuleBookRoute
   '/signup': typeof SignupRoute
   '/trades': typeof TradesRoute
   '/trading-lab': typeof TradingLabRoute
+  '/weekly-review': typeof WeeklyReviewRoute
   '/api/ea-webhook': typeof ApiEaWebhookRoute
   '/api/metaapi-sync': typeof ApiMetaapiSyncRoute
   '/trade/new': typeof TradeNewRoute
@@ -128,9 +142,11 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/market-intel': typeof MarketIntelRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/rule-book': typeof RuleBookRoute
   '/signup': typeof SignupRoute
   '/trades': typeof TradesRoute
   '/trading-lab': typeof TradingLabRoute
+  '/weekly-review': typeof WeeklyReviewRoute
   '/api/ea-webhook': typeof ApiEaWebhookRoute
   '/api/metaapi-sync': typeof ApiMetaapiSyncRoute
   '/trade/new': typeof TradeNewRoute
@@ -146,9 +162,11 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/market-intel': typeof MarketIntelRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/rule-book': typeof RuleBookRoute
   '/signup': typeof SignupRoute
   '/trades': typeof TradesRoute
   '/trading-lab': typeof TradingLabRoute
+  '/weekly-review': typeof WeeklyReviewRoute
   '/api/ea-webhook': typeof ApiEaWebhookRoute
   '/api/metaapi-sync': typeof ApiMetaapiSyncRoute
   '/trade/new': typeof TradeNewRoute
@@ -165,9 +183,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/market-intel'
     | '/reset-password'
+    | '/rule-book'
     | '/signup'
     | '/trades'
     | '/trading-lab'
+    | '/weekly-review'
     | '/api/ea-webhook'
     | '/api/metaapi-sync'
     | '/trade/new'
@@ -182,9 +202,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/market-intel'
     | '/reset-password'
+    | '/rule-book'
     | '/signup'
     | '/trades'
     | '/trading-lab'
+    | '/weekly-review'
     | '/api/ea-webhook'
     | '/api/metaapi-sync'
     | '/trade/new'
@@ -199,9 +221,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/market-intel'
     | '/reset-password'
+    | '/rule-book'
     | '/signup'
     | '/trades'
     | '/trading-lab'
+    | '/weekly-review'
     | '/api/ea-webhook'
     | '/api/metaapi-sync'
     | '/trade/new'
@@ -217,9 +241,11 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MarketIntelRoute: typeof MarketIntelRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  RuleBookRoute: typeof RuleBookRoute
   SignupRoute: typeof SignupRoute
   TradesRoute: typeof TradesRoute
   TradingLabRoute: typeof TradingLabRoute
+  WeeklyReviewRoute: typeof WeeklyReviewRoute
   ApiEaWebhookRoute: typeof ApiEaWebhookRoute
   ApiMetaapiSyncRoute: typeof ApiMetaapiSyncRoute
   TradeNewRoute: typeof TradeNewRoute
@@ -227,6 +253,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/weekly-review': {
+      id: '/weekly-review'
+      path: '/weekly-review'
+      fullPath: '/weekly-review'
+      preLoaderRoute: typeof WeeklyReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/trading-lab': {
       id: '/trading-lab'
       path: '/trading-lab'
@@ -246,6 +279,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rule-book': {
+      id: '/rule-book'
+      path: '/rule-book'
+      fullPath: '/rule-book'
+      preLoaderRoute: typeof RuleBookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -345,9 +385,11 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MarketIntelRoute: MarketIntelRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  RuleBookRoute: RuleBookRoute,
   SignupRoute: SignupRoute,
   TradesRoute: TradesRoute,
   TradingLabRoute: TradingLabRoute,
+  WeeklyReviewRoute: WeeklyReviewRoute,
   ApiEaWebhookRoute: ApiEaWebhookRoute,
   ApiMetaapiSyncRoute: ApiMetaapiSyncRoute,
   TradeNewRoute: TradeNewRoute,
@@ -355,3 +397,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
