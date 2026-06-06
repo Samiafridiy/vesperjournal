@@ -20,7 +20,12 @@ export function TraderScoreCard({ score }: { score: TraderScore }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="surface-card-elevated top-accent p-6 flex flex-col gap-5 relative overflow-hidden"
+      className={cn(
+        "surface-card-elevated top-accent p-6 flex flex-col gap-5 relative overflow-hidden hover-glow",
+        score.color === "pos" && "hover-glow-pos",
+        score.color === "warn" && "hover-glow-champagne",
+        score.color === "neg" && "hover-glow-neg",
+      )}
     >
       <div
         aria-hidden
