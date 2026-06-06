@@ -9,7 +9,7 @@ export function MistakeAlerts({ alerts }: { alerts: MistakeAlert[] }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.15 }}
-      className="surface-card p-6 flex flex-col gap-4 h-full hover-glow hover-glow-neg"
+      className="surface-card p-6 flex flex-col gap-4 h-full"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -38,10 +38,10 @@ export function MistakeAlerts({ alerts }: { alerts: MistakeAlert[] }) {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 + i * 0.06 }}
               className={cn(
-                "rounded-lg p-4 border",
+                "rounded-lg p-4 border hover-glow",
                 a.severity === "high"
-                  ? "border-neg/30 bg-neg/10"
-                  : "border-champagne/25 bg-champagne/5",
+                  ? "border-neg/30 bg-neg/10 hover-glow-neg"
+                  : "border-champagne/25 bg-champagne/5 hover-glow-champagne",
               )}
             >
               <div className="flex items-start gap-3">
