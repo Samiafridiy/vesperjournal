@@ -3,7 +3,7 @@ import { RouteGate } from "@/components/RouteGate";
 import { AppShell } from "@/components/AppShell";
 import { useTrades } from "@/hooks/use-trades";
 import { fmtMoney, PAIRS, SESSIONS, type Trade } from "@/lib/trade-utils";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -45,6 +45,29 @@ function TradesList() {
   const [sessionF, setSessionF] = useState<string>(ALL);
   const [resultF, setResultF] = useState<string>(ALL);
   const [selected, setSelected] = useState<Trade | null>(null);
+  const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setScreenshotUrl(null);
+    const raw = selected?.screenshot_url;
+    if (!raw) return;
+    // Backward compat: older rows stored a full URL. New rows store only the
+    // object path — resolve to a short-lived signed URL on demand.
+    if (/^https?:\/\//i.test(raw)) {
+      setScreenshotUrl(raw);
+      return;
+    }
+    (async () => {
+      const { data } = await supabase.storage
+        .from("screenshots")
+        .createSignedUrl(raw, 60 * 15);
+      if (!cancelled) setScreenshotUrl(data?.signedUrl ?? null);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [selected?.screenshot_url]);
 
   const filtered = useMemo(() => {
     return trades.filter((t) => {
