@@ -315,6 +315,72 @@ export type Database = {
         }
         Relationships: []
       }
+      trading_rules: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          text: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          text: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          text?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      weekly_reviews: {
+        Row: {
+          biggest_mistake: string | null
+          broken_rule: string | null
+          created_at: string
+          did_well: string | null
+          discipline_rating: number
+          do_differently: string | null
+          id: string
+          updated_at: string
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          biggest_mistake?: string | null
+          broken_rule?: string | null
+          created_at?: string
+          did_well?: string | null
+          discipline_rating: number
+          do_differently?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          biggest_mistake?: string | null
+          broken_rule?: string | null
+          created_at?: string
+          did_well?: string | null
+          discipline_rating?: number
+          do_differently?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
