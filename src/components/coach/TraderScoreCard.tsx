@@ -29,8 +29,8 @@ export function TraderScoreCard({ score }: { score: TraderScore }) {
     >
       <div
         aria-hidden
-        className="absolute -top-20 -right-20 size-52 rounded-full blur-3xl opacity-30 pointer-events-none"
-        style={{ background: ringColor }}
+        className="absolute -top-20 -right-20 size-52 rounded-full blur-3xl opacity-20 pointer-events-none"
+        style={{ background: `color-mix(in oklab, ${ringColor} 60%, transparent)` }}
       />
       <div className="flex items-center gap-2 relative">
         <Sparkles className="size-4 text-champagne" />
@@ -62,7 +62,6 @@ export function TraderScoreCard({ score }: { score: TraderScore }) {
               initial={{ strokeDashoffset: circumference }}
               animate={{ strokeDashoffset: offset }}
               transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-              style={{ filter: `drop-shadow(0 0 10px ${ringColor})` }}
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
