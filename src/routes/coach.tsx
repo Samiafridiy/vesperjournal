@@ -16,6 +16,63 @@ import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+function parseAssistant(content: string): {
+  body: string;
+  bars: { label: string; value: number }[] | null;
+  followups: string[];
+} {
+  let body = content;
+  let followups: string[] = [];
+  const fu = body.match(/<followups>([\s\S]*?)<\/followups>/i);
+  if (fu) {
+    followups = fu[1].split("|").map((s) => s.trim()).filter(Boolean).slice(0, 3);
+    body = body.replace(fu[0], "").trim();
+  }
+  let bars: { label: string; value: number }[] | null = null;
+  const bm = body.match(/```bars\s*\n([\s\S]*?)```/i);
+  if (bm) {
+    const rows = bm[1]
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .map((l) => {
+        const [label, val] = l.split("|");
+        return { label: (label ?? "").trim(), value: Number((val ?? "0").trim()) };
+      })
+      .filter((r) => r.label && Number.isFinite(r.value));
+    if (rows.length) bars = rows;
+    body = body.replace(bm[0], "").trim();
+  }
+  return { body, bars, followups };
+}
+
+function InlineBars({ data }: { data: { label: string; value: number }[] }) {
+  const max = Math.max(1, ...data.map((d) => Math.abs(d.value)));
+  return (
+    <div className="my-3 flex flex-col gap-1.5">
+      {data.map((d) => {
+        const pct = (Math.abs(d.value) / max) * 100;
+        const pos = d.value >= 0;
+        return (
+          <div key={d.label} className="grid grid-cols-[90px_1fr_70px] items-center gap-2">
+            <div className="text-[11px] text-soft truncate">{d.label}</div>
+            <div className="h-1.5 rounded-full bg-surface-2 overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{ width: `${pct}%`, background: pos ? "var(--pos)" : "var(--neg)" }}
+              />
+            </div>
+            <div className={"font-mono text-[11px] tabular-nums text-right " + (pos ? "text-pos" : "text-neg")}>
+              {pos ? "+" : ""}
+              {d.value.toLocaleString()}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export const Route = createFileRoute("/coach")({
   head: () => ({
     meta: [
