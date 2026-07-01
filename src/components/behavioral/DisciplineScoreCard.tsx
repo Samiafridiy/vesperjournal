@@ -21,9 +21,18 @@ export function DisciplineScoreCard({ score }: { score: DisciplineScore }) {
       transition={{ duration: 0.4 }}
       className={cn(
         "surface-card p-5 flex flex-col gap-4 relative overflow-hidden hover-glow",
-        score.score >= 70 ? "hover-glow-pos" : "hover-glow-neg",
+        score.score >= 60
+          ? "hover-glow-pos"
+          : score.score >= 40
+            ? "hover-glow-champagne"
+            : "hover-glow-neg",
       )}
     >
+      <div
+        aria-hidden
+        className="absolute -top-16 -right-16 size-40 rounded-full blur-3xl opacity-20 pointer-events-none"
+        style={{ background: `color-mix(in oklab, ${ring} 60%, transparent)` }}
+      />
       <div className="flex items-center gap-2">
         <ShieldCheck className="size-4 text-champagne" />
         <span className="text-[11px] uppercase tracking-[0.18em] text-soft font-medium">
@@ -47,7 +56,6 @@ export function DisciplineScoreCard({ score }: { score: DisciplineScore }) {
               initial={{ strokeDashoffset: circumference }}
               animate={{ strokeDashoffset: offset }}
               transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-              style={{ filter: `drop-shadow(0 0 6px ${ring})` }}
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
