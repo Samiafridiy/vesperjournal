@@ -281,7 +281,11 @@ function CoachPage() {
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto -mx-1 px-1 flex flex-col gap-3 md:gap-4">
           <AnimatePresence initial={false}>
-            {messages.map((m, i) => (
+            {messages.map((m, i) => {
+              const parsed = m.role === "assistant" ? parseAssistant(m.content) : null;
+              const isLastAssistant =
+                m.role === "assistant" && i === messages.length - 1 && !loading;
+              return (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 8 }}
@@ -301,16 +305,32 @@ function CoachPage() {
                       : "bg-surface-2/60 border border-border text-foreground")
                   }
                 >
-                  {m.role === "assistant" ? (
+                  {m.role === "assistant" && parsed ? (
                     <div className="prose prose-sm prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                      <ReactMarkdown>{m.content}</ReactMarkdown>
+                      <ReactMarkdown>{parsed.body}</ReactMarkdown>
+                      {parsed.bars && <InlineBars data={parsed.bars} />}
+                      {isLastAssistant && parsed.followups.length > 0 && (
+                        <div className="not-prose mt-3 flex flex-wrap gap-2">
+                          {parsed.followups.map((q) => (
+                            <button
+                              key={q}
+                              onClick={() => send(q)}
+                              className="text-xs px-3 py-1.5 rounded-full border border-border bg-surface/60 text-soft hover:text-foreground hover:border-champagne/40 transition-colors"
+                            >
+                              <Sparkles className="size-3 inline mr-1 text-champagne" />
+                              {q}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     m.content
                   )}
                 </div>
               </motion.div>
-            ))}
+              );
+            })}
           </AnimatePresence>
           {loading && (
             <div className="flex gap-2 md:gap-3">
