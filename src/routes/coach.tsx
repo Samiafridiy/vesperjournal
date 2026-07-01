@@ -46,29 +46,80 @@ function parseAssistant(content: string): {
   return { body, bars, followups };
 }
 
-function InlineBars({ data }: { data: { label: string; value: number }[] }) {
+function formatBarValue(v: number, allInts: boolean) {
+  const abs = Math.abs(v);
+  const sign = v > 0 ? "+" : v < 0 ? "−" : "";
+  // Heuristic: values that look like currency (>=1 and not all small integers) get $ prefix
+  if (allInts && abs < 100) return `${sign}${abs}`;
+  return `${sign}$${abs.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+}
+
+function InlineBars({ data, bodyText }: { data: { label: string; value: number }[]; bodyText: string }) {
   const max = Math.max(1, ...data.map((d) => Math.abs(d.value)));
+  const allInts = data.every((d) => Number.isInteger(d.value) && Math.abs(d.value) <= 100);
+
+  // Auto-highlight: best positive + worst negative when both exist; otherwise the single extreme.
+  const bestIdx = data.reduce((best, d, i) => (d.value > data[best].value ? i : best), 0);
+  const worstIdx = data.reduce((worst, d, i) => (d.value < data[worst].value ? i : worst), 0);
+  const highlight = new Set<number>();
+  if (data[bestIdx].value > 0) highlight.add(bestIdx);
+  if (data[worstIdx].value < 0) highlight.add(worstIdx);
+
+  // Also highlight any category the assistant explicitly names as strongest/weakest/best/worst.
+  const lower = bodyText.toLowerCase();
+  data.forEach((d, i) => {
+    const l = d.label.toLowerCase();
+    if (!l) return;
+    const mentioned = lower.includes(l);
+    if (mentioned && /(strongest|weakest|best|worst|top|bottom|edge|bleeding)/.test(lower)) {
+      highlight.add(i);
+    }
+  });
+
   return (
-    <div className="my-3 flex flex-col gap-1.5">
-      {data.map((d) => {
-        const pct = (Math.abs(d.value) / max) * 100;
-        const pos = d.value >= 0;
-        return (
-          <div key={d.label} className="grid grid-cols-[90px_1fr_70px] items-center gap-2">
-            <div className="text-[11px] text-soft truncate">{d.label}</div>
-            <div className="h-1.5 rounded-full bg-surface-2 overflow-hidden">
+    <div className="not-prose my-3 rounded-xl bg-surface/70 border border-border p-3">
+      <div className="flex flex-col gap-2">
+        {data.map((d, i) => {
+          const pct = (Math.abs(d.value) / max) * 100;
+          const pos = d.value >= 0;
+          const hl = highlight.has(i);
+          return (
+            <div
+              key={d.label + i}
+              className={cn(
+                "grid grid-cols-[80px_1fr_78px] items-center gap-2 rounded-md px-1.5 py-1 transition-colors",
+                hl && "ring-1 ring-champagne/40 bg-champagne/[0.04]",
+              )}
+            >
+              <div className={cn("text-[11px] truncate", hl ? "text-champagne" : "text-soft")}>
+                {d.label}
+              </div>
+              <div className="h-[7px] rounded-full bg-surface-2 overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${pct}%` }}
+                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                  className="h-full rounded-full"
+                  style={{
+                    background: pos ? "var(--pos)" : "var(--neg)",
+                    boxShadow: hl
+                      ? `0 0 8px 0 ${pos ? "rgb(from var(--pos) r g b / 0.5)" : "rgb(from var(--neg) r g b / 0.5)"}`
+                      : undefined,
+                  }}
+                />
+              </div>
               <div
-                className="h-full rounded-full transition-all"
-                style={{ width: `${pct}%`, background: pos ? "var(--pos)" : "var(--neg)" }}
-              />
+                className={cn(
+                  "font-mono text-[11px] tabular-nums text-right",
+                  pos ? "text-pos" : "text-neg",
+                )}
+              >
+                {formatBarValue(d.value, allInts)}
+              </div>
             </div>
-            <div className={"font-mono text-[11px] tabular-nums text-right " + (pos ? "text-pos" : "text-neg")}>
-              {pos ? "+" : ""}
-              {d.value.toLocaleString()}
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -308,7 +359,7 @@ function CoachPage() {
                   {m.role === "assistant" && parsed ? (
                     <div className="prose prose-sm prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
                       <ReactMarkdown>{parsed.body}</ReactMarkdown>
-                      {parsed.bars && <InlineBars data={parsed.bars} />}
+                      {parsed.bars && <InlineBars data={parsed.bars} bodyText={parsed.body} />}
                       {isLastAssistant && parsed.followups.length > 0 && (
                         <div className="not-prose mt-3 flex flex-wrap gap-2">
                           {parsed.followups.map((q) => (
