@@ -13,6 +13,7 @@ import {
   BookOpen,
   ClipboardList,
   Menu,
+  Zap,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ const nav = [
   { to: "/trading-lab", label: "Lab", shortLabel: "Lab", icon: Beaker },
   { to: "/rule-book", label: "Rule Book", shortLabel: "Rules", icon: BookOpen },
   { to: "/coach", label: "AI Coach", shortLabel: "Coach", icon: Brain },
+  { to: "/agents", label: "Agents", shortLabel: "Agents", icon: Zap },
   { to: "/import", label: "Import", shortLabel: "Import", icon: Download },
 ] as const;
 
@@ -49,7 +51,8 @@ const mobileMore = [
   nav[5], // Market Intel
   nav[6], // Lab
   nav[7], // Rules
-  nav[9], // Import
+  nav[9], // Agents
+  nav[10], // Import
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
