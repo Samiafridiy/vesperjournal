@@ -10,11 +10,13 @@ export type TradeTag = {
 
 /** Approximate duration in minutes using trade_date (entry) → updated_at (close). */
 export function tradeDurationMinutes(trade: Trade): number | null {
-  if (!trade.close_price) return null;
+  if (trade.close_price == null) return null;
+  if (!trade.trade_date || !trade.updated_at) return null;
   const start = new Date(trade.trade_date).getTime();
   const end = new Date(trade.updated_at).getTime();
+  if (!Number.isFinite(start) || !Number.isFinite(end)) return null;
   const diff = (end - start) / 60000;
-  if (!isFinite(diff) || diff <= 0) return null;
+  if (!Number.isFinite(diff) || diff <= 0) return null;
   return diff;
 }
 
