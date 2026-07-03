@@ -139,7 +139,7 @@ export function tradeViolatesRule(
     case "only_sessions":
       return !!trade.session && !parsed.sessions.includes(trade.session);
     case "only_pairs":
-      return !parsed.pairs.includes((trade.pair ?? "").toUpperCase());
+      return !parsed.pairs.includes(trade.pair.toUpperCase());
   }
 }
 

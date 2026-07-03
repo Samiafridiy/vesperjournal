@@ -22,7 +22,6 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CoachRouteImport } from './routes/coach'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
-import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TradeNewRouteImport } from './routes/trade.new'
 import { Route as ApiMetaapiSyncRouteImport } from './routes/api.metaapi-sync'
@@ -93,11 +92,6 @@ const AnalyticsRoute = AnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AgentsRoute = AgentsRouteImport.update({
-  id: '/agents',
-  path: '/agents',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -121,7 +115,6 @@ const ApiEaWebhookRoute = ApiEaWebhookRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/agents': typeof AgentsRoute
   '/analytics': typeof AnalyticsRoute
   '/coach': typeof CoachRoute
   '/dashboard': typeof DashboardRoute
@@ -141,7 +134,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/agents': typeof AgentsRoute
   '/analytics': typeof AnalyticsRoute
   '/coach': typeof CoachRoute
   '/dashboard': typeof DashboardRoute
@@ -162,7 +154,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/agents': typeof AgentsRoute
   '/analytics': typeof AnalyticsRoute
   '/coach': typeof CoachRoute
   '/dashboard': typeof DashboardRoute
@@ -184,7 +175,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/agents'
     | '/analytics'
     | '/coach'
     | '/dashboard'
@@ -204,7 +194,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/agents'
     | '/analytics'
     | '/coach'
     | '/dashboard'
@@ -224,7 +213,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/agents'
     | '/analytics'
     | '/coach'
     | '/dashboard'
@@ -245,7 +233,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AgentsRoute: typeof AgentsRoute
   AnalyticsRoute: typeof AnalyticsRoute
   CoachRoute: typeof CoachRoute
   DashboardRoute: typeof DashboardRoute
@@ -357,13 +344,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnalyticsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/agents': {
-      id: '/agents'
-      path: '/agents'
-      fullPath: '/agents'
-      preLoaderRoute: typeof AgentsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -397,7 +377,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AgentsRoute: AgentsRoute,
   AnalyticsRoute: AnalyticsRoute,
   CoachRoute: CoachRoute,
   DashboardRoute: DashboardRoute,

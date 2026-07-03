@@ -18,7 +18,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
-import { TradeTags } from "@/components/TradeTags";
 
 export const Route = createFileRoute("/trades")({
   head: () => ({
@@ -164,12 +163,7 @@ function TradesList() {
                 <tr key={t.id} onClick={() => setSelected(t)}
                   className="border-b border-border last:border-0 hover:bg-surface-2 cursor-pointer transition-colors">
                   <td className="px-5 py-3 text-soft font-mono text-xs">{new Date(t.trade_date).toLocaleDateString()}</td>
-                  <td className="px-5 py-3 font-medium">
-                    <div className="flex flex-col gap-1.5">
-                      <span>{t.pair}</span>
-                      <TradeTags trade={t} />
-                    </div>
-                  </td>
+                  <td className="px-5 py-3 font-medium">{t.pair}</td>
                   <td className="px-5 py-3 uppercase text-xs">
                     <span className={cn("px-2 py-0.5 rounded-md", t.direction === "buy" ? "bg-pos/10 text-pos" : "bg-neg/10 text-neg")}>
                       {t.direction}
