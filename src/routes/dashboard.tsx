@@ -26,6 +26,7 @@ import { StreaksCard } from "@/components/coach/StreaksCard";
 import { RuleViolationsBadge } from "@/components/rules/RuleViolationsBadge";
 import { WeeklyReviewCard } from "@/components/weekly/WeeklyReviewCard";
 import { SessionReviewCard } from "@/components/agents/SessionReviewCard";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -202,7 +203,9 @@ function Dashboard() {
 
           {/* Today's Session Review (auto-graded) */}
           <section className="mb-8">
-            <SessionReviewCard />
+            <ErrorBoundary name="SessionReviewCard">
+              <SessionReviewCard />
+            </ErrorBoundary>
           </section>
 
           {/* Rule Violations + Weekly Review */}
