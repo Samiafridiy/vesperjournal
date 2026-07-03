@@ -43,6 +43,7 @@ const DEFAULT_DAILY_LIMIT = 3;
 
 function toDayKey(iso: string): string {
   const d = new Date(iso);
+  if (!Number.isFinite(d.getTime())) return "";
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
