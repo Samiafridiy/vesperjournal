@@ -15,6 +15,7 @@ import { Route as TradesRouteImport } from './routes/trades'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as RuleBookRouteImport } from './routes/rule-book'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MarketIntelRouteImport } from './routes/market-intel'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ImportRouteImport } from './routes/import'
@@ -26,6 +27,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as TradeNewRouteImport } from './routes/trade.new'
 import { Route as ApiMetaapiSyncRouteImport } from './routes/api.metaapi-sync'
 import { Route as ApiEaWebhookRouteImport } from './routes/api.ea-webhook'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 
 const WeeklyReviewRoute = WeeklyReviewRouteImport.update({
   id: '/weekly-review',
@@ -55,6 +59,11 @@ const RuleBookRoute = RuleBookRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketIntelRoute = MarketIntelRouteImport.update({
@@ -112,6 +121,24 @@ const ApiEaWebhookRoute = ApiEaWebhookRouteImport.update({
   path: '/api/ea-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -122,15 +149,19 @@ export interface FileRoutesByFullPath {
   '/import': typeof ImportRoute
   '/login': typeof LoginRoute
   '/market-intel': typeof MarketIntelRoute
+  '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rule-book': typeof RuleBookRoute
   '/signup': typeof SignupRoute
   '/trades': typeof TradesRoute
   '/trading-lab': typeof TradingLabRoute
   '/weekly-review': typeof WeeklyReviewRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/ea-webhook': typeof ApiEaWebhookRoute
   '/api/metaapi-sync': typeof ApiMetaapiSyncRoute
   '/trade/new': typeof TradeNewRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -141,15 +172,19 @@ export interface FileRoutesByTo {
   '/import': typeof ImportRoute
   '/login': typeof LoginRoute
   '/market-intel': typeof MarketIntelRoute
+  '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rule-book': typeof RuleBookRoute
   '/signup': typeof SignupRoute
   '/trades': typeof TradesRoute
   '/trading-lab': typeof TradingLabRoute
   '/weekly-review': typeof WeeklyReviewRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/ea-webhook': typeof ApiEaWebhookRoute
   '/api/metaapi-sync': typeof ApiMetaapiSyncRoute
   '/trade/new': typeof TradeNewRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -161,15 +196,19 @@ export interface FileRoutesById {
   '/import': typeof ImportRoute
   '/login': typeof LoginRoute
   '/market-intel': typeof MarketIntelRoute
+  '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rule-book': typeof RuleBookRoute
   '/signup': typeof SignupRoute
   '/trades': typeof TradesRoute
   '/trading-lab': typeof TradingLabRoute
   '/weekly-review': typeof WeeklyReviewRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/ea-webhook': typeof ApiEaWebhookRoute
   '/api/metaapi-sync': typeof ApiMetaapiSyncRoute
   '/trade/new': typeof TradeNewRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -182,15 +221,19 @@ export interface FileRouteTypes {
     | '/import'
     | '/login'
     | '/market-intel'
+    | '/mcp'
     | '/reset-password'
     | '/rule-book'
     | '/signup'
     | '/trades'
     | '/trading-lab'
     | '/weekly-review'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/api/ea-webhook'
     | '/api/metaapi-sync'
     | '/trade/new'
+    | '/.mcp/invoke-tool/$tool'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -201,15 +244,19 @@ export interface FileRouteTypes {
     | '/import'
     | '/login'
     | '/market-intel'
+    | '/mcp'
     | '/reset-password'
     | '/rule-book'
     | '/signup'
     | '/trades'
     | '/trading-lab'
     | '/weekly-review'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/api/ea-webhook'
     | '/api/metaapi-sync'
     | '/trade/new'
+    | '/.mcp/invoke-tool/$tool'
   id:
     | '__root__'
     | '/'
@@ -220,15 +267,19 @@ export interface FileRouteTypes {
     | '/import'
     | '/login'
     | '/market-intel'
+    | '/mcp'
     | '/reset-password'
     | '/rule-book'
     | '/signup'
     | '/trades'
     | '/trading-lab'
     | '/weekly-review'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/api/ea-webhook'
     | '/api/metaapi-sync'
     | '/trade/new'
+    | '/.mcp/invoke-tool/$tool'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -240,15 +291,19 @@ export interface RootRouteChildren {
   ImportRoute: typeof ImportRoute
   LoginRoute: typeof LoginRoute
   MarketIntelRoute: typeof MarketIntelRoute
+  McpRoute: typeof McpRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RuleBookRoute: typeof RuleBookRoute
   SignupRoute: typeof SignupRoute
   TradesRoute: typeof TradesRoute
   TradingLabRoute: typeof TradingLabRoute
   WeeklyReviewRoute: typeof WeeklyReviewRoute
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiEaWebhookRoute: typeof ApiEaWebhookRoute
   ApiMetaapiSyncRoute: typeof ApiMetaapiSyncRoute
   TradeNewRoute: typeof TradeNewRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -293,6 +348,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/market-intel': {
@@ -372,6 +434,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiEaWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -384,15 +467,20 @@ const rootRouteChildren: RootRouteChildren = {
   ImportRoute: ImportRoute,
   LoginRoute: LoginRoute,
   MarketIntelRoute: MarketIntelRoute,
+  McpRoute: McpRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RuleBookRoute: RuleBookRoute,
   SignupRoute: SignupRoute,
   TradesRoute: TradesRoute,
   TradingLabRoute: TradingLabRoute,
   WeeklyReviewRoute: WeeklyReviewRoute,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiEaWebhookRoute: ApiEaWebhookRoute,
   ApiMetaapiSyncRoute: ApiMetaapiSyncRoute,
   TradeNewRoute: TradeNewRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
