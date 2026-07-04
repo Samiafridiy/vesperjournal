@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
+import { autoTagsFor, type AutoTag } from "@/lib/auto-tags";
 
 export const Route = createFileRoute("/trades")({
   head: () => ({
@@ -163,7 +164,12 @@ function TradesList() {
                 <tr key={t.id} onClick={() => setSelected(t)}
                   className="border-b border-border last:border-0 hover:bg-surface-2 cursor-pointer transition-colors">
                   <td className="px-5 py-3 text-soft font-mono text-xs">{new Date(t.trade_date).toLocaleDateString()}</td>
-                  <td className="px-5 py-3 font-medium">{t.pair}</td>
+                  <td className="px-5 py-3 font-medium">
+                    <div className="flex flex-col gap-1.5">
+                      <span>{t.pair}</span>
+                      <TagChips tags={autoTagsFor(t)} />
+                    </div>
+                  </td>
                   <td className="px-5 py-3 uppercase text-xs">
                     <span className={cn("px-2 py-0.5 rounded-md", t.direction === "buy" ? "bg-pos/10 text-pos" : "bg-neg/10 text-neg")}>
                       {t.direction}
@@ -270,6 +276,30 @@ function Meta({ label, value }: { label: string; value: string }) {
     <div className="flex items-baseline justify-between border-b border-border pb-2">
       <span className="text-xs text-faint uppercase tracking-wider">{label}</span>
       <span className="text-foreground">{value}</span>
+    </div>
+  );
+}
+
+function TagChips({ tags }: { tags: AutoTag[] }) {
+  if (tags.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-1">
+      {tags.map((tag, i) => (
+        <span
+          key={`${tag.label}-${i}`}
+          className={cn(
+            "px-1.5 py-0.5 rounded-md text-[10px] font-medium tracking-wide border",
+            tag.tone === "pos" && "bg-pos/10 text-pos border-pos/20",
+            tag.tone === "neg" && "bg-neg/10 text-neg border-neg/20",
+            tag.tone === "champagne" &&
+              "bg-champagne/10 text-champagne border-champagne/20",
+            tag.tone === "neutral" &&
+              "bg-surface-2 text-soft border-border",
+          )}
+        >
+          {tag.label}
+        </span>
+      ))}
     </div>
   );
 }
