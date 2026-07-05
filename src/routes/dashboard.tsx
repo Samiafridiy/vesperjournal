@@ -21,6 +21,7 @@ import { DailyMissions } from "@/components/coach/DailyMissions";
 import { WinLossSplit } from "@/components/overview/WinLossSplit";
 import { RecentTrades } from "@/components/overview/RecentTrades";
 import { AICoachLastSession } from "@/components/coach/AICoachLastSession";
+import { TodaySessionReview } from "@/components/overview/TodaySessionReview";
 import { TraderIdentity } from "@/components/coach/TraderIdentity";
 import { StreaksCard } from "@/components/coach/StreaksCard";
 import { RuleViolationsBadge } from "@/components/rules/RuleViolationsBadge";
@@ -197,6 +198,11 @@ function Dashboard() {
           {/* AI Coach — Last session */}
           <section className="mb-8">
             <AICoachLastSession trades={trades} />
+          </section>
+
+          {/* Today's Session Review */}
+          <section className="mb-8">
+            <TodaySessionReview trades={trades} />
           </section>
 
           {/* Rule Violations + Weekly Review */}
