@@ -180,6 +180,10 @@ function Dashboard() {
 
           {/* BEHAVIOR */}
           <section className="mb-8">
+            <MonthlyPnlCalendar trades={trades} />
+          </section>
+
+          <section className="mb-8">
             <div className="flex items-center gap-2 mb-4">
               <span className="size-2 bg-champagne rounded-full glow-champagne" />
               <span className="text-[11px] uppercase tracking-[0.18em] text-soft font-medium">
