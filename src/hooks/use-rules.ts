@@ -28,7 +28,7 @@ export function useRules() {
   useEffect(() => {
     if (!user) return;
     const ch = supabase
-      .channel(`rules-${user.id}`)
+      .channel(`rules-${user.id}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "trading_rules", filter: `user_id=eq.${user.id}` },
