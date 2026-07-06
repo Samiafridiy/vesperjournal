@@ -57,6 +57,7 @@ import { PairSelector, pushRecentPair } from "@/components/PairSelector";
 export const Route = createFileRoute("/trade/new")({
   validateSearch: z.object({
     id: z.string().optional(),
+    date: z.string().optional(),
   }),
   head: () => ({
     meta: [

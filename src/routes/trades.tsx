@@ -19,8 +19,12 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
 import { autoTagsFor, type AutoTag } from "@/lib/auto-tags";
+import { z } from "zod";
 
 export const Route = createFileRoute("/trades")({
+  validateSearch: z.object({
+    date: z.string().optional(),
+  }),
   head: () => ({
     meta: [
       { title: "Trade history — Vesper Journal" },
