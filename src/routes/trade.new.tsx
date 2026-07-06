@@ -57,6 +57,7 @@ import { PairSelector, pushRecentPair } from "@/components/PairSelector";
 export const Route = createFileRoute("/trade/new")({
   validateSearch: z.object({
     id: z.string().optional(),
+    date: z.string().optional(),
   }),
   head: () => ({
     meta: [
@@ -77,6 +78,7 @@ function NewTrade() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { id: editId } = Route.useSearch();
+  const { date: prefillDate } = Route.useSearch();
   const isEdit = Boolean(editId);
   const [submitting, setSubmitting] = useState(false);
   const [savedFlash, setSavedFlash] = useState(false);
@@ -90,7 +92,12 @@ function NewTrade() {
   const [stop, setStop] = useState("");
   const [tp, setTp] = useState("");
   const [close, setClose] = useState("");
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 16));
+  const [date, setDate] = useState(() => {
+    if (prefillDate && /^\d{4}-\d{2}-\d{2}$/.test(prefillDate)) {
+      return `${prefillDate}T09:00`;
+    }
+    return new Date().toISOString().slice(0, 16);
+  });
   const [session, setSession] = useState<string | undefined>("London");
   const [strategy, setStrategy] = useState("");
   const [notes, setNotes] = useState("");

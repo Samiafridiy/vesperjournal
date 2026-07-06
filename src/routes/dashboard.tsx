@@ -26,6 +26,7 @@ import { TraderIdentity } from "@/components/coach/TraderIdentity";
 import { StreaksCard } from "@/components/coach/StreaksCard";
 import { RuleViolationsBadge } from "@/components/rules/RuleViolationsBadge";
 import { WeeklyReviewCard } from "@/components/weekly/WeeklyReviewCard";
+import { MonthlyPnlCalendar } from "@/components/overview/MonthlyPnlCalendar";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -175,6 +176,11 @@ function Dashboard() {
               sub="Avg per trade"
             />
             </div>
+          </section>
+
+          {/* MONTHLY P&L CALENDAR */}
+          <section className="mb-8">
+            <MonthlyPnlCalendar trades={trades} />
           </section>
 
           {/* BEHAVIOR */}
