@@ -45,6 +45,7 @@ const ALL = "__all";
 function TradesList() {
   const { trades, loading } = useTrades();
   const navigate = useNavigate();
+  const { date: dateF } = Route.useSearch();
   const [q, setQ] = useState("");
   const [pairF, setPairF] = useState<string>(ALL);
   const [sessionF, setSessionF] = useState<string>(ALL);
@@ -79,10 +80,17 @@ function TradesList() {
       if (pairF !== ALL && t.pair !== pairF) return false;
       if (sessionF !== ALL && t.session !== sessionF) return false;
       if (resultF !== ALL && t.result !== resultF) return false;
+      if (dateF) {
+        const d = new Date(t.trade_date);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        if (`${y}-${m}-${day}` !== dateF) return false;
+      }
       if (q && !`${t.pair} ${t.strategy ?? ""} ${t.notes ?? ""}`.toLowerCase().includes(q.toLowerCase())) return false;
       return true;
     });
-  }, [trades, q, pairF, sessionF, resultF]);
+  }, [trades, q, pairF, sessionF, resultF, dateF]);
 
   async function deleteTrade(id: string) {
     const { error } = await supabase.from("trades").delete().eq("id", id);

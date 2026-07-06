@@ -26,6 +26,7 @@ import { TraderIdentity } from "@/components/coach/TraderIdentity";
 import { StreaksCard } from "@/components/coach/StreaksCard";
 import { RuleViolationsBadge } from "@/components/rules/RuleViolationsBadge";
 import { WeeklyReviewCard } from "@/components/weekly/WeeklyReviewCard";
+import { MonthlyPnlCalendar } from "@/components/overview/MonthlyPnlCalendar";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
