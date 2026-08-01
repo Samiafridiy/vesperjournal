@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 
 function parseAssistant(content: string): {
   body: string;
+  bodyAfter: string;
   bars: { label: string; value: number }[] | null;
   followups: string[];
 } {
@@ -29,7 +30,8 @@ function parseAssistant(content: string): {
     body = body.replace(fu[0], "").trim();
   }
   let bars: { label: string; value: number }[] | null = null;
-  const bm = body.match(/```bars\s*\n([\s\S]*?)```/i);
+  let bodyAfter = "";
+  const bm = body.match(/```bars[^\n]*\n([\s\S]*?)```/i);
   if (bm) {
     const rows = bm[1]
       .split("\n")
@@ -37,13 +39,19 @@ function parseAssistant(content: string): {
       .filter(Boolean)
       .map((l) => {
         const [label, val] = l.split("|");
-        return { label: (label ?? "").trim(), value: Number((val ?? "0").trim()) };
+        return {
+          label: (label ?? "").trim(),
+          value: Number((val ?? "0").trim().replace(/[$,%\s+]/g, "").replace(/[−–]/g, "-")),
+        };
       })
       .filter((r) => r.label && Number.isFinite(r.value));
-    if (rows.length) bars = rows;
-    body = body.replace(bm[0], "").trim();
+    // Always render highest → lowest for easy scanning.
+    if (rows.length >= 2) bars = rows.sort((a, b) => b.value - a.value);
+    const idx = body.indexOf(bm[0]);
+    bodyAfter = body.slice(idx + bm[0].length).trim();
+    body = body.slice(0, idx).trim();
   }
-  return { body, bars, followups };
+  return { body, bodyAfter, bars, followups };
 }
 
 function formatBarValue(v: number, allInts: boolean) {
