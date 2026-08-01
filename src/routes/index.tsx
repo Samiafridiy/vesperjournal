@@ -1041,6 +1041,195 @@ function TraderTypeCard({
   );
 }
 
-// Suppress unused-import warnings for icons reserved for future use
-void Eye;
-void MessageSquare;
+// ---------- Mockup: Session Review ----------
+function SessionReviewMockup() {
+  const rules = [
+    { l: "Max 3 trades per day", ok: true },
+    { l: "Stop loss on every entry", ok: true },
+    { l: "No trade within 20m of a loss", ok: false },
+    { l: "London session only", ok: true },
+  ];
+  return (
+    <div className="surface-card-elevated top-accent p-5 md:p-6 relative overflow-hidden">
+      <div className="absolute -top-20 -right-20 size-48 bg-champagne/[0.08] rounded-full blur-3xl pointer-events-none" />
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-2">
+          <Eye className="size-4 text-champagne" />
+          <span className="text-sm font-medium">Today's session review</span>
+        </div>
+        <span className="text-[10px] uppercase tracking-[0.18em] text-faint">live</span>
+      </div>
+      <div className="flex items-center gap-5">
+        <div className="size-24 rounded-2xl border border-champagne/30 bg-champagne/10 flex flex-col items-center justify-center shrink-0">
+          <div className="text-4xl font-semibold leading-none tabular text-champagne">B</div>
+          <div className="text-[10px] uppercase tracking-[0.18em] text-faint mt-1">85/100</div>
+        </div>
+        <div className="grid grid-cols-3 gap-2 flex-1">
+          {[
+            { l: "Trades", v: "3", tone: "" },
+            { l: "Win rate", v: "67%", tone: "" },
+            { l: "Net P&L", v: "+$240", tone: "pos" },
+          ].map((s) => (
+            <div key={s.l} className="rounded-lg border border-border bg-surface px-2.5 py-2">
+              <div className="text-[9px] uppercase tracking-[0.18em] text-faint">{s.l}</div>
+              <div className={`tabular text-base mt-1 ${s.tone === "pos" ? "text-pos" : "text-foreground"}`}>
+                {s.v}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="mt-6">
+        <div className="text-[10px] uppercase tracking-[0.18em] text-faint mb-2.5">Rule adherence</div>
+        <ul className="space-y-2 text-xs">
+          {rules.map((r) => (
+            <li key={r.l} className="flex items-center gap-2.5">
+              <span
+                className={`size-5 rounded-md flex items-center justify-center shrink-0 border ${
+                  r.ok ? "bg-pos/15 border-pos/30" : "bg-neg/15 border-neg/30"
+                }`}
+              >
+                {r.ok ? <Check className="size-3 text-pos" /> : <AlertTriangle className="size-3 text-neg" />}
+              </span>
+              <span className={r.ok ? "text-soft" : "text-foreground"}>{r.l}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="mt-4 rounded-lg border border-champagne/25 bg-champagne/10 px-3 py-2 text-xs text-champagne">
+        Biggest issue today: trading too soon after a loss
+      </div>
+    </div>
+  );
+}
+
+// ---------- Mockup: Identity + Streaks ----------
+function IdentityStreaksMockup() {
+  const streaks = [
+    { l: "Discipline days", v: "6", tone: "pos" },
+    { l: "Clean sessions", v: "4", tone: "pos" },
+    { l: "SL on every trade", v: "9", tone: "pos" },
+    { l: "No revenge trades", v: "2", tone: "champagne" },
+  ];
+  return (
+    <div className="surface-card-elevated top-accent p-5 md:p-6 relative overflow-hidden">
+      <div className="absolute -top-20 -left-20 size-48 bg-pos/[0.08] rounded-full blur-3xl pointer-events-none" />
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Target className="size-4 text-champagne" />
+          <span className="text-sm font-medium">This week's identity</span>
+        </div>
+        <span className="text-[10px] uppercase tracking-[0.18em] text-faint">last 7d</span>
+      </div>
+      <div className="rounded-lg border border-pos/30 bg-pos/10 p-4">
+        <div className="text-2xl font-semibold tracking-tight text-pos">Building</div>
+        <p className="text-xs text-soft mt-1.5 leading-relaxed">
+          You followed your plan on <span className="tabular text-foreground">11 of 14 trades</span> and cut your
+          average loss by <span className="tabular text-foreground">18%</span>. One more clean week and you're Disciplined.
+        </p>
+      </div>
+      <div className="text-[10px] uppercase tracking-[0.18em] text-faint mt-5 mb-2.5">Streaks</div>
+      <div className="grid grid-cols-2 gap-2.5">
+        {streaks.map((s) => (
+          <div key={s.l} className="rounded-lg border border-border bg-surface px-3 py-2.5">
+            <div className="flex items-baseline gap-1.5">
+              <span className={`tabular text-2xl ${s.tone === "pos" ? "text-pos" : "text-champagne"}`}>{s.v}</span>
+              <span className="text-[10px] text-faint">days</span>
+              <Flame className={`size-3 ml-auto ${s.tone === "pos" ? "text-pos" : "text-champagne"}`} />
+            </div>
+            <div className="text-[11px] text-soft mt-1">{s.l}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------- Mockup: Rule Book ----------
+function RuleBookMockup() {
+  const rules = [
+    { l: "Max 3 trades per day", n: 1 },
+    { l: "Never trade without a stop loss", n: 0 },
+    { l: "No trades after 2 losses", n: 2 },
+    { l: "Risk max 1% per trade", n: 0 },
+  ];
+  return (
+    <div className="surface-card-elevated top-accent p-5 md:p-6 relative overflow-hidden">
+      <div className="absolute -top-20 -right-20 size-48 bg-champagne/[0.08] rounded-full blur-3xl pointer-events-none" />
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Shield className="size-4 text-champagne" />
+          <span className="text-sm font-medium">Rule Book</span>
+        </div>
+        <span className="text-[10px] uppercase tracking-[0.18em] text-faint">4 active</span>
+      </div>
+      <div className="rounded-lg bg-surface border border-border px-3 py-2 text-[11px] text-faint mb-3">
+        Write a rule in plain English…
+      </div>
+      <div className="space-y-2">
+        {rules.map((r) => (
+          <div
+            key={r.l}
+            className="flex items-center gap-2.5 rounded-lg border border-border bg-surface px-3 py-2.5"
+          >
+            <span className="size-1.5 rounded-full bg-champagne shrink-0" />
+            <span className="text-xs text-foreground truncate">{r.l}</span>
+            <span
+              className={`ml-auto text-[10px] px-2 py-0.5 rounded-full border shrink-0 ${
+                r.n === 0
+                  ? "border-pos/30 bg-pos/10 text-pos"
+                  : "border-neg/30 bg-neg/10 text-neg"
+              }`}
+            >
+              {r.n === 0 ? "clean" : `${r.n} broken`}
+            </span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
+        <span className="text-[10px] uppercase tracking-[0.18em] text-faint">Cost of broken rules</span>
+        <span className="tabular text-neg text-lg">−$510</span>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Mockup: Weekly Review ----------
+function WeeklyReviewMockup() {
+  return (
+    <div className="surface-card-elevated top-accent p-5 md:p-6 relative overflow-hidden">
+      <div className="absolute -top-20 -left-20 size-48 bg-champagne/[0.08] rounded-full blur-3xl pointer-events-none" />
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <MessageSquare className="size-4 text-champagne" />
+          <span className="text-sm font-medium">Weekly review</span>
+        </div>
+        <span className="text-[10px] uppercase tracking-[0.18em] text-faint">week of Mar 4</span>
+      </div>
+      <div className="space-y-2.5">
+        {[
+          { q: "What went well this week?", a: "London EURUSD continuations — 4 of 5 winners." },
+          { q: "What cost you the most?", a: "Two revenge trades on Wednesday, −$260." },
+          { q: "What changes next week?", a: "Hard stop after two losses. No NY session." },
+        ].map((r) => (
+          <div key={r.q} className="rounded-lg border border-border bg-surface px-3 py-2.5">
+            <div className="text-[10px] uppercase tracking-[0.18em] text-faint">{r.q}</div>
+            <div className="text-xs text-soft mt-1 leading-relaxed">{r.a}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-5">
+        <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.18em] text-faint mb-2">
+          <span>Discipline rating</span>
+          <span className="tabular text-champagne text-sm normal-case tracking-normal">7 / 10</span>
+        </div>
+        <div className="h-1.5 rounded-full bg-surface overflow-hidden">
+          <div className="h-full rounded-full bg-champagne" style={{ width: "70%" }} />
+        </div>
+        <div className="mt-3 flex items-center gap-2 text-[11px] text-soft">
+          <TrendingUp className="size-3 text-pos" /> Up from 5 last week
+        </div>
+      </div>
+    </div>
+  );
+}
