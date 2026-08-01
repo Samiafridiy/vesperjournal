@@ -311,6 +311,32 @@ function Landing() {
           description="Set risk presets once. Vesper auto-calculates your position size, max loss, and take profit on every trade. Set daily limits and get alerts before you overtrade."
           mockup={<RiskEngineMockup />}
         />
+        <ZigzagFeature
+          index={8}
+          reverse
+          title="Every session gets a grade. No hiding."
+          description="At the end of each day Vesper scores your session out of 100, converts it to a letter grade, and checks every rule you wrote against every trade you took. Trades, win rate, net P&L and your biggest issue — one card, no excuses."
+          mockup={<SessionReviewMockup />}
+        />
+        <ZigzagFeature
+          index={9}
+          title="Who were you as a trader this week?"
+          description="Vesper reads your last 7 days and names your pattern — Disciplined, Building, Over-trader, Revenge, Emotional. Then it tracks the streaks that actually matter: discipline days, clean sessions, stop loss on every trade, and days without a revenge trade."
+          mockup={<IdentityStreaksMockup />}
+        />
+        <ZigzagFeature
+          index={10}
+          reverse
+          title="Write your rules. Vesper enforces them."
+          description="Type your trading rules in plain English — max 3 trades a day, no trading after two losses, always use a stop. Vesper parses them, checks every trade automatically, and shows you each violation and what it cost you."
+          mockup={<RuleBookMockup />}
+        />
+        <ZigzagFeature
+          index={11}
+          title="Close every week with a real review."
+          description="Five focused questions and a 1–10 discipline rating, saved week after week. Your last score follows you onto the dashboard, so you always know whether you're actually improving or just trading more."
+          mockup={<WeeklyReviewMockup />}
+        />
       </section>
 
       {/* BUILT FOR EVERY TRADER */}
@@ -373,8 +399,9 @@ function Landing() {
                 "AI Trader Score & live coach",
                 "Mistake alerts & psychology tracking",
                 "Risk Engine & funded account rules",
-                "Deep analytics & calendar heatmap",
-                "MT4 / MT5 auto-journaling",
+                "Deep analytics & monthly P&L calendar",
+                "Rule Book, Session Review & Weekly Review",
+                "MT4 / MT5 statement & CSV import",
                 "Encrypted, row-level security",
               ].map((f) => (
                 <li key={f} className="flex items-center gap-2.5">
