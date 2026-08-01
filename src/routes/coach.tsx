@@ -367,7 +367,13 @@ function CoachPage() {
                   {m.role === "assistant" && parsed ? (
                     <div className="prose prose-sm prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
                       <ReactMarkdown>{parsed.body}</ReactMarkdown>
-                      {parsed.bars && <InlineBars data={parsed.bars} bodyText={parsed.body} />}
+                      {parsed.bars && (
+                        <InlineBars
+                          data={parsed.bars}
+                          bodyText={parsed.body + " " + parsed.bodyAfter}
+                        />
+                      )}
+                      {parsed.bodyAfter && <ReactMarkdown>{parsed.bodyAfter}</ReactMarkdown>}
                       {isLastAssistant && parsed.followups.length > 0 && (
                         <div className="not-prose mt-3 flex flex-wrap gap-2">
                           {parsed.followups.map((q) => (
