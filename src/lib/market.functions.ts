@@ -260,6 +260,15 @@ const FF_FEEDS = {
   nextweek: "https://nfs.faireconomy.media/ff_calendar_nextweek.json",
 };
 
+/** Stable, user-independent key for an economic event (used as cache key). */
+function eventKey(country: string, title: string, date: string) {
+  const iso = (() => {
+    const d = new Date(date);
+    return isNaN(d.getTime()) ? String(date) : d.toISOString();
+  })();
+  return `${country}|${title}|${iso}`.slice(0, 300);
+}
+
 export const getEconomicCalendar = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
