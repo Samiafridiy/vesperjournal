@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      calendar_event_analysis: {
+        Row: {
+          above: string
+          actual: string
+          below: string
+          country: string
+          created_at: string
+          event_date: string
+          event_key: string
+          forecast: string
+          impact: string
+          long_term: string
+          on_forecast: string
+          previous: string
+          short_term: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          above?: string
+          actual?: string
+          below?: string
+          country: string
+          created_at?: string
+          event_date: string
+          event_key: string
+          forecast?: string
+          impact?: string
+          long_term?: string
+          on_forecast?: string
+          previous?: string
+          short_term?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          above?: string
+          actual?: string
+          below?: string
+          country?: string
+          created_at?: string
+          event_date?: string
+          event_key?: string
+          forecast?: string
+          impact?: string
+          long_term?: string
+          on_forecast?: string
+          previous?: string
+          short_term?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coach_conversations: {
         Row: {
           created_at: string

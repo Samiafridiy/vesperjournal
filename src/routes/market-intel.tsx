@@ -22,7 +22,8 @@ import {
   getMarketNews,
   analyzeHeadlines,
   getEconomicCalendar,
-  analyzeCalendar,
+  getCachedCalendarAnalysis,
+  ensureCalendarAnalysis,
   type NewsItem,
   type NewsAnalysis,
   type CalendarEvent,
@@ -123,11 +124,13 @@ function MarketIntelPage() {
   const [calLoading, setCalLoading] = useState(true);
   const [calError, setCalError] = useState<string | null>(null);
   const [calExpanded, setCalExpanded] = useState<Record<string, boolean>>({});
+  const [calPending, setCalPending] = useState<Record<string, boolean>>({});
 
   const fetchNews = useServerFn(getMarketNews);
   const fetchAnalysis = useServerFn(analyzeHeadlines);
   const fetchCalendar = useServerFn(getEconomicCalendar);
-  const fetchCalAnalysis = useServerFn(analyzeCalendar);
+  const fetchCachedAnalysis = useServerFn(getCachedCalendarAnalysis);
+  const ensureAnalysis = useServerFn(ensureCalendarAnalysis);
   const { trades } = useTrades();
 
   const load = useCallback(
@@ -205,8 +208,8 @@ function MarketIntelPage() {
       setCalEvents(evs);
       setCalLoading(false);
 
-      // Analyze top 12 by impact + soonest
-      const top = [...evs]
+      // Rank by impact + soonest
+      const ranked = [...evs]
         .filter((e) => e.impact !== "HOLIDAY")
         .sort((a, b) => {
           const rk = (i: CalendarEvent["impact"]) =>
@@ -214,25 +217,26 @@ function MarketIntelPage() {
           const d = rk(a.impact) - rk(b.impact);
           if (d !== 0) return d;
           return new Date(a.date).getTime() - new Date(b.date).getTime();
-        })
-        .slice(0, 12);
+        });
+      const top = ranked.slice(0, 24);
       if (top.length === 0) return;
-      const a = await fetchCalAnalysis({
-        data: {
-          events: top.map((e) => ({
-            id: e.id,
-            title: e.title,
-            country: e.country,
-            impact: e.impact,
-            forecast: e.forecast,
-            previous: e.previous,
-          })),
-        },
-      });
-      if (a.results?.length) {
+
+      const merge = (
+        results: Array<{
+          id: string;
+          actual: string;
+          shortTerm: string;
+          longTerm: string;
+          above: string;
+          on: string;
+          below: string;
+        }>,
+      ) => {
+        if (!results.length) return;
         setCalAnalysis((prev) => {
           const next = { ...prev };
-          for (const r of a.results) {
+          for (const r of results) {
+            if (!r.shortTerm) continue;
             next[r.id] = {
               shortTerm: r.shortTerm,
               longTerm: r.longTerm,
@@ -243,13 +247,74 @@ function MarketIntelPage() {
           }
           return next;
         });
+      };
+
+      // 1. Instantly show whatever is already cached in the database.
+      const cachedIds = new Set<string>();
+      try {
+        const cached = await fetchCachedAnalysis({
+          data: { ids: top.map((e) => e.id) },
+        });
+        for (const r of cached.results ?? []) {
+          // Stale once the real "actual" lands — will be regenerated below.
+          const ev = top.find((e) => e.id === r.id);
+          if (ev && (ev.actual || "") !== (r.actual || "")) continue;
+          cachedIds.add(r.id);
+        }
+        merge((cached.results ?? []).filter((r) => cachedIds.has(r.id)));
+      } catch {
+        /* cache read is best-effort */
+      }
+
+      // 2. Generate only what's missing / outdated, in the background.
+      const missing = top.filter((e) => !cachedIds.has(e.id)).slice(0, 8);
+      if (missing.length === 0) return;
+
+      // 3. Skeleton timeout — after 15s show "Analysis pending" instead of a spinner.
+      const timeout = setTimeout(() => {
+        setCalPending((p) => {
+          const next = { ...p };
+          for (const e of missing) next[e.id] = true;
+          return next;
+        });
+      }, 15_000);
+
+      try {
+        const gen = await ensureAnalysis({
+          data: {
+            events: missing.map((e) => ({
+              id: e.id,
+              title: e.title,
+              country: e.country,
+              date: e.date,
+              impact: e.impact,
+              forecast: e.forecast,
+              previous: e.previous,
+              actual: e.actual,
+            })),
+          },
+        });
+        merge(gen.results ?? []);
+        setCalPending((p) => {
+          const next = { ...p };
+          for (const id of gen.pending ?? []) next[id] = true;
+          for (const r of gen.results ?? []) delete next[r.id];
+          return next;
+        });
+      } catch {
+        setCalPending((p) => {
+          const next = { ...p };
+          for (const e of missing) next[e.id] = true;
+          return next;
+        });
+      } finally {
+        clearTimeout(timeout);
       }
     },
-    [fetchCalendar, fetchCalAnalysis],
+    [fetchCalendar, fetchCachedAnalysis, ensureAnalysis],
   );
 
   useEffect(() => {
-    setCalAnalysis({});
     loadCalendar(range);
     // Cache calendar — refresh once per hour to avoid rate limits
     const t = setInterval(() => loadCalendar(range), 60 * 60_000);
@@ -537,6 +602,7 @@ function MarketIntelPage() {
                 ev={ev}
                 index={i}
                 analysis={calAnalysis[ev.id]}
+                analysisPending={!!calPending[ev.id]}
                 expanded={!!calExpanded[ev.id]}
                 onToggle={() =>
                   setCalExpanded((p) => ({ ...p, [ev.id]: !p[ev.id] }))
@@ -884,12 +950,14 @@ function EventCard({
   ev,
   index,
   analysis,
+  analysisPending,
   expanded,
   onToggle,
 }: {
   ev: CalendarEvent;
   index: number;
   analysis?: CalendarAnalysis;
+  analysisPending?: boolean;
   expanded: boolean;
   onToggle: () => void;
 }) {
@@ -1026,7 +1094,8 @@ function EventCard({
             className="relative mt-3 inline-flex items-center gap-1 text-[11px] text-soft hover:text-champagne"
           >
             {expanded ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
-            AI analysis {analysis ? "" : "(loading…)"}
+            AI analysis{" "}
+            {analysis ? "" : analysisPending ? "(pending)" : "(loading…)"}
           </button>
           <AnimatePresence initial={false}>
             {expanded && (
@@ -1037,14 +1106,24 @@ function EventCard({
                 className="overflow-hidden"
               >
                 <div className="mt-3 grid gap-3 text-sm">
-                  <AnalysisRow
-                    label="⚡ Short Term (1–4 hours)"
-                    body={analysis?.shortTerm || "Analysis pending…"}
-                  />
-                  <AnalysisRow
-                    label="📅 Long Term (1–7 days)"
-                    body={analysis?.longTerm || "Analysis pending…"}
-                  />
+                  {!analysis && !analysisPending ? (
+                    <div className="grid gap-2">
+                      <div className="h-3 w-1/3 rounded bg-muted/40 animate-pulse" />
+                      <div className="h-3 w-full rounded bg-muted/30 animate-pulse" />
+                      <div className="h-3 w-4/5 rounded bg-muted/30 animate-pulse" />
+                    </div>
+                  ) : (
+                    <>
+                      <AnalysisRow
+                        label="⚡ Short Term (1–4 hours)"
+                        body={analysis?.shortTerm || "Analysis pending"}
+                      />
+                      <AnalysisRow
+                        label="📅 Long Term (1–7 days)"
+                        body={analysis?.longTerm || "Analysis pending"}
+                      />
+                    </>
+                  )}
                 </div>
               </motion.div>
             )}

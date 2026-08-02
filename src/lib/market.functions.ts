@@ -260,6 +260,15 @@ const FF_FEEDS = {
   nextweek: "https://nfs.faireconomy.media/ff_calendar_nextweek.json",
 };
 
+/** Stable, user-independent key for an economic event (used as cache key). */
+function eventKey(country: string, title: string, date: string) {
+  const iso = (() => {
+    const d = new Date(date);
+    return isNaN(d.getTime()) ? String(date) : d.toISOString();
+  })();
+  return `${country}|${title}|${iso}`.slice(0, 300);
+}
+
 export const getEconomicCalendar = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
@@ -286,8 +295,8 @@ export const getEconomicCalendar = createServerFn({ method: "POST" })
         actual?: string;
       }>;
 
-      const all: CalendarEvent[] = json.map((e, i) => ({
-        id: `${e.country}-${e.title}-${e.date}-${i}`,
+      const all: CalendarEvent[] = json.map((e) => ({
+        id: eventKey(e.country, e.title, e.date),
         title: e.title,
         country: e.country,
         date: new Date(e.date).toISOString(),
@@ -460,5 +469,227 @@ export const analyzeCalendar = createServerFn({ method: "POST" })
     } catch (e) {
       console.error("analyzeCalendar error", e);
       return { results: [], error: "Network error reaching AI." };
+    }
+  });
+/* -------------------------------------------------------------------------- */
+/*  Cached calendar analysis (generated once per event, shared by all users)  */
+/* -------------------------------------------------------------------------- */
+
+type CachedAnalysis = CalendarAnalysis & { id: string; actual: string };
+
+const CachedInput = z.object({
+  events: z
+    .array(
+      z.object({
+        id: z.string().min(1).max(300),
+        title: z.string().default(""),
+        country: z.string().default(""),
+        date: z.string().default(""),
+        impact: z.string().default("LOW"),
+        forecast: z.string().optional().default(""),
+        previous: z.string().optional().default(""),
+        actual: z.string().optional().default(""),
+      }),
+    )
+    .min(1)
+    .max(30),
+});
+
+/** Read-only: instantly return whatever analyses are already cached. */
+export const getCachedCalendarAnalysis = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z.object({ ids: z.array(z.string()).min(1).max(60) }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: rows, error } = await supabaseAdmin
+        .from("calendar_event_analysis")
+        .select("event_key, actual, short_term, long_term, above, on_forecast, below")
+        .in("event_key", data.ids);
+      if (error) throw error;
+      const results: CachedAnalysis[] = (rows ?? []).map((r) => ({
+        id: r.event_key,
+        actual: r.actual ?? "",
+        shortTerm: r.short_term ?? "",
+        longTerm: r.long_term ?? "",
+        above: r.above ?? "",
+        on: r.on_forecast ?? "",
+        below: r.below ?? "",
+      }));
+      return { results, error: null as string | null };
+    } catch (e) {
+      console.error("getCachedCalendarAnalysis error", e);
+      return { results: [] as CachedAnalysis[], error: null as string | null };
+    }
+  });
+
+/**
+ * Generate analysis only for events with no cached row, or whose "actual"
+ * value changed after release. Persists results so nobody pays for them twice.
+ */
+export const ensureCalendarAnalysis = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => CachedInput.parse(input))
+  .handler(async ({ data }) => {
+    const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const ids = data.events.map((e) => e.id);
+      const { data: rows } = await supabaseAdmin
+        .from("calendar_event_analysis")
+        .select("event_key, actual, short_term, long_term, above, on_forecast, below")
+        .in("event_key", ids);
+
+      const byKey = new Map((rows ?? []).map((r) => [r.event_key, r]));
+      const cached: CachedAnalysis[] = [];
+      const stale: typeof data.events = [];
+
+      for (const ev of data.events) {
+        const row = byKey.get(ev.id);
+        const fresh =
+          row && (row.actual ?? "") === (ev.actual ?? "") && !!row.short_term;
+        if (fresh && row) {
+          cached.push({
+            id: row.event_key,
+            actual: row.actual ?? "",
+            shortTerm: row.short_term ?? "",
+            longTerm: row.long_term ?? "",
+            above: row.above ?? "",
+            on: row.on_forecast ?? "",
+            below: row.below ?? "",
+          });
+        } else {
+          stale.push(ev);
+        }
+      }
+
+      // Cap generation work per request so the call stays fast.
+      const todo = stale.slice(0, 8);
+      if (todo.length === 0 || !LOVABLE_API_KEY) {
+        return { results: cached, pending: stale.map((e) => e.id), error: null as string | null };
+      }
+
+      const systemPrompt =
+        "You are a professional forex market analyst. For each economic event, provide: 1) Short term price impact in next 1-4 hours if result beats forecast, meets forecast, or misses forecast — be specific about pip moves and direction. 2) Longer term impact over next 1-7 days on related currency pairs and assets. Also state the directional outcome for the affected currency under three scenarios: above forecast, on forecast, below forecast (each one short phrase like 'Very Bullish USD', 'Neutral', 'Bearish USD'). Keep each answer to 2 sentences maximum. Be direct and specific with pair names.";
+
+      const userPrompt =
+        "Analyze these economic events:\n" +
+        todo
+          .map(
+            (e, i) =>
+              `${i + 1}. [${e.country}] ${e.title} — impact ${e.impact}, forecast ${e.forecast || "n/a"}, previous ${e.previous || "n/a"}, actual ${e.actual || "not released"}`,
+          )
+          .join("\n");
+
+      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        signal: AbortSignal.timeout(45_000),
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          tools: [
+            {
+              type: "function",
+              function: {
+                name: "report_calendar",
+                description: "Return structured analysis for each economic event.",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    results: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          shortTerm: { type: "string" },
+                          longTerm: { type: "string" },
+                          above: { type: "string" },
+                          on: { type: "string" },
+                          below: { type: "string" },
+                        },
+                        required: ["shortTerm", "longTerm", "above", "on", "below"],
+                        additionalProperties: false,
+                      },
+                    },
+                  },
+                  required: ["results"],
+                  additionalProperties: false,
+                },
+              },
+            },
+          ],
+          tool_choice: { type: "function", function: { name: "report_calendar" } },
+        }),
+      });
+
+      if (!res.ok) {
+        console.error("ensureCalendarAnalysis gateway", res.status, await res.text());
+        return { results: cached, pending: stale.map((e) => e.id), error: null as string | null };
+      }
+
+      const json = await res.json();
+      const args = json?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+      const raw: any[] = args ? (JSON.parse(args).results ?? []) : [];
+
+      const generated: CachedAnalysis[] = [];
+      const upserts = todo.map((e, i) => {
+        const r = raw[i] ?? {};
+        const item = {
+          event_key: e.id,
+          title: e.title,
+          country: e.country,
+          event_date: e.date ? new Date(e.date).toISOString() : new Date().toISOString(),
+          impact: e.impact,
+          forecast: e.forecast ?? "",
+          previous: e.previous ?? "",
+          actual: e.actual ?? "",
+          short_term: String(r.shortTerm ?? ""),
+          long_term: String(r.longTerm ?? ""),
+          above: String(r.above ?? ""),
+          on_forecast: String(r.on ?? ""),
+          below: String(r.below ?? ""),
+        };
+        if (item.short_term) {
+          generated.push({
+            id: e.id,
+            actual: item.actual,
+            shortTerm: item.short_term,
+            longTerm: item.long_term,
+            above: item.above,
+            on: item.on_forecast,
+            below: item.below,
+          });
+        }
+        return item;
+      });
+
+      const persist = upserts.filter((u) => u.short_term);
+      if (persist.length) {
+        const { error: upErr } = await supabaseAdmin
+          .from("calendar_event_analysis")
+          .upsert(persist, { onConflict: "event_key" });
+        if (upErr) console.error("ensureCalendarAnalysis upsert", upErr);
+      }
+
+      const doneIds = new Set(generated.map((g) => g.id));
+      return {
+        results: [...cached, ...generated],
+        pending: stale.filter((e) => !doneIds.has(e.id)).map((e) => e.id),
+        error: null as string | null,
+      };
+    } catch (e) {
+      console.error("ensureCalendarAnalysis error", e);
+      return {
+        results: [] as CachedAnalysis[],
+        pending: data.events.map((e) => e.id),
+        error: null as string | null,
+      };
     }
   });
