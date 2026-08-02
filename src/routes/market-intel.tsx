@@ -602,6 +602,7 @@ function MarketIntelPage() {
                 ev={ev}
                 index={i}
                 analysis={calAnalysis[ev.id]}
+                analysisPending={!!calPending[ev.id]}
                 expanded={!!calExpanded[ev.id]}
                 onToggle={() =>
                   setCalExpanded((p) => ({ ...p, [ev.id]: !p[ev.id] }))
