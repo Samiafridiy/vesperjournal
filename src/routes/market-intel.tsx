@@ -884,12 +884,14 @@ function EventCard({
   ev,
   index,
   analysis,
+  analysisPending,
   expanded,
   onToggle,
 }: {
   ev: CalendarEvent;
   index: number;
   analysis?: CalendarAnalysis;
+  analysisPending?: boolean;
   expanded: boolean;
   onToggle: () => void;
 }) {
@@ -1026,7 +1028,8 @@ function EventCard({
             className="relative mt-3 inline-flex items-center gap-1 text-[11px] text-soft hover:text-champagne"
           >
             {expanded ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
-            AI analysis {analysis ? "" : "(loading…)"}
+            AI analysis{" "}
+            {analysis ? "" : analysisPending ? "(pending)" : "(loading…)"}
           </button>
           <AnimatePresence initial={false}>
             {expanded && (
@@ -1037,14 +1040,24 @@ function EventCard({
                 className="overflow-hidden"
               >
                 <div className="mt-3 grid gap-3 text-sm">
-                  <AnalysisRow
-                    label="⚡ Short Term (1–4 hours)"
-                    body={analysis?.shortTerm || "Analysis pending…"}
-                  />
-                  <AnalysisRow
-                    label="📅 Long Term (1–7 days)"
-                    body={analysis?.longTerm || "Analysis pending…"}
-                  />
+                  {!analysis && !analysisPending ? (
+                    <div className="grid gap-2">
+                      <div className="h-3 w-1/3 rounded bg-muted/40 animate-pulse" />
+                      <div className="h-3 w-full rounded bg-muted/30 animate-pulse" />
+                      <div className="h-3 w-4/5 rounded bg-muted/30 animate-pulse" />
+                    </div>
+                  ) : (
+                    <>
+                      <AnalysisRow
+                        label="⚡ Short Term (1–4 hours)"
+                        body={analysis?.shortTerm || "Analysis pending"}
+                      />
+                      <AnalysisRow
+                        label="📅 Long Term (1–7 days)"
+                        body={analysis?.longTerm || "Analysis pending"}
+                      />
+                    </>
+                  )}
                 </div>
               </motion.div>
             )}
