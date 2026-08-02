@@ -42,21 +42,21 @@ export function DayOfWeekHeatmap({ trades }: { trades: Trade[] }) {
             ? `color-mix(in oklab, var(--neg) ${20 + intensity * 70}%, transparent)`
             : "var(--surface-2)";
           return (
+          <div
+            key={d.name}
+            className="rounded-lg border border-border/50 p-3 flex flex-col items-center gap-1 min-h-[78px] justify-center"
+            style={{ background: bg }}
+          >
+            <div className="text-[11px] uppercase tracking-[0.14em] text-foreground/90">{d.name}</div>
             <div
-              key={d.name}
-              className="rounded-lg border border-border/50 p-3 flex flex-col items-center gap-1 min-h-[78px] justify-center"
-              style={{ background: bg }}
+              className={
+                "font-mono text-xs tabular-nums font-medium " +
+                (d.n === 0 ? "text-muted-foreground" : "text-foreground")
+              }
             >
-              <div className="text-[11px] uppercase tracking-[0.14em] text-soft">{d.name}</div>
-              <div
-                className={
-                  "font-mono text-xs tabular-nums " +
-                  (d.n === 0 ? "text-faint" : isPos ? "text-pos" : isNeg ? "text-neg" : "text-soft")
-                }
-              >
-                {d.n === 0 ? "—" : fmtMoney(d.pnl, { sign: true })}
-              </div>
+              {d.n === 0 ? "—" : fmtMoney(d.pnl, { sign: true })}
             </div>
+          </div>
           );
         })}
       </div>
