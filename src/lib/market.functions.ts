@@ -287,7 +287,7 @@ export const getEconomicCalendar = createServerFn({ method: "POST" })
       }>;
 
       const all: CalendarEvent[] = json.map((e, i) => ({
-        id: `${e.country}-${e.title}-${e.date}-${i}`,
+        id: eventKey(e.country, e.title, e.date),
         title: e.title,
         country: e.country,
         date: new Date(e.date).toISOString(),
