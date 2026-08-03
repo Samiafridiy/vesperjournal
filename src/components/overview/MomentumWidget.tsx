@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { Link } from "@tanstack/react-router";
-import { Flame, TrendingUp, ArrowRight } from "lucide-react";
+import { Flame, TrendingUp } from "lucide-react";
 import type { Trade } from "@/lib/trade-utils";
 import { fmtMoney } from "@/lib/trade-utils";
 import { computeStreaks } from "@/components/coach/StreaksCard";
@@ -109,13 +108,6 @@ export function MomentumWidget({ trades }: { trades: Trade[] }) {
           </svg>
         </div>
       )}
-
-      <Link
-        to="/analytics"
-        className="text-[11px] text-soft hover:text-champagne transition-colors inline-flex items-center gap-1 self-start"
-      >
-        View full analytics <ArrowRight className="size-3" />
-      </Link>
     </motion.div>
   );
 }
