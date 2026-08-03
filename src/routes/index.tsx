@@ -27,7 +27,7 @@ import {
   Quote,
   Twitter,
 } from "lucide-react";
-import { HeroChart } from "@/components/landing/HeroChart";
+import { HeroCalendarPreview } from "@/components/landing/HeroCalendarPreview";
 import { Reveal, StaggerGroup, StaggerItem } from "@/components/motion/Reveal";
 
 export const Route = createFileRoute("/")({
