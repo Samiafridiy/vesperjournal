@@ -8,7 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { BookOpen, Plus, Trash2, AlertTriangle, Check } from "lucide-react";
+import { BookOpen, Plus, Trash2, AlertTriangle, Check, ClipboardList } from "lucide-react";
+import { useTradingPlan } from "@/hooks/use-trading-plan";
 import { parseRule, ruleSummary } from "@/lib/rule-engine";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -42,6 +43,24 @@ function RuleBook() {
   const { rules, loading } = useRules();
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
+  const { plan, loading: planLoading, save: savePlan } = useTradingPlan();
+  const [planDraft, setPlanDraft] = useState("");
+  const [planTouched, setPlanTouched] = useState(false);
+  const [planSaving, setPlanSaving] = useState(false);
+
+  const planValue = planTouched ? planDraft : plan;
+
+  async function handleSavePlan() {
+    setPlanSaving(true);
+    const { error } = await savePlan(planValue);
+    setPlanSaving(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setPlanTouched(false);
+    toast.success("Trading plan saved");
+  }
 
   async function addRule(text: string) {
     if (!user) return;
@@ -89,6 +108,35 @@ function RuleBook() {
           show up in Analytics and on your Overview.
         </p>
       </header>
+
+      {/* Trading Plan */}
+      <section className="surface-card p-6 mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <ClipboardList className="size-4 text-champagne" />
+          <span className="text-[11px] uppercase tracking-[0.18em] text-faint font-medium">
+            Trading Plan
+          </span>
+        </div>
+        <p className="text-xs text-soft mb-3">
+          Write your plan, goals and focus areas. It shows on your Overview.
+        </p>
+        <Textarea
+          value={planValue}
+          onChange={(e) => { setPlanTouched(true); setPlanDraft(e.target.value); }}
+          placeholder={planLoading ? "Loading…" : "e.g. Focus on London session. Max 2 setups. Always set a stop loss."}
+          rows={7}
+          className="bg-surface-2 border-border resize-y"
+        />
+        <div className="flex justify-end mt-3">
+          <Button
+            onClick={handleSavePlan}
+            disabled={planSaving || planLoading}
+            className="bg-champagne text-primary-foreground hover:bg-champagne/90"
+          >
+            {planSaving ? "Saving…" : "Save plan"}
+          </Button>
+        </div>
+      </section>
 
       {/* Add new rule */}
       <section className="surface-card p-6 mb-6">
