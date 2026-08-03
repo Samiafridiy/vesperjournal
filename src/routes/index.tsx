@@ -27,7 +27,7 @@ import {
   Quote,
   Twitter,
 } from "lucide-react";
-import { HeroChart } from "@/components/landing/HeroChart";
+import { HeroCalendarPreview } from "@/components/landing/HeroCalendarPreview";
 import { Reveal, StaggerGroup, StaggerItem } from "@/components/motion/Reveal";
 
 export const Route = createFileRoute("/")({
@@ -211,9 +211,7 @@ function Landing() {
               <HeroStat label="Max Drawdown" value="-$180" tone="neg" />
             </div>
 
-            <div className="p-3">
-              <HeroChart />
-            </div>
+            <HeroCalendarPreview />
           </div>
         </motion.div>
       </motion.section>
