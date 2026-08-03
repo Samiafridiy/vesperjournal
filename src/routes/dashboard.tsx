@@ -3,7 +3,7 @@ import { RouteGate } from "@/components/RouteGate";
 import { AppShell } from "@/components/AppShell";
 import { StatCard } from "@/components/StatCard";
 import { useTrades } from "@/hooks/use-trades";
-import { computeStats, fmtMoney, fmtPct, generateInsights } from "@/lib/trade-utils";
+import { computeStats, fmtMoney, fmtPct } from "@/lib/trade-utils";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Sparkles } from "lucide-react";
 import { useMemo } from "react";
@@ -28,6 +28,7 @@ import { RuleViolationsBadge } from "@/components/rules/RuleViolationsBadge";
 import { WeeklyReviewCard } from "@/components/weekly/WeeklyReviewCard";
 import { MonthlyPnlCalendar } from "@/components/overview/MonthlyPnlCalendar";
 import { MomentumWidget } from "@/components/overview/MomentumWidget";
+import { TradingPlanCard } from "@/components/overview/TradingPlanCard";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -48,13 +49,11 @@ export const Route = createFileRoute("/dashboard")({
 function Dashboard() {
   const { trades, loading } = useTrades();
   const stats = useMemo(() => computeStats(trades), [trades]);
-  const insights = useMemo(() => generateInsights(trades), [trades]);
   const traderScore = useMemo(() => computeTraderScore(trades), [trades]);
   const mistakeAlerts = useMemo(() => detectMistakes(trades), [trades]);
   const discipline = useMemo(() => computeDisciplineScore(trades), [trades]);
 
   const empty = !loading && trades.length === 0;
-  const heroInsight = insights[0];
 
   return (
     <motion.div
@@ -98,35 +97,8 @@ function Dashboard() {
             <div className="lg:col-span-7">
               <TraderScoreCard score={traderScore} />
             </div>
-            <div className="lg:col-span-5 surface-card-elevated top-accent p-6 flex flex-col hover-glow hover-glow-champagne">
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="size-4 text-champagne" />
-                <span className="text-[11px] uppercase tracking-[0.18em] text-champagne font-medium">
-                  Today's insight
-                </span>
-              </div>
-              {heroInsight ? (
-                <div
-                  className={
-                    "rounded-lg p-4 border flex-1 " +
-                    (heroInsight.tone === "warn"
-                      ? "border-neg/20 bg-neg/10"
-                      : heroInsight.tone === "good"
-                      ? "border-pos/20 bg-pos/10"
-                      : "border-border bg-surface")
-                  }
-                >
-                  <div className="text-sm font-medium">{heroInsight.title}</div>
-                  <div className="text-xs text-soft mt-1 leading-relaxed">{heroInsight.detail}</div>
-                </div>
-              ) : (
-                <div className="text-xs text-soft flex-1">Log a few trades to unlock insights.</div>
-              )}
-              <Link to="/trade/new" className="mt-4">
-                <Button className="w-full bg-champagne text-primary-foreground hover:bg-champagne/90 gap-2 h-11">
-                  <PlusCircle className="size-4" /> Log a trade
-                </Button>
-              </Link>
+            <div className="lg:col-span-5">
+              <TradingPlanCard />
             </div>
           </section>
 
