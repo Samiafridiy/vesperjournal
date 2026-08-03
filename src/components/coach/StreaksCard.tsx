@@ -16,7 +16,7 @@ function dayKey(d: Date) {
   return d.toDateString();
 }
 
-function computeStreaks(trades: Trade[]): StreakItem[] {
+export function computeStreaks(trades: Trade[]): StreakItem[] {
   const sorted = [...trades].sort(
     (a, b) => new Date(b.trade_date).getTime() - new Date(a.trade_date).getTime(),
   );
