@@ -211,9 +211,7 @@ function Landing() {
               <HeroStat label="Max Drawdown" value="-$180" tone="neg" />
             </div>
 
-            <div className="p-3">
-              <HeroChart />
-            </div>
+            <HeroCalendarPreview />
           </div>
         </motion.div>
       </motion.section>
