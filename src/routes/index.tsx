@@ -698,35 +698,145 @@ function TraderScoreMockup() {
   );
 }
 
-// ---------- Mockup: Coach Says Today ----------
-function CoachSaysMockup() {
+// ---------- Mockup: Vesper Mentor ----------
+function MentorMockup() {
   return (
     <div className="surface-card-elevated top-accent p-5 md:p-6 relative overflow-hidden">
-      <div className="absolute -top-20 -left-20 size-48 bg-neg/[0.1] rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -top-20 -left-20 size-48 bg-champagne/[0.08] rounded-full blur-3xl pointer-events-none" />
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Brain className="size-4 text-champagne" />
-          <span className="text-sm font-medium">Coach says today</span>
+          <span className="text-[11px] uppercase tracking-[0.18em] text-champagne font-medium">Vesper Mentor</span>
         </div>
-        <span className="text-[10px] uppercase tracking-[0.18em] text-faint">live</span>
+        <span className="text-[10px] uppercase tracking-[0.18em] text-faint">today</span>
       </div>
-      <div className="rounded-lg p-4 border border-neg/30 bg-neg/10 mb-3">
-        <div className="flex items-center gap-2 mb-2">
-          <Flame className="size-4 text-neg" />
-          <span className="text-xs font-semibold uppercase tracking-wide text-neg">Revenge trading detected</span>
-        </div>
-        <p className="text-sm text-foreground leading-relaxed">
-          You took <span className="tabular text-neg font-semibold">4 trades on USDCHF</span> within 12 minutes after a loss yesterday — costing you <span className="tabular text-neg font-semibold">−$340</span>.
+      <p className="text-sm leading-relaxed text-foreground">
+        <span className="text-faint mr-2">Observation —</span>
+        You took <span className="tabular text-neg font-semibold">4 trades on USDCHF</span> within 12 minutes of a
+        loss yesterday, costing <span className="tabular text-neg font-semibold">−$340</span>.
+      </p>
+      <p className="text-sm leading-relaxed text-foreground mt-3">
+        <span className="text-faint mr-2">Question —</span>
+        What were you trying to get back?
+      </p>
+      <p className="text-sm leading-relaxed text-soft mt-3">
+        <span className="text-faint mr-2">Insight —</span>
+        Your first trade after a loss loses <span className="tabular text-foreground">71%</span> of the time. Every
+        other entry wins <span className="tabular text-foreground">58%</span>.
+      </p>
+      <div className="mt-4 rounded-lg border border-champagne/25 bg-champagne/10 px-3 py-2.5 text-xs text-champagne">
+        Action — wait 15 minutes after any losing trade this week.
+      </div>
+    </div>
+  );
+}
+
+// ---------- Mockup: Trading Plan + AI assist ----------
+function TradingPlanMockup() {
+  return (
+    <div className="surface-card-elevated top-accent p-5 md:p-6 relative overflow-hidden">
+      <div className="absolute -top-20 -right-20 size-48 bg-champagne/[0.08] rounded-full blur-3xl pointer-events-none" />
+      <div className="flex items-center gap-2 mb-4">
+        <Target className="size-4 text-champagne" />
+        <span className="text-[11px] uppercase tracking-[0.18em] text-champagne font-medium">Trading Plan</span>
+      </div>
+      <div className="relative rounded-lg border border-border bg-surface p-4 overflow-hidden">
+        <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
+          {"London session only, 07:00–11:00.\nMax 3 trades per day.\nRisk 1% per trade, minimum 1:2 R:R.\nStop loss set before entry, never moved.\nNo new trade within 20 minutes of a loss."}
         </p>
-        <p className="text-xs text-soft mt-2">Try a 15-min cooldown after any losing trade this week.</p>
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-surface to-transparent" />
       </div>
-      <div className="rounded-lg p-3 border border-pos/30 bg-pos/10">
-        <div className="flex items-center gap-2 mb-1">
-          <CheckCircle2 className="size-3.5 text-pos" />
-          <span className="text-xs font-medium text-pos">Win of the week</span>
+      <div className="mt-3 text-[11px] text-faint">Last updated: Mar 4, 2026</div>
+      <div className="mt-4 rounded-lg border border-champagne/30 bg-champagne/10 px-3 py-2.5 flex items-center justify-center gap-2 text-champagne text-xs font-medium">
+        <Sparkles className="size-3.5" /> Improve with AI
+      </div>
+      <div className="mt-3 rounded-lg border border-border bg-surface p-3">
+        <div className="text-[10px] uppercase tracking-[0.18em] text-faint mb-1.5">Vesper suggests</div>
+        <p className="text-xs text-soft leading-relaxed">
+          Add: "No XAUUSD before NY open" — it's <span className="tabular text-neg">−$560</span> across 11 trades.
+        </p>
+        <div className="flex gap-2 mt-2.5">
+          <span className="text-[10px] px-2 py-1 rounded-md border border-champagne/30 bg-champagne/10 text-champagne">
+            Apply — replace plan
+          </span>
+          <span className="text-[10px] px-2 py-1 rounded-md border border-border bg-surface-2 text-soft">
+            Append to plan
+          </span>
         </div>
-        <p className="text-xs text-soft">Your London EURUSD setup is +$620 across 7 trades. Keep leaning in.</p>
       </div>
+    </div>
+  );
+}
+
+// ---------- Mockup: Monthly P&L calendar ----------
+function MonthlyCalendarMockup() {
+  const days = [
+    0, 0, 120, -45, 0, 0, 0, 230, -80, 65, -120, 340, 0, 0, -30, 180, 95, -60, 410, 0, 0, -150,
+    275, 55, 130, -95, 0, 0,
+  ];
+  const weekTotals = [75, 435, 795, 215];
+  const money = (n: number) => `${n > 0 ? "+" : "−"}$${Math.abs(n)}`;
+  const cells: React.ReactNode[] = [];
+  days.forEach((pnl, i) => {
+    cells.push(
+      <div
+        key={`d${i}`}
+        className={`aspect-square rounded-md border p-1 flex flex-col ${
+          pnl > 0
+            ? "border-pos/25 bg-pos/[0.08]"
+            : pnl < 0
+            ? "border-neg/25 bg-neg/[0.08]"
+            : "border-border bg-surface"
+        }`}
+      >
+        <span className="text-[9px] font-mono text-faint leading-none">{i + 1}</span>
+        {pnl !== 0 && (
+          <span
+            className={`mt-auto self-center font-mono text-[10px] tabular leading-none ${
+              pnl > 0 ? "text-pos" : "text-neg"
+            }`}
+          >
+            {money(pnl)}
+          </span>
+        )}
+      </div>,
+    );
+    if (i % 7 === 6) {
+      const row = Math.floor(i / 7);
+      cells.push(
+        <div
+          key={`w${row}`}
+          className="rounded-md border border-border bg-surface-2 flex flex-col items-center justify-center"
+        >
+          <span className="text-[9px] uppercase tracking-[0.16em] text-faint">W{row + 1}</span>
+          <span className={`font-mono text-xs tabular ${weekTotals[row] >= 0 ? "text-pos" : "text-neg"}`}>
+            {money(weekTotals[row])}
+          </span>
+        </div>,
+      );
+    }
+  });
+  return (
+    <div className="surface-card-elevated top-accent p-5 md:p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <BarChart3 className="size-4 text-champagne" />
+          <span className="text-[11px] uppercase tracking-[0.18em] text-soft font-medium">Monthly P&L</span>
+        </div>
+        <span className="tabular text-xs px-3 py-1.5 rounded-md border border-pos/30 bg-pos/10 text-pos">
+          Monthly: +$1,520
+        </span>
+      </div>
+      <div className="text-sm font-medium text-center mb-3 tabular">March 2026</div>
+      <div className="grid grid-cols-[repeat(7,minmax(0,1fr))_minmax(0,1.2fr)] gap-1.5 mb-1.5">
+        {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+          <div key={i} className="text-[10px] uppercase tracking-[0.18em] text-faint text-center py-1">
+            {d}
+          </div>
+        ))}
+        <div className="text-[10px] uppercase tracking-[0.18em] text-faint text-center py-1">Wk</div>
+      </div>
+      <div className="grid grid-cols-[repeat(7,minmax(0,1fr))_minmax(0,1.2fr)] gap-1.5">{cells}</div>
     </div>
   );
 }
