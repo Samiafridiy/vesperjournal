@@ -33,9 +33,12 @@ function parseAssistant(content: string): {
   bodyAfter: string;
   bars: { label: string; value: number }[] | null;
   followups: string[];
+  planText: string | null;
 } {
   let body = content;
   let followups: string[] = [];
+  const planText = extractPlan(body);
+  if (planText) body = body.replace(/```plan[^\n]*\n[\s\S]*?```/i, "").trim();
   const fu = body.match(/<followups>([\s\S]*?)<\/followups>/i);
   if (fu) {
     followups = fu[1].split("|").map((s) => s.trim()).filter(Boolean).slice(0, 3);
@@ -63,7 +66,7 @@ function parseAssistant(content: string): {
     bodyAfter = body.slice(idx + bm[0].length).trim();
     body = body.slice(0, idx).trim();
   }
-  return { body, bodyAfter, bars, followups };
+  return { body, bodyAfter, bars, followups, planText };
 }
 
 function formatBarValue(v: number, allInts: boolean) {
