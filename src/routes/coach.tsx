@@ -189,6 +189,8 @@ function CoachPage() {
   const { user } = useAuth();
   const ask = useServerFn(askVesper);
   const context = useMemo(() => buildTraderContext(trades), [trades]);
+  const search = Route.useSearch();
+  const { plan: currentPlan, save: savePlan } = useTradingPlan();
 
   const [conversations, setConversations] = useState<Conv[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -197,6 +199,7 @@ function CoachPage() {
   const [loading, setLoading] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const planStartedRef = useRef(false);
 
   const loadConversations = useCallback(async () => {
     if (!user) return;
@@ -275,7 +278,8 @@ function CoachPage() {
     const convId = await ensureConversation(trimmed);
     if (convId) await persistMessage(convId, userMsg);
     try {
-      const extraSystem = PRESET_INSTRUCTIONS[trimmed];
+      const extraSystem =
+        trimmed === PLAN_STARTER ? PLAN_SYSTEM : PRESET_INSTRUCTIONS[trimmed];
       const res = await ask({ data: { context, messages: next, mode: "chat", extraSystem } });
       const reply: Msg = {
         role: "assistant",
