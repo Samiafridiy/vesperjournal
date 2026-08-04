@@ -265,21 +265,24 @@ function Landing() {
       <section className="relative z-10 max-w-6xl mx-auto px-6 space-y-28 md:space-y-36 pb-24">
         <ZigzagFeature
           index={1}
-          title="Your trading score. Updated after every trade."
-          description="Vesper measures your discipline, risk management, and emotional control — not just your P&L. Know exactly what's holding you back with a score out of 100."
+          title="Your Vesper Score. Updated after every trade."
+          plain="One number out of 100 that tells you how well you're trading — not how much you made."
+          description="Vesper grades six things from your own trades: win rate consistency, risk/reward, risk management, discipline, emotional control, and overtrading. Each one gets its own score so you know exactly which habit to fix first."
           mockup={<TraderScoreMockup />}
         />
         <ZigzagFeature
           index={2}
           reverse
-          title="Your coach catches what you miss."
-          description="Every time you open your dashboard, Vesper analyzes your recent trades and tells you exactly what's going wrong — with real numbers from your own journal."
-          mockup={<CoachSaysMockup />}
+          title="A mentor that walks you through the problem."
+          plain="Vesper spots something in your recent trades and talks you through it, step by step."
+          description="When something meaningful happens — a revenge streak, a discipline run, a bad session — the Mentor card opens with an Observation, asks you a Question, then reveals the Insight and one Action. Calm, specific, and based on real numbers from your journal."
+          mockup={<MentorMockup />}
         />
         <ZigzagFeature
           index={3}
           title="Ask your AI coach anything. Get honest answers."
-          description="Chat with Vesper — your personal AI trading coach. Ask why you're losing, what your best setup is, or which session to avoid. Vesper reads your real trade data and gives specific advice — not generic tips. Available 24/7. Completely free."
+          plain="A chat that already knows your trades, so you can just ask what's going wrong."
+          description="Ask why you're losing, what your best setup is, or which session to avoid. Vesper reads your real trade data, answers with your actual numbers, and draws simple comparison bars whenever it stacks two things side by side."
           badge="Tradezella's AI is still coming soon. Vesper's is live now."
           mockup={<AICoachMockup />}
         />
@@ -287,52 +290,75 @@ function Landing() {
           index={4}
           reverse
           title="Your mind is costing you money. Here's the proof."
-          description="Log your emotions before and after every trade. Tag mistakes like FOMO, revenge trading, and early exits. See exactly which emotions drain your account — shown in real dollar amounts."
+          plain="Tag how you felt and what you did wrong, and Vesper puts a dollar figure on it."
+          description="Log your emotion before and after every trade, tag mistakes like FOMO, moved stop, or early exit — and tag what you did well too. Vesper adds up what each habit costs or earns you in real money."
           mockup={<PsychologyMockup />}
         />
         <ZigzagFeature
           index={5}
           title="Stop repeating the same mistakes."
+          plain="Vesper warns you about bad habits before they cost you another account."
           description="Vesper automatically detects your dangerous patterns. Trading without stop loss. Revenge trading. Overtrading. Real alerts with real fixes — before your account pays the price."
           mockup={<MistakeAlertsMockup />}
         />
         <ZigzagFeature
           index={6}
           reverse
-          title="See exactly what's working. And what isn't."
-          description="Deep analytics showing your P&L by pair, session, emotion, and strategy. Find out which pairs make you money, which sessions to avoid, and how your emotions affect your performance."
-          mockup={<AnalyticsMockup />}
+          title="Write your trading plan. Improve it with AI."
+          plain="Keep your plan in the app and let Vesper rewrite it using your own results."
+          description="Your plan sits on the Overview page where you'll actually read it. Tap Improve with AI and Vesper turns your real stats — best pair, best session, most expensive mistake — into specific rules you can apply to your plan in one click, or edit yourself in the Rule Book."
+          mockup={<TradingPlanMockup />}
         />
         <ZigzagFeature
           index={7}
-          title="Risk the right amount. Every single trade."
-          description="Set risk presets once. Vesper auto-calculates your position size, max loss, and take profit on every trade. Set daily limits and get alerts before you overtrade."
-          mockup={<RiskEngineMockup />}
+          title="See your whole month, day by day."
+          plain="A calendar of your profit and loss, one square per day, with weekly totals."
+          description="Green days, red days, and the running total for every week — plus the month's net P&L in the corner. Flip back through previous months to see whether you're actually building or just churning."
+          mockup={<MonthlyCalendarMockup />}
         />
         <ZigzagFeature
           index={8}
           reverse
-          title="Every session gets a grade. No hiding."
-          description="At the end of each day Vesper scores your session out of 100, converts it to a letter grade, and checks every rule you wrote against every trade you took. Trades, win rate, net P&L and your biggest issue — one card, no excuses."
-          mockup={<SessionReviewMockup />}
+          title="See exactly what's working. And what isn't."
+          plain="Charts that show which pairs, sessions, days and moods make or lose you money."
+          description="P&L by pair, session, emotion and strategy, plus an equity curve, drawdown chart, day-of-week heatmap and a behaviour cost table — all filterable by date range."
+          mockup={<AnalyticsMockup />}
         />
         <ZigzagFeature
           index={9}
-          title="Who were you as a trader this week?"
-          description="Vesper reads your last 7 days and names your pattern — Disciplined, Building, Over-trader, Revenge, Emotional. Then it tracks the streaks that actually matter: discipline days, clean sessions, stop loss on every trade, and days without a revenge trade."
-          mockup={<IdentityStreaksMockup />}
+          title="Risk the right amount. Every single trade."
+          plain="Tell Vesper your account size once and it works out your lot size for every trade."
+          description="Save risk presets for a live account or a funded challenge — funded mode sizes your risk from the drawdown limit instead of a flat percentage. Vesper then calculates position size, max loss and take profit, and warns you before you break a daily limit."
+          mockup={<RiskEngineMockup />}
         />
         <ZigzagFeature
           index={10}
           reverse
+          title="Every session gets a grade. No hiding."
+          plain="At the end of the day you get a letter grade for how you traded, not just what you earned."
+          description="At the end of each day Vesper scores your session out of 100, converts it to a letter grade, and checks every rule you wrote against every trade you took. Trades, win rate, net P&L and your biggest issue — one card, no excuses."
+          mockup={<SessionReviewMockup />}
+        />
+        <ZigzagFeature
+          index={11}
+          title="Who were you as a trader this week?"
+          plain="Vesper names the trading habit you showed this week and counts your good streaks."
+          description="Vesper reads your last 7 days and names your pattern — Disciplined, Building, Over-trader, Revenge, Emotional. Then it tracks the streaks that actually matter: discipline days, clean sessions, stop loss on every trade, and days without a revenge trade."
+          mockup={<IdentityStreaksMockup />}
+        />
+        <ZigzagFeature
+          index={12}
+          reverse
           title="Write your rules. Vesper enforces them."
+          plain="Type your rules in normal English and Vesper checks every trade against them."
           description="Type your trading rules in plain English — max 3 trades a day, no trading after two losses, always use a stop. Vesper parses them, checks every trade automatically, and shows you each violation and what it cost you."
           mockup={<RuleBookMockup />}
         />
         <ZigzagFeature
-          index={11}
+          index={13}
           title="Close every week with a real review."
-          description="Five focused questions and a 1–10 discipline rating, saved week after week. Your last score follows you onto the dashboard, so you always know whether you're actually improving or just trading more."
+          plain="Four short questions every Sunday so you can see if you're actually improving."
+          description="Your biggest mistake, what you did well, the rule you broke most, what changes next week — plus a 1–10 discipline rating. Every review is saved, and your latest score follows you onto the dashboard."
           mockup={<WeeklyReviewMockup />}
         />
       </section>
