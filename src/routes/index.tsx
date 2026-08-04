@@ -649,9 +649,9 @@ function TraderScoreMockup() {
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <Gauge className="size-4 text-champagne" />
-          <span className="text-sm font-medium">AI Trader Score</span>
+          <span className="text-sm font-medium">Vesper Score</span>
         </div>
-        <span className="text-[10px] uppercase tracking-[0.18em] text-faint">last 30d</span>
+        <span className="text-[10px] uppercase tracking-[0.18em] text-champagne">Average</span>
       </div>
       <div className="flex items-end gap-3">
         <div className="text-6xl md:text-7xl font-semibold tracking-tight tabular text-champagne">67</div>
@@ -664,9 +664,12 @@ function TraderScoreMockup() {
       </div>
       <div className="mt-6 space-y-3">
         {[
+          { label: "Win rate consistency", value: 61, tone: "champagne" },
+          { label: "Risk / Reward", value: 74, tone: "pos" },
+          { label: "Risk management", value: 58, tone: "champagne" },
           { label: "Discipline", value: 72, tone: "pos" },
-          { label: "Risk Management", value: 58, tone: "champagne" },
-          { label: "Emotional Control", value: 49, tone: "neg" },
+          { label: "Emotional control", value: 49, tone: "neg" },
+          { label: "Overtrading", value: 66, tone: "champagne" },
         ].map((b) => (
           <div key={b.label}>
             <div className="flex items-center justify-between text-xs">
@@ -685,7 +688,7 @@ function TraderScoreMockup() {
         ))}
       </div>
       <div className="mt-6 pt-5 border-t border-border">
-        <div className="text-[10px] uppercase tracking-[0.18em] text-faint mb-2">How to improve</div>
+        <div className="text-[10px] uppercase tracking-[0.18em] text-faint mb-2">Composite of discipline, risk and psychology</div>
         <ul className="space-y-1.5 text-xs text-soft">
           <li className="flex items-start gap-2"><Check className="size-3 text-pos mt-0.5" /> Cut revenge trades after 2 losses</li>
           <li className="flex items-start gap-2"><Check className="size-3 text-pos mt-0.5" /> Always set a stop loss on entry</li>
