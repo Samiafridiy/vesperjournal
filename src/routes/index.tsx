@@ -205,7 +205,7 @@ function Landing() {
 
             {/* Stats strip */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border/60">
-              <HeroStat label="AI Trader Score" value="67" suffix="/100" tone="champagne" />
+              <HeroStat label="Vesper Score" value="67" suffix="/100" tone="champagne" />
               <HeroStat label="Win Rate" value="58" suffix="%" tone="pos" />
               <HeroStat label="Trades" value="124" tone="default" />
               <HeroStat label="Max Drawdown" value="-$180" tone="neg" />
@@ -420,9 +420,10 @@ function Landing() {
             </div>
             <ul className="mt-7 space-y-3 text-sm">
               {[
-                "AI Trader Score & live coach",
+                "Vesper Score & AI coach chat",
                 "Mistake alerts & psychology tracking",
-                "Risk Engine & funded account rules",
+                "Risk Engine — live & funded account modes",
+                "Trading Plan with AI assist",
                 "Deep analytics & monthly P&L calendar",
                 "Rule Book, Session Review & Weekly Review",
                 "MT4 / MT5 statement & CSV import",
@@ -953,6 +954,10 @@ function PsychologyMockup() {
         <span className="text-xs text-soft">FOMO this month</span>
         <span className="tabular text-neg font-semibold text-sm">−$520</span>
       </div>
+      <div className="rounded-lg p-3 border border-pos/20 bg-pos/5 flex items-center justify-between mt-2">
+        <span className="text-xs text-soft">What went well · Followed plan</span>
+        <span className="tabular text-pos font-semibold text-sm">+$780</span>
+      </div>
     </div>
   );
 }
@@ -1103,16 +1108,16 @@ function RiskEngineMockup() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Target className="size-4 text-champagne" />
-          <span className="text-sm font-medium">New risk preset</span>
+          <span className="text-sm font-medium">Risk preset · Funded account</span>
         </div>
         <span className="text-[10px] uppercase tracking-[0.18em] text-pos px-2 py-0.5 rounded-full bg-pos/10 border border-pos/30">
-          Conservative
+          Funded mode
         </span>
       </div>
       <div className="grid grid-cols-2 gap-3 mb-5">
-        <Field label="Risk %" value="1.0%" />
+        <Field label="Max drawdown" value="$5,000" />
+        <Field label="Risk % (auto)" value="0.8%" />
         <Field label="R:R" value="1 : 2.5" />
-        <Field label="Daily loss limit" value="$200" />
         <Field label="Max trades / day" value="5" />
       </div>
       <div className="rounded-lg border border-border bg-surface p-4">
@@ -1352,9 +1357,10 @@ function WeeklyReviewMockup() {
       </div>
       <div className="space-y-2.5">
         {[
-          { q: "What went well this week?", a: "London EURUSD continuations — 4 of 5 winners." },
-          { q: "What cost you the most?", a: "Two revenge trades on Wednesday, −$260." },
-          { q: "What changes next week?", a: "Hard stop after two losses. No NY session." },
+          { q: "1. What was your biggest mistake this week?", a: "Two revenge trades on Wednesday, −$260." },
+          { q: "2. What did you do well?", a: "London EURUSD continuations — 4 of 5 winners." },
+          { q: "3. Which rule did you break most often?", a: "No trade within 20m of a loss." },
+          { q: "4. What will you do differently next week?", a: "Hard stop after two losses. No NY session." },
         ].map((r) => (
           <div key={r.q} className="rounded-lg border border-border bg-surface px-3 py-2.5">
             <div className="text-[10px] uppercase tracking-[0.18em] text-faint">{r.q}</div>
