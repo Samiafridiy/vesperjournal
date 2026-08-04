@@ -205,7 +205,7 @@ function Landing() {
 
             {/* Stats strip */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border/60">
-              <HeroStat label="AI Trader Score" value="67" suffix="/100" tone="champagne" />
+              <HeroStat label="Vesper Score" value="67" suffix="/100" tone="champagne" />
               <HeroStat label="Win Rate" value="58" suffix="%" tone="pos" />
               <HeroStat label="Trades" value="124" tone="default" />
               <HeroStat label="Max Drawdown" value="-$180" tone="neg" />
@@ -265,21 +265,24 @@ function Landing() {
       <section className="relative z-10 max-w-6xl mx-auto px-6 space-y-28 md:space-y-36 pb-24">
         <ZigzagFeature
           index={1}
-          title="Your trading score. Updated after every trade."
-          description="Vesper measures your discipline, risk management, and emotional control — not just your P&L. Know exactly what's holding you back with a score out of 100."
+          title="Your Vesper Score. Updated after every trade."
+          plain="One number out of 100 that tells you how well you're trading — not how much you made."
+          description="Vesper grades six things from your own trades: win rate consistency, risk/reward, risk management, discipline, emotional control, and overtrading. Each one gets its own score so you know exactly which habit to fix first."
           mockup={<TraderScoreMockup />}
         />
         <ZigzagFeature
           index={2}
           reverse
-          title="Your coach catches what you miss."
-          description="Every time you open your dashboard, Vesper analyzes your recent trades and tells you exactly what's going wrong — with real numbers from your own journal."
-          mockup={<CoachSaysMockup />}
+          title="A mentor that walks you through the problem."
+          plain="Vesper spots something in your recent trades and talks you through it, step by step."
+          description="When something meaningful happens — a revenge streak, a discipline run, a bad session — the Mentor card opens with an Observation, asks you a Question, then reveals the Insight and one Action. Calm, specific, and based on real numbers from your journal."
+          mockup={<MentorMockup />}
         />
         <ZigzagFeature
           index={3}
           title="Ask your AI coach anything. Get honest answers."
-          description="Chat with Vesper — your personal AI trading coach. Ask why you're losing, what your best setup is, or which session to avoid. Vesper reads your real trade data and gives specific advice — not generic tips. Available 24/7. Completely free."
+          plain="A chat that already knows your trades, so you can just ask what's going wrong."
+          description="Ask why you're losing, what your best setup is, or which session to avoid. Vesper reads your real trade data, answers with your actual numbers, and draws simple comparison bars whenever it stacks two things side by side."
           badge="Tradezella's AI is still coming soon. Vesper's is live now."
           mockup={<AICoachMockup />}
         />
@@ -287,52 +290,75 @@ function Landing() {
           index={4}
           reverse
           title="Your mind is costing you money. Here's the proof."
-          description="Log your emotions before and after every trade. Tag mistakes like FOMO, revenge trading, and early exits. See exactly which emotions drain your account — shown in real dollar amounts."
+          plain="Tag how you felt and what you did wrong, and Vesper puts a dollar figure on it."
+          description="Log your emotion before and after every trade, tag mistakes like FOMO, moved stop, or early exit — and tag what you did well too. Vesper adds up what each habit costs or earns you in real money."
           mockup={<PsychologyMockup />}
         />
         <ZigzagFeature
           index={5}
           title="Stop repeating the same mistakes."
+          plain="Vesper warns you about bad habits before they cost you another account."
           description="Vesper automatically detects your dangerous patterns. Trading without stop loss. Revenge trading. Overtrading. Real alerts with real fixes — before your account pays the price."
           mockup={<MistakeAlertsMockup />}
         />
         <ZigzagFeature
           index={6}
           reverse
-          title="See exactly what's working. And what isn't."
-          description="Deep analytics showing your P&L by pair, session, emotion, and strategy. Find out which pairs make you money, which sessions to avoid, and how your emotions affect your performance."
-          mockup={<AnalyticsMockup />}
+          title="Write your trading plan. Improve it with AI."
+          plain="Keep your plan in the app and let Vesper rewrite it using your own results."
+          description="Your plan sits on the Overview page where you'll actually read it. Tap Improve with AI and Vesper turns your real stats — best pair, best session, most expensive mistake — into specific rules you can apply to your plan in one click, or edit yourself in the Rule Book."
+          mockup={<TradingPlanMockup />}
         />
         <ZigzagFeature
           index={7}
-          title="Risk the right amount. Every single trade."
-          description="Set risk presets once. Vesper auto-calculates your position size, max loss, and take profit on every trade. Set daily limits and get alerts before you overtrade."
-          mockup={<RiskEngineMockup />}
+          title="See your whole month, day by day."
+          plain="A calendar of your profit and loss, one square per day, with weekly totals."
+          description="Green days, red days, and the running total for every week — plus the month's net P&L in the corner. Flip back through previous months to see whether you're actually building or just churning."
+          mockup={<MonthlyCalendarMockup />}
         />
         <ZigzagFeature
           index={8}
           reverse
-          title="Every session gets a grade. No hiding."
-          description="At the end of each day Vesper scores your session out of 100, converts it to a letter grade, and checks every rule you wrote against every trade you took. Trades, win rate, net P&L and your biggest issue — one card, no excuses."
-          mockup={<SessionReviewMockup />}
+          title="See exactly what's working. And what isn't."
+          plain="Charts that show which pairs, sessions, days and moods make or lose you money."
+          description="P&L by pair, session, emotion and strategy, plus an equity curve, drawdown chart, day-of-week heatmap and a behaviour cost table — all filterable by date range."
+          mockup={<AnalyticsMockup />}
         />
         <ZigzagFeature
           index={9}
-          title="Who were you as a trader this week?"
-          description="Vesper reads your last 7 days and names your pattern — Disciplined, Building, Over-trader, Revenge, Emotional. Then it tracks the streaks that actually matter: discipline days, clean sessions, stop loss on every trade, and days without a revenge trade."
-          mockup={<IdentityStreaksMockup />}
+          title="Risk the right amount. Every single trade."
+          plain="Tell Vesper your account size once and it works out your lot size for every trade."
+          description="Save risk presets for a live account or a funded challenge — funded mode sizes your risk from the drawdown limit instead of a flat percentage. Vesper then calculates position size, max loss and take profit, and warns you before you break a daily limit."
+          mockup={<RiskEngineMockup />}
         />
         <ZigzagFeature
           index={10}
           reverse
+          title="Every session gets a grade. No hiding."
+          plain="At the end of the day you get a letter grade for how you traded, not just what you earned."
+          description="At the end of each day Vesper scores your session out of 100, converts it to a letter grade, and checks every rule you wrote against every trade you took. Trades, win rate, net P&L and your biggest issue — one card, no excuses."
+          mockup={<SessionReviewMockup />}
+        />
+        <ZigzagFeature
+          index={11}
+          title="Who were you as a trader this week?"
+          plain="Vesper names the trading habit you showed this week and counts your good streaks."
+          description="Vesper reads your last 7 days and names your pattern — Disciplined, Building, Over-trader, Revenge, Emotional. Then it tracks the streaks that actually matter: discipline days, clean sessions, stop loss on every trade, and days without a revenge trade."
+          mockup={<IdentityStreaksMockup />}
+        />
+        <ZigzagFeature
+          index={12}
+          reverse
           title="Write your rules. Vesper enforces them."
+          plain="Type your rules in normal English and Vesper checks every trade against them."
           description="Type your trading rules in plain English — max 3 trades a day, no trading after two losses, always use a stop. Vesper parses them, checks every trade automatically, and shows you each violation and what it cost you."
           mockup={<RuleBookMockup />}
         />
         <ZigzagFeature
-          index={11}
+          index={13}
           title="Close every week with a real review."
-          description="Five focused questions and a 1–10 discipline rating, saved week after week. Your last score follows you onto the dashboard, so you always know whether you're actually improving or just trading more."
+          plain="Four short questions every Sunday so you can see if you're actually improving."
+          description="Your biggest mistake, what you did well, the rule you broke most, what changes next week — plus a 1–10 discipline rating. Every review is saved, and your latest score follows you onto the dashboard."
           mockup={<WeeklyReviewMockup />}
         />
       </section>
@@ -394,9 +420,10 @@ function Landing() {
             </div>
             <ul className="mt-7 space-y-3 text-sm">
               {[
-                "AI Trader Score & live coach",
+                "Vesper Score & AI coach chat",
                 "Mistake alerts & psychology tracking",
-                "Risk Engine & funded account rules",
+                "Risk Engine — live & funded account modes",
+                "Trading Plan with AI assist",
                 "Deep analytics & monthly P&L calendar",
                 "Rule Book, Session Review & Weekly Review",
                 "MT4 / MT5 statement & CSV import",
@@ -568,6 +595,7 @@ function HeroStat({
 function ZigzagFeature({
   index,
   title,
+  plain,
   description,
   mockup,
   reverse,
@@ -575,6 +603,7 @@ function ZigzagFeature({
 }: {
   index: number;
   title: string;
+  plain?: string;
   description: string;
   mockup: React.ReactNode;
   reverse?: boolean;
@@ -593,6 +622,11 @@ function ZigzagFeature({
         <h3 className="text-2xl md:text-4xl font-semibold tracking-tight leading-[1.1] text-balance">
           {title}
         </h3>
+        {plain && (
+          <p className="mt-3 text-base md:text-lg text-foreground/90 text-pretty leading-relaxed">
+            {plain}
+          </p>
+        )}
         <p className="mt-5 text-soft text-pretty leading-relaxed text-base md:text-lg">
           {description}
         </p>
@@ -616,9 +650,9 @@ function TraderScoreMockup() {
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <Gauge className="size-4 text-champagne" />
-          <span className="text-sm font-medium">AI Trader Score</span>
+          <span className="text-sm font-medium">Vesper Score</span>
         </div>
-        <span className="text-[10px] uppercase tracking-[0.18em] text-faint">last 30d</span>
+        <span className="text-[10px] uppercase tracking-[0.18em] text-champagne">Average</span>
       </div>
       <div className="flex items-end gap-3">
         <div className="text-6xl md:text-7xl font-semibold tracking-tight tabular text-champagne">67</div>
@@ -631,9 +665,12 @@ function TraderScoreMockup() {
       </div>
       <div className="mt-6 space-y-3">
         {[
+          { label: "Win rate consistency", value: 61, tone: "champagne" },
+          { label: "Risk / Reward", value: 74, tone: "pos" },
+          { label: "Risk management", value: 58, tone: "champagne" },
           { label: "Discipline", value: 72, tone: "pos" },
-          { label: "Risk Management", value: 58, tone: "champagne" },
-          { label: "Emotional Control", value: 49, tone: "neg" },
+          { label: "Emotional control", value: 49, tone: "neg" },
+          { label: "Overtrading", value: 66, tone: "champagne" },
         ].map((b) => (
           <div key={b.label}>
             <div className="flex items-center justify-between text-xs">
@@ -652,7 +689,7 @@ function TraderScoreMockup() {
         ))}
       </div>
       <div className="mt-6 pt-5 border-t border-border">
-        <div className="text-[10px] uppercase tracking-[0.18em] text-faint mb-2">How to improve</div>
+        <div className="text-[10px] uppercase tracking-[0.18em] text-faint mb-2">Composite of discipline, risk and psychology</div>
         <ul className="space-y-1.5 text-xs text-soft">
           <li className="flex items-start gap-2"><Check className="size-3 text-pos mt-0.5" /> Cut revenge trades after 2 losses</li>
           <li className="flex items-start gap-2"><Check className="size-3 text-pos mt-0.5" /> Always set a stop loss on entry</li>
@@ -662,35 +699,145 @@ function TraderScoreMockup() {
   );
 }
 
-// ---------- Mockup: Coach Says Today ----------
-function CoachSaysMockup() {
+// ---------- Mockup: Vesper Mentor ----------
+function MentorMockup() {
   return (
     <div className="surface-card-elevated top-accent p-5 md:p-6 relative overflow-hidden">
-      <div className="absolute -top-20 -left-20 size-48 bg-neg/[0.1] rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -top-20 -left-20 size-48 bg-champagne/[0.08] rounded-full blur-3xl pointer-events-none" />
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Brain className="size-4 text-champagne" />
-          <span className="text-sm font-medium">Coach says today</span>
+          <span className="text-[11px] uppercase tracking-[0.18em] text-champagne font-medium">Vesper Mentor</span>
         </div>
-        <span className="text-[10px] uppercase tracking-[0.18em] text-faint">live</span>
+        <span className="text-[10px] uppercase tracking-[0.18em] text-faint">today</span>
       </div>
-      <div className="rounded-lg p-4 border border-neg/30 bg-neg/10 mb-3">
-        <div className="flex items-center gap-2 mb-2">
-          <Flame className="size-4 text-neg" />
-          <span className="text-xs font-semibold uppercase tracking-wide text-neg">Revenge trading detected</span>
-        </div>
-        <p className="text-sm text-foreground leading-relaxed">
-          You took <span className="tabular text-neg font-semibold">4 trades on USDCHF</span> within 12 minutes after a loss yesterday — costing you <span className="tabular text-neg font-semibold">−$340</span>.
+      <p className="text-sm leading-relaxed text-foreground">
+        <span className="text-faint mr-2">Observation —</span>
+        You took <span className="tabular text-neg font-semibold">4 trades on USDCHF</span> within 12 minutes of a
+        loss yesterday, costing <span className="tabular text-neg font-semibold">−$340</span>.
+      </p>
+      <p className="text-sm leading-relaxed text-foreground mt-3">
+        <span className="text-faint mr-2">Question —</span>
+        What were you trying to get back?
+      </p>
+      <p className="text-sm leading-relaxed text-soft mt-3">
+        <span className="text-faint mr-2">Insight —</span>
+        Your first trade after a loss loses <span className="tabular text-foreground">71%</span> of the time. Every
+        other entry wins <span className="tabular text-foreground">58%</span>.
+      </p>
+      <div className="mt-4 rounded-lg border border-champagne/25 bg-champagne/10 px-3 py-2.5 text-xs text-champagne">
+        Action — wait 15 minutes after any losing trade this week.
+      </div>
+    </div>
+  );
+}
+
+// ---------- Mockup: Trading Plan + AI assist ----------
+function TradingPlanMockup() {
+  return (
+    <div className="surface-card-elevated top-accent p-5 md:p-6 relative overflow-hidden">
+      <div className="absolute -top-20 -right-20 size-48 bg-champagne/[0.08] rounded-full blur-3xl pointer-events-none" />
+      <div className="flex items-center gap-2 mb-4">
+        <Target className="size-4 text-champagne" />
+        <span className="text-[11px] uppercase tracking-[0.18em] text-champagne font-medium">Trading Plan</span>
+      </div>
+      <div className="relative rounded-lg border border-border bg-surface p-4 overflow-hidden">
+        <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
+          {"London session only, 07:00–11:00.\nMax 3 trades per day.\nRisk 1% per trade, minimum 1:2 R:R.\nStop loss set before entry, never moved.\nNo new trade within 20 minutes of a loss."}
         </p>
-        <p className="text-xs text-soft mt-2">Try a 15-min cooldown after any losing trade this week.</p>
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-surface to-transparent" />
       </div>
-      <div className="rounded-lg p-3 border border-pos/30 bg-pos/10">
-        <div className="flex items-center gap-2 mb-1">
-          <CheckCircle2 className="size-3.5 text-pos" />
-          <span className="text-xs font-medium text-pos">Win of the week</span>
+      <div className="mt-3 text-[11px] text-faint">Last updated: Mar 4, 2026</div>
+      <div className="mt-4 rounded-lg border border-champagne/30 bg-champagne/10 px-3 py-2.5 flex items-center justify-center gap-2 text-champagne text-xs font-medium">
+        <Sparkles className="size-3.5" /> Improve with AI
+      </div>
+      <div className="mt-3 rounded-lg border border-border bg-surface p-3">
+        <div className="text-[10px] uppercase tracking-[0.18em] text-faint mb-1.5">Vesper suggests</div>
+        <p className="text-xs text-soft leading-relaxed">
+          Add: "No XAUUSD before NY open" — it's <span className="tabular text-neg">−$560</span> across 11 trades.
+        </p>
+        <div className="flex gap-2 mt-2.5">
+          <span className="text-[10px] px-2 py-1 rounded-md border border-champagne/30 bg-champagne/10 text-champagne">
+            Apply — replace plan
+          </span>
+          <span className="text-[10px] px-2 py-1 rounded-md border border-border bg-surface-2 text-soft">
+            Append to plan
+          </span>
         </div>
-        <p className="text-xs text-soft">Your London EURUSD setup is +$620 across 7 trades. Keep leaning in.</p>
       </div>
+    </div>
+  );
+}
+
+// ---------- Mockup: Monthly P&L calendar ----------
+function MonthlyCalendarMockup() {
+  const days = [
+    0, 0, 120, -45, 0, 0, 0, 230, -80, 65, -120, 340, 0, 0, -30, 180, 95, -60, 410, 0, 0, -150,
+    275, 55, 130, -95, 0, 0,
+  ];
+  const weekTotals = [75, 435, 795, 215];
+  const money = (n: number) => `${n > 0 ? "+" : "−"}$${Math.abs(n)}`;
+  const cells: React.ReactNode[] = [];
+  days.forEach((pnl, i) => {
+    cells.push(
+      <div
+        key={`d${i}`}
+        className={`aspect-square rounded-md border p-1 flex flex-col ${
+          pnl > 0
+            ? "border-pos/25 bg-pos/[0.08]"
+            : pnl < 0
+            ? "border-neg/25 bg-neg/[0.08]"
+            : "border-border bg-surface"
+        }`}
+      >
+        <span className="text-[9px] font-mono text-faint leading-none">{i + 1}</span>
+        {pnl !== 0 && (
+          <span
+            className={`mt-auto self-center font-mono text-[10px] tabular leading-none ${
+              pnl > 0 ? "text-pos" : "text-neg"
+            }`}
+          >
+            {money(pnl)}
+          </span>
+        )}
+      </div>,
+    );
+    if (i % 7 === 6) {
+      const row = Math.floor(i / 7);
+      cells.push(
+        <div
+          key={`w${row}`}
+          className="rounded-md border border-border bg-surface-2 flex flex-col items-center justify-center"
+        >
+          <span className="text-[9px] uppercase tracking-[0.16em] text-faint">W{row + 1}</span>
+          <span className={`font-mono text-xs tabular ${weekTotals[row] >= 0 ? "text-pos" : "text-neg"}`}>
+            {money(weekTotals[row])}
+          </span>
+        </div>,
+      );
+    }
+  });
+  return (
+    <div className="surface-card-elevated top-accent p-5 md:p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <BarChart3 className="size-4 text-champagne" />
+          <span className="text-[11px] uppercase tracking-[0.18em] text-soft font-medium">Monthly P&L</span>
+        </div>
+        <span className="tabular text-xs px-3 py-1.5 rounded-md border border-pos/30 bg-pos/10 text-pos">
+          Monthly: +$1,520
+        </span>
+      </div>
+      <div className="text-sm font-medium text-center mb-3 tabular">March 2026</div>
+      <div className="grid grid-cols-[repeat(7,minmax(0,1fr))_minmax(0,1.2fr)] gap-1.5 mb-1.5">
+        {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+          <div key={i} className="text-[10px] uppercase tracking-[0.18em] text-faint text-center py-1">
+            {d}
+          </div>
+        ))}
+        <div className="text-[10px] uppercase tracking-[0.18em] text-faint text-center py-1">Wk</div>
+      </div>
+      <div className="grid grid-cols-[repeat(7,minmax(0,1fr))_minmax(0,1.2fr)] gap-1.5">{cells}</div>
     </div>
   );
 }
@@ -806,6 +953,10 @@ function PsychologyMockup() {
       <div className="rounded-lg p-3 border border-neg/20 bg-neg/5 flex items-center justify-between">
         <span className="text-xs text-soft">FOMO this month</span>
         <span className="tabular text-neg font-semibold text-sm">−$520</span>
+      </div>
+      <div className="rounded-lg p-3 border border-pos/20 bg-pos/5 flex items-center justify-between mt-2">
+        <span className="text-xs text-soft">What went well · Followed plan</span>
+        <span className="tabular text-pos font-semibold text-sm">+$780</span>
       </div>
     </div>
   );
@@ -957,16 +1108,16 @@ function RiskEngineMockup() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Target className="size-4 text-champagne" />
-          <span className="text-sm font-medium">New risk preset</span>
+          <span className="text-sm font-medium">Risk preset · Funded account</span>
         </div>
         <span className="text-[10px] uppercase tracking-[0.18em] text-pos px-2 py-0.5 rounded-full bg-pos/10 border border-pos/30">
-          Conservative
+          Funded mode
         </span>
       </div>
       <div className="grid grid-cols-2 gap-3 mb-5">
-        <Field label="Risk %" value="1.0%" />
+        <Field label="Max drawdown" value="$5,000" />
+        <Field label="Risk % (auto)" value="0.8%" />
         <Field label="R:R" value="1 : 2.5" />
-        <Field label="Daily loss limit" value="$200" />
         <Field label="Max trades / day" value="5" />
       </div>
       <div className="rounded-lg border border-border bg-surface p-4">
@@ -1206,9 +1357,10 @@ function WeeklyReviewMockup() {
       </div>
       <div className="space-y-2.5">
         {[
-          { q: "What went well this week?", a: "London EURUSD continuations — 4 of 5 winners." },
-          { q: "What cost you the most?", a: "Two revenge trades on Wednesday, −$260." },
-          { q: "What changes next week?", a: "Hard stop after two losses. No NY session." },
+          { q: "1. What was your biggest mistake this week?", a: "Two revenge trades on Wednesday, −$260." },
+          { q: "2. What did you do well?", a: "London EURUSD continuations — 4 of 5 winners." },
+          { q: "3. Which rule did you break most often?", a: "No trade within 20m of a loss." },
+          { q: "4. What will you do differently next week?", a: "Hard stop after two losses. No NY session." },
         ].map((r) => (
           <div key={r.q} className="rounded-lg border border-border bg-surface px-3 py-2.5">
             <div className="text-[10px] uppercase tracking-[0.18em] text-faint">{r.q}</div>
