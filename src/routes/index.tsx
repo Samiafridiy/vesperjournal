@@ -594,6 +594,7 @@ function HeroStat({
 function ZigzagFeature({
   index,
   title,
+  plain,
   description,
   mockup,
   reverse,
@@ -601,6 +602,7 @@ function ZigzagFeature({
 }: {
   index: number;
   title: string;
+  plain?: string;
   description: string;
   mockup: React.ReactNode;
   reverse?: boolean;
@@ -619,6 +621,11 @@ function ZigzagFeature({
         <h3 className="text-2xl md:text-4xl font-semibold tracking-tight leading-[1.1] text-balance">
           {title}
         </h3>
+        {plain && (
+          <p className="mt-3 text-base md:text-lg text-foreground/90 text-pretty leading-relaxed">
+            {plain}
+          </p>
+        )}
         <p className="mt-5 text-soft text-pretty leading-relaxed text-base md:text-lg">
           {description}
         </p>
