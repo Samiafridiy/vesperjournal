@@ -8,8 +8,8 @@ export function TradingPlanCard() {
   const hasPlan = plan.trim().length > 0;
 
   return (
-    <div className="surface-card-elevated top-accent p-6 h-full flex flex-col hover-glow hover-glow-champagne">
-      <div className="flex items-center gap-2 mb-4">
+    <div className="surface-card-elevated top-accent p-6 h-full min-h-0 flex flex-col hover-glow hover-glow-champagne">
+      <div className="flex items-center gap-2 mb-4 shrink-0">
         <ClipboardList className="size-4 text-champagne" />
         <span className="text-[11px] uppercase tracking-[0.18em] text-champagne font-medium">
           Trading Plan
@@ -20,11 +20,14 @@ export function TradingPlanCard() {
         <div className="text-xs text-soft flex-1">Loading…</div>
       ) : hasPlan ? (
         <>
-          <div className="rounded-lg p-4 border border-border bg-surface flex-1 min-h-[8rem] overflow-auto">
-            <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{plan}</p>
+          <div className="relative flex-1 min-h-[8rem] rounded-lg border border-border bg-surface overflow-hidden">
+            <div className="absolute inset-0 overflow-y-auto overscroll-contain p-4 [-webkit-overflow-scrolling:touch]">
+              <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{plan}</p>
+            </div>
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-surface to-transparent rounded-b-lg" />
           </div>
           {updatedAt && (
-            <div className="mt-3 text-[11px] text-faint">
+            <div className="mt-3 text-[11px] text-faint shrink-0">
               Last updated:{" "}
               {new Date(updatedAt).toLocaleDateString(undefined, {
                 month: "short",
@@ -46,7 +49,7 @@ export function TradingPlanCard() {
       )}
 
       {!loading && (
-        <Link to="/coach" search={{ plan: 1 }} className="mt-4 block">
+        <Link to="/coach" search={{ plan: 1 }} className="mt-4 block shrink-0">
           <Button
             variant="outline"
             className="w-full gap-2 h-10 border-champagne/30 text-champagne hover:bg-champagne/10 hover:text-champagne"

@@ -27,7 +27,6 @@ import { StreaksCard } from "@/components/coach/StreaksCard";
 import { RuleViolationsBadge } from "@/components/rules/RuleViolationsBadge";
 import { WeeklyReviewCard } from "@/components/weekly/WeeklyReviewCard";
 import { MonthlyPnlCalendar } from "@/components/overview/MonthlyPnlCalendar";
-import { MomentumWidget } from "@/components/overview/MomentumWidget";
 import { TradingPlanCard } from "@/components/overview/TradingPlanCard";
 
 export const Route = createFileRoute("/dashboard")({
@@ -87,17 +86,12 @@ function Dashboard() {
           <CooldownBanner />
           <DailyTipModal trades={trades} />
 
-          {/* 30-DAY MOMENTUM */}
-          <section className="mb-6">
-            <MomentumWidget trades={trades} />
-          </section>
-
           {/* HERO — Vesper Score + one insight + action */}
           <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-8">
             <div className="lg:col-span-7">
               <TraderScoreCard score={traderScore} />
             </div>
-            <div className="lg:col-span-5">
+            <div className="lg:col-span-5 lg:h-0 lg:min-h-full">
               <TradingPlanCard />
             </div>
           </section>
