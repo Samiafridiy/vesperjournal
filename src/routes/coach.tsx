@@ -15,15 +15,30 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useTradingPlan } from "@/hooks/use-trading-plan";
+
+const PLAN_SYSTEM = `The trader wants help improving their written TRADING PLAN.
+Use their real data above (win rate by pair/session, mistake tags, emotional patterns, risk stats) to propose SPECIFIC, personalised plan rules with real numbers — never generic advice.
+After a brief explanation, output the complete suggested plan text inside a fenced block starting with \`\`\`plan and ending with \`\`\`. The block must contain ONLY the plan text (plain lines/bullets), ready to paste into their journal.`;
+
+const PLAN_STARTER = "Based on my trade history, help me improve my trading plan.";
+
+function extractPlan(content: string): string | null {
+  const m = content.match(/```plan[^\n]*\n([\s\S]*?)```/i);
+  return m ? m[1].trim() : null;
+}
 
 function parseAssistant(content: string): {
   body: string;
   bodyAfter: string;
   bars: { label: string; value: number }[] | null;
   followups: string[];
+  planText: string | null;
 } {
   let body = content;
   let followups: string[] = [];
+  const planText = extractPlan(body);
+  if (planText) body = body.replace(/```plan[^\n]*\n[\s\S]*?```/i, "").trim();
   const fu = body.match(/<followups>([\s\S]*?)<\/followups>/i);
   if (fu) {
     followups = fu[1].split("|").map((s) => s.trim()).filter(Boolean).slice(0, 3);
@@ -51,7 +66,7 @@ function parseAssistant(content: string): {
     bodyAfter = body.slice(idx + bm[0].length).trim();
     body = body.slice(0, idx).trim();
   }
-  return { body, bodyAfter, bars, followups };
+  return { body, bodyAfter, bars, followups, planText };
 }
 
 function formatBarValue(v: number, allInts: boolean) {
@@ -133,6 +148,9 @@ function InlineBars({ data, bodyText }: { data: { label: string; value: number }
 }
 
 export const Route = createFileRoute("/coach")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    plan: search.plan ? 1 : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Vesper — AI Trading Coach" },
@@ -167,10 +185,12 @@ const WELCOME: Msg = {
 };
 
 function CoachPage() {
-  const { trades } = useTrades();
+  const { trades, loading: tradesLoading } = useTrades();
   const { user } = useAuth();
   const ask = useServerFn(askVesper);
   const context = useMemo(() => buildTraderContext(trades), [trades]);
+  const search = Route.useSearch();
+  const { plan: currentPlan, save: savePlan } = useTradingPlan();
 
   const [conversations, setConversations] = useState<Conv[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -179,6 +199,7 @@ function CoachPage() {
   const [loading, setLoading] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const planStartedRef = useRef(false);
 
   const loadConversations = useCallback(async () => {
     if (!user) return;
@@ -257,7 +278,8 @@ function CoachPage() {
     const convId = await ensureConversation(trimmed);
     if (convId) await persistMessage(convId, userMsg);
     try {
-      const extraSystem = PRESET_INSTRUCTIONS[trimmed];
+      const extraSystem =
+        trimmed === PLAN_STARTER ? PLAN_SYSTEM : PRESET_INSTRUCTIONS[trimmed];
       const res = await ask({ data: { context, messages: next, mode: "chat", extraSystem } });
       const reply: Msg = {
         role: "assistant",
@@ -271,6 +293,22 @@ function CoachPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  // Auto-start the "Improve my plan" conversation when arriving from the Overview card.
+  useEffect(() => {
+    if (!search.plan || planStartedRef.current || tradesLoading || !user) return;
+    planStartedRef.current = true;
+    send(PLAN_STARTER);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.plan, tradesLoading, user]);
+
+  async function applyPlan(text: string, mode: "replace" | "append") {
+    const next =
+      mode === "append" && currentPlan.trim() ? `${currentPlan.trim()}\n\n${text}` : text;
+    const { error } = await savePlan(next);
+    if (error) return toast.error(error.message);
+    toast.success(mode === "append" ? "Added to your trading plan" : "Trading plan updated");
   }
 
   return (
@@ -374,6 +412,33 @@ function CoachPage() {
                         />
                       )}
                       {parsed.bodyAfter && <ReactMarkdown>{parsed.bodyAfter}</ReactMarkdown>}
+                      {parsed.planText && (
+                        <div className="not-prose mt-3 rounded-xl border border-champagne/25 bg-champagne/[0.04] p-3">
+                          <div className="text-[11px] uppercase tracking-[0.18em] text-champagne font-medium mb-2">
+                            Suggested plan
+                          </div>
+                          <p className="text-[13px] text-foreground whitespace-pre-wrap leading-relaxed">
+                            {parsed.planText}
+                          </p>
+                          <div className="flex flex-wrap gap-2 mt-3">
+                            <Button
+                              size="sm"
+                              onClick={() => applyPlan(parsed.planText!, "replace")}
+                              className="h-8 gap-1.5 text-xs bg-champagne text-primary-foreground hover:bg-champagne/90"
+                            >
+                              <Sparkles className="size-3.5" /> Apply — replace plan
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => applyPlan(parsed.planText!, "append")}
+                              className="h-8 text-xs"
+                            >
+                              Append to plan
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                       {isLastAssistant && parsed.followups.length > 0 && (
                         <div className="not-prose mt-3 flex flex-wrap gap-2">
                           {parsed.followups.map((q) => (
