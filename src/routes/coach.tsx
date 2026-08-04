@@ -15,6 +15,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useTradingPlan } from "@/hooks/use-trading-plan";
+
+const PLAN_SYSTEM = `The trader wants help improving their written TRADING PLAN.
+Use their real data above (win rate by pair/session, mistake tags, emotional patterns, risk stats) to propose SPECIFIC, personalised plan rules with real numbers — never generic advice.
+After a brief explanation, output the complete suggested plan text inside a fenced block starting with \`\`\`plan and ending with \`\`\`. The block must contain ONLY the plan text (plain lines/bullets), ready to paste into their journal.`;
+
+const PLAN_STARTER = "Based on my trade history, help me improve my trading plan.";
+
+function extractPlan(content: string): string | null {
+  const m = content.match(/```plan[^\n]*\n([\s\S]*?)```/i);
+  return m ? m[1].trim() : null;
+}
 
 function parseAssistant(content: string): {
   body: string;
@@ -133,6 +145,9 @@ function InlineBars({ data, bodyText }: { data: { label: string; value: number }
 }
 
 export const Route = createFileRoute("/coach")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    plan: search.plan ? 1 : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Vesper — AI Trading Coach" },
