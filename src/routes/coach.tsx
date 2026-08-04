@@ -185,7 +185,7 @@ const WELCOME: Msg = {
 };
 
 function CoachPage() {
-  const { trades } = useTrades();
+  const { trades, loading: tradesLoading } = useTrades();
   const { user } = useAuth();
   const ask = useServerFn(askVesper);
   const context = useMemo(() => buildTraderContext(trades), [trades]);
@@ -293,6 +293,22 @@ function CoachPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  // Auto-start the "Improve my plan" conversation when arriving from the Overview card.
+  useEffect(() => {
+    if (!search.plan || planStartedRef.current || tradesLoading || !user) return;
+    planStartedRef.current = true;
+    send(PLAN_STARTER);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.plan, tradesLoading, user]);
+
+  async function applyPlan(text: string, mode: "replace" | "append") {
+    const next =
+      mode === "append" && currentPlan.trim() ? `${currentPlan.trim()}\n\n${text}` : text;
+    const { error } = await savePlan(next);
+    if (error) return toast.error(error.message);
+    toast.success(mode === "append" ? "Added to your trading plan" : "Trading plan updated");
   }
 
   return (
