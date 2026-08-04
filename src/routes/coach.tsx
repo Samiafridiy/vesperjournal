@@ -412,6 +412,33 @@ function CoachPage() {
                         />
                       )}
                       {parsed.bodyAfter && <ReactMarkdown>{parsed.bodyAfter}</ReactMarkdown>}
+                      {parsed.planText && (
+                        <div className="not-prose mt-3 rounded-xl border border-champagne/25 bg-champagne/[0.04] p-3">
+                          <div className="text-[11px] uppercase tracking-[0.18em] text-champagne font-medium mb-2">
+                            Suggested plan
+                          </div>
+                          <p className="text-[13px] text-foreground whitespace-pre-wrap leading-relaxed">
+                            {parsed.planText}
+                          </p>
+                          <div className="flex flex-wrap gap-2 mt-3">
+                            <Button
+                              size="sm"
+                              onClick={() => applyPlan(parsed.planText!, "replace")}
+                              className="h-8 gap-1.5 text-xs bg-champagne text-primary-foreground hover:bg-champagne/90"
+                            >
+                              <Sparkles className="size-3.5" /> Apply — replace plan
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => applyPlan(parsed.planText!, "append")}
+                              className="h-8 text-xs"
+                            >
+                              Append to plan
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                       {isLastAssistant && parsed.followups.length > 0 && (
                         <div className="not-prose mt-3 flex flex-wrap gap-2">
                           {parsed.followups.map((q) => (
