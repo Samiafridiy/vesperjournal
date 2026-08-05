@@ -2,9 +2,12 @@ import { useEffect, useState, useCallback, useId } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import type { Trade } from "@/lib/trade-utils";
+import { useDemoMode } from "@/lib/demo-mode";
+import { DEMO_TRADES } from "@/lib/demo-data";
 
 export function useTrades() {
   const { user } = useAuth();
+  const { demo } = useDemoMode();
   const [trades, setTrades] = useState<Trade[]>([]);
   const [loading, setLoading] = useState(true);
   const instanceId = useId();
@@ -43,6 +46,8 @@ export function useTrades() {
       supabase.removeChannel(channel);
     };
   }, [user, refetch, instanceId]);
+
+  if (demo) return { trades: DEMO_TRADES, loading: false, refetch };
 
   return { trades, loading, refetch };
 }

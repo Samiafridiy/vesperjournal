@@ -23,8 +23,17 @@ export function RecentTrades({ trades }: { trades: Trade[] }) {
         </Link>
       </div>
       {recent.length === 0 ? (
-        <div className="flex-1 flex items-center justify-center text-sm text-soft">
-          No trades yet.
+        <div className="flex-1 flex flex-col items-center justify-center text-center gap-2 px-4 py-6">
+          <div className="text-sm font-medium">No trades yet</div>
+          <p className="text-xs text-soft max-w-[34ch] leading-relaxed">
+            Your five most recent trades will show up here with their result and profit or loss.
+          </p>
+          <Link
+            to="/trade/new"
+            className="mt-1 inline-flex items-center rounded-md border border-champagne/30 bg-champagne/10 px-3 py-1.5 text-xs font-medium text-champagne hover:bg-champagne/20"
+          >
+            Log a trade
+          </Link>
         </div>
       ) : (
         <div className="flex flex-col divide-y divide-border/60">

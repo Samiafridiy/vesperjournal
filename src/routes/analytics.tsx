@@ -23,6 +23,8 @@ import { SessionBoxes } from "@/components/analytics/SessionBoxes";
 import { DayOfWeekHeatmap } from "@/components/analytics/DayOfWeekHeatmap";
 import { BehaviorImpact } from "@/components/analytics/BehaviorImpact";
 import { RuleViolationsCard } from "@/components/rules/RuleViolationsCard";
+import { Link } from "@tanstack/react-router";
+import { useDemoMode } from "@/lib/demo-mode";
 
 export const Route = createFileRoute("/analytics")({
   head: () => ({
@@ -61,6 +63,7 @@ function aggregate<K extends string>(trades: Trade[], key: (t: Trade) => K | nul
 
 function Analytics() {
   const { trades: allTrades } = useTrades();
+  const { setDemo } = useDemoMode();
   const [range, setRange] = useState<"7" | "30" | "90" | "all">("30");
 
   const trades = useMemo(() => {
@@ -101,6 +104,31 @@ function Analytics() {
         <p className="text-soft mt-2">What's actually working — and what isn't.</p>
       </header>
 
+      {allTrades.length === 0 && (
+        <section className="mb-8 surface-card-elevated top-accent p-6 md:p-8 text-center">
+          <h2 className="text-lg font-semibold">Nothing to analyse yet</h2>
+          <p className="text-soft text-sm mt-2 max-w-lg mx-auto leading-relaxed">
+            Analytics turns your logged trades into plain answers: which pairs make you money, which
+            trading session suits you, and how your mood changes your results. The charts below fill
+            in automatically once you start journaling.
+          </p>
+          <div className="mt-5 flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              to="/trade/new"
+              className="inline-flex items-center justify-center rounded-md bg-champagne px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+            >
+              Log a trade
+            </Link>
+            <button
+              onClick={() => setDemo(true)}
+              className="inline-flex items-center justify-center rounded-md border border-champagne/30 bg-champagne/10 px-4 py-2 text-sm font-medium text-champagne hover:bg-champagne/20"
+            >
+              See a demo with sample data
+            </button>
+          </div>
+        </section>
+      )}
+
       {/* Date range filter */}
       <div className="mb-6 flex items-center gap-2 flex-wrap">
         <span className="text-[11px] uppercase tracking-[0.18em] text-faint mr-2">Range</span>
@@ -132,6 +160,15 @@ function Analytics() {
           <span className="text-[11px] uppercase tracking-[0.18em] text-champagne font-medium">Smart insights</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {insights.length === 0 && (
+            <div className="rounded-lg p-4 border border-border bg-surface md:col-span-2">
+              <div className="text-sm font-medium">Insights unlock with data</div>
+              <div className="text-xs text-soft mt-1 leading-relaxed">
+                Once you've logged a handful of trades, Vesper writes short plain-English notes here
+                about your strongest setups and your most expensive habits.
+              </div>
+            </div>
+          )}
           {insights.map((ins, i) => (
             <div key={i}
               className={
@@ -308,7 +345,7 @@ function WinRateBars({ data }: { data: { name: string; winRate: number; n: numbe
 function Empty() {
   return (
     <div className="h-full flex items-center justify-center text-sm text-faint">
-      Not enough data yet.
+      No data for this range yet — log a few trades and this chart fills in.
     </div>
   );
 }

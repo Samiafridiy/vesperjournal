@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import type { Trade } from "@/lib/trade-utils";
 import { cn } from "@/lib/utils";
+import { EmptyHint } from "@/components/EmptyHint";
 
 export function WinLossSplit({ trades }: { trades: Trade[] }) {
   const { wins, losses, winRate } = useMemo(() => {
@@ -32,6 +33,15 @@ export function WinLossSplit({ trades }: { trades: Trade[] }) {
       <div className="text-[11px] uppercase tracking-[0.18em] text-soft font-medium mb-4">
         Win / Loss Split
       </div>
+      {total === 0 ? (
+        <EmptyHint
+          title="No closed trades yet"
+          description="This shows how many of your trades end as wins versus losses, so you can see your win rate at a glance."
+          actionLabel="Log a trade"
+          actionTo="/trade/new"
+        />
+      ) : (
+      <>
       <div className="flex-1 flex items-center justify-center py-2">
         <div className="relative size-[180px]">
           <svg viewBox="0 0 140 140" className="size-full -rotate-90">
@@ -85,6 +95,8 @@ export function WinLossSplit({ trades }: { trades: Trade[] }) {
           <span className="font-mono tabular-nums">{losses}</span>
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 }

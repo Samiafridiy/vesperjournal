@@ -11,6 +11,7 @@ import { getDailyLimit } from "@/lib/intervention";
 import { fmtMoney, fmtPct } from "@/lib/trade-utils";
 import type { Trade } from "@/lib/trade-utils";
 import { cn } from "@/lib/utils";
+import { EmptyHint } from "@/components/EmptyHint";
 
 function isToday(iso: string) {
   const d = new Date(iso);
@@ -95,6 +96,15 @@ export function TodaySessionReview({ trades }: { trades: Trade[] }) {
         </span>
       </div>
 
+      {todayTrades.length === 0 ? (
+        <EmptyHint
+          title="No trades logged today"
+          description="At the end of each trading day this grades your session — how well you stuck to your rules, your win rate and your net result."
+          actionLabel="Log today's trade"
+          actionTo="/trade/new"
+        />
+      ) : (
+      <>
       <div className="flex flex-col md:flex-row md:items-center gap-6 mb-6">
         <div
           className={cn(
@@ -138,7 +148,10 @@ export function TodaySessionReview({ trades }: { trades: Trade[] }) {
           Rule adherence
         </div>
         {adherence.length === 0 ? (
-          <div className="text-xs text-soft">No active rules in your Rule Book.</div>
+          <div className="text-xs text-soft">
+            No active rules yet — add your trading rules in the Rule Book and Vesper will check every
+            session against them.
+          </div>
         ) : (
           <ul className="space-y-2">
             {adherence.map((r) => (
@@ -173,6 +186,8 @@ export function TodaySessionReview({ trades }: { trades: Trade[] }) {
         <div className="rounded-lg border border-champagne/25 bg-champagne/10 px-3 py-2 text-xs text-champagne">
           Biggest issue today: {biggestIssue}
         </div>
+      )}
+      </>
       )}
     </div>
   );
