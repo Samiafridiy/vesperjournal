@@ -2,9 +2,12 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import type { TradingRule } from "@/lib/rule-engine";
+import { useDemoMode } from "@/lib/demo-mode";
+import { DEMO_RULES } from "@/lib/demo-data";
 
 export function useRules() {
   const { user } = useAuth();
+  const { demo } = useDemoMode();
   const [rules, setRules] = useState<TradingRule[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,6 +40,8 @@ export function useRules() {
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [user, refetch]);
+
+  if (demo) return { rules: DEMO_RULES, loading: false, refetch };
 
   return { rules, loading, refetch };
 }
