@@ -149,6 +149,13 @@ export function MonthlyPnlCalendar({ trades }: { trades: Trade[] }) {
       </div>
 
       {/* Grid header */}
+      {pnlByDay.size === 0 && (
+        <p className="text-xs text-soft mb-4 leading-relaxed">
+          No trades logged yet. Each day you trade gets coloured green or red here, so you can spot
+          your good and bad stretches at a glance —{" "}
+          <span className="text-champagne">click any day to log a trade</span>.
+        </p>
+      )}
       <div className="grid grid-cols-[repeat(7,minmax(0,1fr))_minmax(0,1.2fr)] gap-1.5 mb-1.5">
         {DOW.map((d) => (
           <div
