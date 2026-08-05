@@ -345,7 +345,7 @@ function WinRateBars({ data }: { data: { name: string; winRate: number; n: numbe
 function Empty() {
   return (
     <div className="h-full flex items-center justify-center text-sm text-faint">
-      Not enough data yet.
+      No data for this range yet — log a few trades and this chart fills in.
     </div>
   );
 }
