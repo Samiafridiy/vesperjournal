@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useDemoMode } from "@/lib/demo-mode";
+import { DEMO_PLAN } from "@/lib/demo-data";
 
 export function useTradingPlan() {
   const { user } = useAuth();
+  const { demo } = useDemoMode();
   const [plan, setPlan] = useState<string>("");
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,6 +46,10 @@ export function useTradingPlan() {
     },
     [user],
   );
+
+  if (demo) {
+    return { plan: DEMO_PLAN, updatedAt: new Date().toISOString(), loading: false, save, refetch };
+  }
 
   return { plan, updatedAt, loading, save, refetch };
 }
