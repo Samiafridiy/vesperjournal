@@ -186,7 +186,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </div>
 
-      <main className="flex-1 min-w-0 pt-14 md:pt-0 pb-20 md:pb-0">{children}</main>
+      <main className="flex-1 min-w-0 pt-14 md:pt-0 pb-20 md:pb-0">
+        <DemoBanner />
+        {children}
+      </main>
 
       {/* Mobile bottom nav — exactly 5 items */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-sidebar/95 backdrop-blur border-t border-border pb-[env(safe-area-inset-bottom)]">
