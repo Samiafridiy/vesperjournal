@@ -148,7 +148,10 @@ export function TodaySessionReview({ trades }: { trades: Trade[] }) {
           Rule adherence
         </div>
         {adherence.length === 0 ? (
-          <div className="text-xs text-soft">No active rules in your Rule Book.</div>
+          <div className="text-xs text-soft">
+            No active rules yet — add your trading rules in the Rule Book and Vesper will check every
+            session against them.
+          </div>
         ) : (
           <ul className="space-y-2">
             {adherence.map((r) => (
