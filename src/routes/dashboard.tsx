@@ -28,6 +28,8 @@ import { RuleViolationsBadge } from "@/components/rules/RuleViolationsBadge";
 import { WeeklyReviewCard } from "@/components/weekly/WeeklyReviewCard";
 import { MonthlyPnlCalendar } from "@/components/overview/MonthlyPnlCalendar";
 import { TradingPlanCard } from "@/components/overview/TradingPlanCard";
+import { useDemoMode } from "@/lib/demo-mode";
+import { Eye } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -47,6 +49,7 @@ export const Route = createFileRoute("/dashboard")({
 
 function Dashboard() {
   const { trades, loading } = useTrades();
+  const { demo, setDemo } = useDemoMode();
   const stats = useMemo(() => computeStats(trades), [trades]);
   const traderScore = useMemo(() => computeTraderScore(trades), [trades]);
   const mistakeAlerts = useMemo(() => detectMistakes(trades), [trades]);
@@ -81,8 +84,13 @@ function Dashboard() {
         </Link>
       </header>
 
-      {empty ? <EmptyState /> : (
+      {empty ? <EmptyState onDemo={() => setDemo(true)} /> : (
         <>
+          {demo && (
+            <div className="mb-6 rounded-lg border border-champagne/25 bg-champagne/5 px-4 py-3 text-xs text-champagne">
+              This is sample data so you can see how Vesper looks once you've been journaling. Nothing here is yours yet.
+            </div>
+          )}
           <CooldownBanner />
           <DailyTipModal trades={trades} />
 
@@ -204,7 +212,7 @@ function Dashboard() {
   );
 }
 
-function EmptyState() {
+function EmptyState({ onDemo }: { onDemo: () => void }) {
   return (
     <div className="surface-card-elevated top-accent p-10 md:p-16 text-center max-w-2xl mx-auto">
       <div className="size-12 rounded-xl bg-champagne/10 ring-1 ring-champagne/20 flex items-center justify-center mx-auto mb-5">
@@ -213,12 +221,26 @@ function EmptyState() {
       <h2 className="text-2xl font-semibold tracking-tight">Your journal is empty.</h2>
       <p className="text-soft mt-2 max-w-md mx-auto">
         Log your first trade to start uncovering patterns in your performance and psychology.
+        Your Vesper Score, monthly P&amp;L calendar, session reviews and AI coaching all appear here
+        once you have a few trades in.
       </p>
-      <Link to="/trade/new" className="inline-block mt-6">
-        <Button className="bg-champagne text-primary-foreground hover:bg-champagne/90 gap-2 h-11">
-          <PlusCircle className="size-4" /> Log your first trade
+      <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+        <Link to="/trade/new" className="inline-block">
+          <Button className="bg-champagne text-primary-foreground hover:bg-champagne/90 gap-2 h-11 w-full">
+            <PlusCircle className="size-4" /> Log your first trade
+          </Button>
+        </Link>
+        <Button
+          variant="outline"
+          onClick={onDemo}
+          className="gap-2 h-11 border-champagne/30 text-champagne hover:bg-champagne/10 hover:text-champagne"
+        >
+          <Eye className="size-4" /> See a demo with sample data
         </Button>
-      </Link>
+      </div>
+      <p className="text-[11px] text-faint mt-4">
+        Demo mode fills the app with example trades — you can exit it any time.
+      </p>
     </div>
   );
 }
