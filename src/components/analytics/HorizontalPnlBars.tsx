@@ -24,8 +24,11 @@ export function HorizontalPnlBars({
         {subtitle && <div className="text-xs text-soft mt-0.5">{subtitle}</div>}
       </div>
       {data.length === 0 ? (
-        <div className="flex-1 flex items-center justify-center text-sm text-faint">
-          {emptyHint ?? "Not enough data yet."}
+        <div className="flex-1 flex flex-col items-center justify-center gap-1 text-center px-4">
+          <div className="text-sm text-foreground">Nothing to compare yet</div>
+          <div className="text-xs text-soft max-w-[34ch] leading-relaxed">
+            {emptyHint ?? "Once you've logged a few trades, this breaks your profit and loss down so you can see what's actually working."}
+          </div>
         </div>
       ) : (
         <div className="flex flex-col gap-2.5 flex-1">
