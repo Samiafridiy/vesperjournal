@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { DemoBanner } from "@/components/DemoBanner";
 import {
   LayoutDashboard,
   PlusCircle,
