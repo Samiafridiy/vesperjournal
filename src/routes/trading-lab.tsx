@@ -501,26 +501,59 @@ function PresetDialog({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 py-2">
         {/* Form */}
         <div className="flex flex-col gap-4">
-          <Field label="Preset name"><Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Conservative" /></Field>
-          <Field label="Account">
-            <Select value={accountId} onValueChange={setAccountId}>
-              <SelectTrigger><SelectValue placeholder="Pick account" /></SelectTrigger>
-              <SelectContent>
-                {accounts.map((a) => <SelectItem key={a.id} value={a.id}>{a.name} — {fmtMoney(Number(a.balance))}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Risk per trade %"><Input type="number" step="0.1" value={riskPct} onChange={(e) => setRiskPct(e.target.value)} className="font-mono" /></Field>
-            <Field label="R:R ratio (optional)"><Input type="number" step="0.1" value={rr} onChange={(e) => setRr(e.target.value)} placeholder="e.g. 2" className="font-mono" /></Field>
-          </div>
-          <Field label="Strategy tag (optional)"><Input value={strategy} onChange={(e) => setStrategy(e.target.value)} placeholder="e.g. Breakout, ICT" /></Field>
-          <div className="border-t border-border pt-4">
-            <div className="text-[11px] uppercase tracking-wider text-faint mb-3">Risk limits</div>
+          {/* Basics */}
+          <div className="flex flex-col gap-4">
+            <div className="text-[11px] uppercase tracking-wider text-faint">Basics</div>
+            <Field label="Preset name"><Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Conservative" /></Field>
+            <Field label="Account">
+              {quickAdd ? (
+                <div className="rounded-md border border-border bg-surface-2/40 p-3 flex flex-col gap-3">
+                  <div className="text-xs text-soft">Add an account — used to turn your risk % into dollars.</div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input value={newAcctName} onChange={(e) => setNewAcctName(e.target.value)} placeholder="Account name" />
+                    <Input type="number" step="any" value={newAcctBalance} onChange={(e) => setNewAcctBalance(e.target.value)} placeholder="Starting balance" className="font-mono" />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button type="button" size="sm" onClick={createAccountInline} disabled={creatingAcct} className="bg-champagne text-primary-foreground hover:bg-champagne/90">
+                      Add account
+                    </Button>
+                    {allAccounts.length > 0 && (
+                      <Button type="button" size="sm" variant="ghost" onClick={() => setQuickAdd(false)}>Cancel</Button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <Select value={accountId} onValueChange={setAccountId}>
+                    <SelectTrigger className="flex-1"><SelectValue placeholder="Pick account" /></SelectTrigger>
+                    <SelectContent>
+                      {allAccounts.map((a) => <SelectItem key={a.id} value={a.id}>{a.name} — {fmtMoney(Number(a.balance))}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  <Button type="button" variant="outline" size="icon" onClick={() => setQuickAdd(true)} aria-label="Add account">
+                    <Plus className="size-4" />
+                  </Button>
+                </div>
+              )}
+            </Field>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Max daily risk %"><Input type="number" step="0.1" value={daily} onChange={(e) => setDaily(e.target.value)} placeholder="e.g. 3" className="font-mono" /></Field>
-              <Field label="Max weekly risk %"><Input type="number" step="0.1" value={weekly} onChange={(e) => setWeekly(e.target.value)} placeholder="e.g. 6" className="font-mono" /></Field>
+              <Field label="Risk per trade %"><Input type="number" step="0.1" value={riskPct} onChange={(e) => setRiskPct(e.target.value)} className="font-mono" /></Field>
+              <Field label="R:R ratio (optional)" hint="How much you aim to win compared to what you risk — 2 means you target $2 for every $1 risked.">
+                <Input type="number" step="0.1" value={rr} onChange={(e) => setRr(e.target.value)} placeholder="e.g. 2" className="font-mono" />
+              </Field>
             </div>
+            <Field label="Strategy tag (optional)"><Input value={strategy} onChange={(e) => setStrategy(e.target.value)} placeholder="e.g. Breakout, ICT" /></Field>
+          </div>
+
+          {/* Risk limits (collapsed) */}
+          <div className="border-t border-border pt-4">
+            <SectionToggle open={limitsOpen} onToggle={() => setLimitsOpen((v) => !v)} label="Risk limits" sub="Optional caps on how much you can risk per day or week" />
+            {limitsOpen && (
+              <div className="grid grid-cols-2 gap-3 mt-3">
+                <Field label="Max daily risk %"><Input type="number" step="0.1" value={daily} onChange={(e) => setDaily(e.target.value)} placeholder="e.g. 3" className="font-mono" /></Field>
+                <Field label="Max weekly risk %"><Input type="number" step="0.1" value={weekly} onChange={(e) => setWeekly(e.target.value)} placeholder="e.g. 6" className="font-mono" /></Field>
+              </div>
+            )}
           </div>
           {/* Funded Account Settings */}
           <div className="border-t border-border pt-4">
@@ -549,15 +582,20 @@ function PresetDialog({
                 </Field>
                 <div className="grid grid-cols-2 gap-3">
                   <Field label="Profit target ($)"><Input type="number" step="any" value={profitTarget} onChange={(e) => setProfitTarget(e.target.value)} placeholder="e.g. 500" className="font-mono" /></Field>
-                  <Field label="Max drawdown ($)"><Input type="number" step="any" value={maxDD} onChange={(e) => setMaxDD(e.target.value)} placeholder="e.g. 400" className="font-mono" /></Field>
+                  <Field label="Max DD ($)" hint="Max drawdown: the largest total loss your funded account allows before it's breached.">
+                    <Input type="number" step="any" value={maxDD} onChange={(e) => setMaxDD(e.target.value)} placeholder="e.g. 400" className="font-mono" />
+                  </Field>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <Field label="Daily loss limit ($)"><Input type="number" step="any" value={dailyLossLimit} onChange={(e) => setDailyLossLimit(e.target.value)} placeholder="e.g. 200" className="font-mono" /></Field>
-                  <Field label="Min trading days"><Input type="number" step="1" value={minDays} onChange={(e) => setMinDays(e.target.value)} placeholder="e.g. 5" className="font-mono" /></Field>
+                <Field label="Daily loss limit ($)"><Input type="number" step="any" value={dailyLossLimit} onChange={(e) => setDailyLossLimit(e.target.value)} placeholder="e.g. 200" className="font-mono" /></Field>
+                <div className="border-t border-border pt-3">
+                  <SectionToggle open={moreFundedOpen} onToggle={() => setMoreFundedOpen((v) => !v)} label="More details" sub="Min trading days and challenge deadline" />
+                  {moreFundedOpen && (
+                    <div className="grid grid-cols-2 gap-3 mt-3">
+                      <Field label="Min trading days"><Input type="number" step="1" value={minDays} onChange={(e) => setMinDays(e.target.value)} placeholder="e.g. 5" className="font-mono" /></Field>
+                      <Field label="Challenge deadline"><Input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="font-mono" /></Field>
+                    </div>
+                  )}
                 </div>
-                <Field label="Challenge deadline">
-                  <Input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="font-mono" />
-                </Field>
               </div>
             )}
           </div>
