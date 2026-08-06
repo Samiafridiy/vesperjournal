@@ -715,12 +715,46 @@ function PresetDialog({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <Label className="text-xs uppercase tracking-[0.1em] text-faint">{label}</Label>
+      <Label className="text-xs uppercase tracking-[0.1em] text-faint flex items-center gap-1.5">
+        {label}
+        {hint && <InfoTip text={hint} />}
+      </Label>
       {children}
     </div>
+  );
+}
+
+export function InfoTip({ text }: { text: string }) {
+  return (
+    <TooltipProvider delayDuration={100}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button type="button" aria-label="More info" className="text-faint hover:text-champagne transition-colors">
+            <HelpCircle className="size-3.5" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-[240px] text-xs normal-case tracking-normal">{text}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
+function SectionToggle({ open, onToggle, label, sub }: { open: boolean; onToggle: () => void; label: string; sub?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="w-full flex items-center justify-between text-left group"
+    >
+      <span>
+        <span className="text-[11px] uppercase tracking-wider text-faint group-hover:text-soft transition-colors">{label}</span>
+        {sub && <span className="block text-[11px] text-faint/70 mt-0.5 normal-case">{sub}</span>}
+      </span>
+      <ChevronDown className={cn("size-4 text-faint transition-transform", open && "rotate-180")} />
+    </button>
   );
 }
 function KV({ k, v, small }: { k: string; v: string; small?: boolean }) {
