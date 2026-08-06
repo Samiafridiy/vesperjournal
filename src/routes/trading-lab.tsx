@@ -379,12 +379,13 @@ function RiskEngineTab() {
 }
 
 function PresetDialog({
-  edit, accounts, defaultAccountId, onSaved,
+  edit, accounts, defaultAccountId, onSaved, onAccountsChanged,
 }: {
   edit: RiskPreset | null;
   accounts: TradingAccount[];
   defaultAccountId: string | null;
   onSaved: () => void;
+  onAccountsChanged?: () => void;
 }) {
   const { user } = useAuth();
   const [name, setName] = useState(edit?.name ?? "");
@@ -407,7 +408,49 @@ function PresetDialog({
   const [deadline, setDeadline] = useState(edit?.challenge_deadline ?? "");
   const [startingBal, setStartingBal] = useState(edit?.starting_balance != null ? String(edit.starting_balance) : "");
 
-  const account = accounts.find((a) => a.id === accountId) ?? null;
+  // Section expansion
+  const [limitsOpen, setLimitsOpen] = useState<boolean>(!!(edit?.max_daily_risk_pct || edit?.max_weekly_risk_pct));
+  const [moreFundedOpen, setMoreFundedOpen] = useState<boolean>(!!(edit?.min_trading_days || edit?.challenge_deadline));
+
+  // Inline quick-add account
+  const [quickAdd, setQuickAdd] = useState(accounts.length === 0);
+  const [newAcctName, setNewAcctName] = useState("");
+  const [newAcctBalance, setNewAcctBalance] = useState("10000");
+  const [creatingAcct, setCreatingAcct] = useState(false);
+  const [localAccounts, setLocalAccounts] = useState<TradingAccount[]>(accounts);
+
+  const allAccounts = useMemo(() => {
+    const map = new Map<string, TradingAccount>();
+    for (const a of [...accounts, ...localAccounts]) map.set(a.id, a);
+    return Array.from(map.values());
+  }, [accounts, localAccounts]);
+
+  async function createAccountInline() {
+    if (!user) return;
+    if (!newAcctName.trim()) return toast.error("Account name required");
+    setCreatingAcct(true);
+    const { data, error } = await supabase
+      .from("trading_accounts")
+      .insert({
+        user_id: user.id,
+        name: newAcctName.trim(),
+        balance: Number(newAcctBalance) || 0,
+        is_default: allAccounts.length === 0,
+      })
+      .select()
+      .single();
+    setCreatingAcct(false);
+    if (error || !data) return toast.error(error?.message ?? "Could not create account");
+    const acct = data as TradingAccount;
+    setLocalAccounts((prev) => [...prev, acct]);
+    setAccountId(acct.id);
+    setQuickAdd(false);
+    setNewAcctName("");
+    toast.success("Account added");
+    onAccountsChanged?.();
+  }
+
+  const account = allAccounts.find((a) => a.id === accountId) ?? null;
   const balance = Number(account?.balance ?? 0);
   const riskN = Number(riskPct) || 0;
   const profile = useMemo(() => riskProfileLabel(riskN), [riskN]);
