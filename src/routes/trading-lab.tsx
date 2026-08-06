@@ -23,6 +23,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useTradingAccounts, useRiskPresets, riskProfileLabel, projectDrawdown, type RiskPreset, type TradingAccount } from "@/hooks/use-risk";
@@ -30,7 +31,7 @@ import { useTrades } from "@/hooks/use-trades";
 import { computeRiskUsedPct } from "@/lib/edge-context";
 import { fmtMoney, fmtPct } from "@/lib/trade-utils";
 import { toast } from "sonner";
-import { Beaker, Plus, Trash2, Star, AlertTriangle, Wallet, ShieldCheck, Trophy } from "lucide-react";
+import { Beaker, Plus, Trash2, Star, AlertTriangle, Wallet, ShieldCheck, Trophy, HelpCircle, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   ACCOUNT_TYPE_LABEL,
@@ -225,7 +226,7 @@ function AccountDialog({ onSaved, edit }: { onSaved: () => void; edit?: TradingA
 
 function RiskEngineTab() {
   const { presets, refetch } = useRiskPresets();
-  const { accounts, defaultAccount } = useTradingAccounts();
+  const { accounts, defaultAccount, refetch: refetchAccounts } = useTradingAccounts();
   const { trades } = useTrades();
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
@@ -275,12 +276,12 @@ function RiskEngineTab() {
       <div className="flex items-center justify-between">
         <div className="text-sm text-soft">
           {accounts.length === 0
-            ? "Add a trading account first to unlock dollar-based risk."
+            ? "No account yet — you can add one right inside the preset form."
             : `Calculations use ${defaultAccount?.name} (${fmtMoney(balance)})`}
         </div>
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
           <DialogTrigger asChild>
-            <Button className="bg-champagne text-primary-foreground hover:bg-champagne/90 gap-2" disabled={accounts.length === 0}>
+            <Button className="bg-champagne text-primary-foreground hover:bg-champagne/90 gap-2">
               <Plus className="size-4" /> New preset
             </Button>
           </DialogTrigger>
@@ -289,6 +290,7 @@ function RiskEngineTab() {
             edit={editing}
             accounts={accounts}
             defaultAccountId={defaultAccount?.id ?? null}
+            onAccountsChanged={refetchAccounts}
             onSaved={() => { setOpen(false); setEditing(null); refetch(); }}
           />
         </Dialog>
@@ -377,12 +379,13 @@ function RiskEngineTab() {
 }
 
 function PresetDialog({
-  edit, accounts, defaultAccountId, onSaved,
+  edit, accounts, defaultAccountId, onSaved, onAccountsChanged,
 }: {
   edit: RiskPreset | null;
   accounts: TradingAccount[];
   defaultAccountId: string | null;
   onSaved: () => void;
+  onAccountsChanged?: () => void;
 }) {
   const { user } = useAuth();
   const [name, setName] = useState(edit?.name ?? "");
@@ -405,7 +408,49 @@ function PresetDialog({
   const [deadline, setDeadline] = useState(edit?.challenge_deadline ?? "");
   const [startingBal, setStartingBal] = useState(edit?.starting_balance != null ? String(edit.starting_balance) : "");
 
-  const account = accounts.find((a) => a.id === accountId) ?? null;
+  // Section expansion
+  const [limitsOpen, setLimitsOpen] = useState<boolean>(!!(edit?.max_daily_risk_pct || edit?.max_weekly_risk_pct));
+  const [moreFundedOpen, setMoreFundedOpen] = useState<boolean>(!!(edit?.min_trading_days || edit?.challenge_deadline));
+
+  // Inline quick-add account
+  const [quickAdd, setQuickAdd] = useState(accounts.length === 0);
+  const [newAcctName, setNewAcctName] = useState("");
+  const [newAcctBalance, setNewAcctBalance] = useState("10000");
+  const [creatingAcct, setCreatingAcct] = useState(false);
+  const [localAccounts, setLocalAccounts] = useState<TradingAccount[]>(accounts);
+
+  const allAccounts = useMemo(() => {
+    const map = new Map<string, TradingAccount>();
+    for (const a of [...accounts, ...localAccounts]) map.set(a.id, a);
+    return Array.from(map.values());
+  }, [accounts, localAccounts]);
+
+  async function createAccountInline() {
+    if (!user) return;
+    if (!newAcctName.trim()) return toast.error("Account name required");
+    setCreatingAcct(true);
+    const { data, error } = await supabase
+      .from("trading_accounts")
+      .insert({
+        user_id: user.id,
+        name: newAcctName.trim(),
+        balance: Number(newAcctBalance) || 0,
+        is_default: allAccounts.length === 0,
+      })
+      .select()
+      .single();
+    setCreatingAcct(false);
+    if (error || !data) return toast.error(error?.message ?? "Could not create account");
+    const acct = data as TradingAccount;
+    setLocalAccounts((prev) => [...prev, acct]);
+    setAccountId(acct.id);
+    setQuickAdd(false);
+    setNewAcctName("");
+    toast.success("Account added");
+    onAccountsChanged?.();
+  }
+
+  const account = allAccounts.find((a) => a.id === accountId) ?? null;
   const balance = Number(account?.balance ?? 0);
   const riskN = Number(riskPct) || 0;
   const profile = useMemo(() => riskProfileLabel(riskN), [riskN]);
@@ -456,26 +501,59 @@ function PresetDialog({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 py-2">
         {/* Form */}
         <div className="flex flex-col gap-4">
-          <Field label="Preset name"><Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Conservative" /></Field>
-          <Field label="Account">
-            <Select value={accountId} onValueChange={setAccountId}>
-              <SelectTrigger><SelectValue placeholder="Pick account" /></SelectTrigger>
-              <SelectContent>
-                {accounts.map((a) => <SelectItem key={a.id} value={a.id}>{a.name} — {fmtMoney(Number(a.balance))}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Risk per trade %"><Input type="number" step="0.1" value={riskPct} onChange={(e) => setRiskPct(e.target.value)} className="font-mono" /></Field>
-            <Field label="R:R ratio (optional)"><Input type="number" step="0.1" value={rr} onChange={(e) => setRr(e.target.value)} placeholder="e.g. 2" className="font-mono" /></Field>
-          </div>
-          <Field label="Strategy tag (optional)"><Input value={strategy} onChange={(e) => setStrategy(e.target.value)} placeholder="e.g. Breakout, ICT" /></Field>
-          <div className="border-t border-border pt-4">
-            <div className="text-[11px] uppercase tracking-wider text-faint mb-3">Risk limits</div>
+          {/* Basics */}
+          <div className="flex flex-col gap-4">
+            <div className="text-[11px] uppercase tracking-wider text-faint">Basics</div>
+            <Field label="Preset name"><Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Conservative" /></Field>
+            <Field label="Account">
+              {quickAdd ? (
+                <div className="rounded-md border border-border bg-surface-2/40 p-3 flex flex-col gap-3">
+                  <div className="text-xs text-soft">Add an account — used to turn your risk % into dollars.</div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input value={newAcctName} onChange={(e) => setNewAcctName(e.target.value)} placeholder="Account name" />
+                    <Input type="number" step="any" value={newAcctBalance} onChange={(e) => setNewAcctBalance(e.target.value)} placeholder="Starting balance" className="font-mono" />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button type="button" size="sm" onClick={createAccountInline} disabled={creatingAcct} className="bg-champagne text-primary-foreground hover:bg-champagne/90">
+                      Add account
+                    </Button>
+                    {allAccounts.length > 0 && (
+                      <Button type="button" size="sm" variant="ghost" onClick={() => setQuickAdd(false)}>Cancel</Button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <Select value={accountId} onValueChange={setAccountId}>
+                    <SelectTrigger className="flex-1"><SelectValue placeholder="Pick account" /></SelectTrigger>
+                    <SelectContent>
+                      {allAccounts.map((a) => <SelectItem key={a.id} value={a.id}>{a.name} — {fmtMoney(Number(a.balance))}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  <Button type="button" variant="outline" size="icon" onClick={() => setQuickAdd(true)} aria-label="Add account">
+                    <Plus className="size-4" />
+                  </Button>
+                </div>
+              )}
+            </Field>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Max daily risk %"><Input type="number" step="0.1" value={daily} onChange={(e) => setDaily(e.target.value)} placeholder="e.g. 3" className="font-mono" /></Field>
-              <Field label="Max weekly risk %"><Input type="number" step="0.1" value={weekly} onChange={(e) => setWeekly(e.target.value)} placeholder="e.g. 6" className="font-mono" /></Field>
+              <Field label="Risk per trade %"><Input type="number" step="0.1" value={riskPct} onChange={(e) => setRiskPct(e.target.value)} className="font-mono" /></Field>
+              <Field label="R:R ratio (optional)" hint="How much you aim to win compared to what you risk — 2 means you target $2 for every $1 risked.">
+                <Input type="number" step="0.1" value={rr} onChange={(e) => setRr(e.target.value)} placeholder="e.g. 2" className="font-mono" />
+              </Field>
             </div>
+            <Field label="Strategy tag (optional)"><Input value={strategy} onChange={(e) => setStrategy(e.target.value)} placeholder="e.g. Breakout, ICT" /></Field>
+          </div>
+
+          {/* Risk limits (collapsed) */}
+          <div className="border-t border-border pt-4">
+            <SectionToggle open={limitsOpen} onToggle={() => setLimitsOpen((v) => !v)} label="Risk limits" sub="Optional caps on how much you can risk per day or week" />
+            {limitsOpen && (
+              <div className="grid grid-cols-2 gap-3 mt-3">
+                <Field label="Max daily risk %"><Input type="number" step="0.1" value={daily} onChange={(e) => setDaily(e.target.value)} placeholder="e.g. 3" className="font-mono" /></Field>
+                <Field label="Max weekly risk %"><Input type="number" step="0.1" value={weekly} onChange={(e) => setWeekly(e.target.value)} placeholder="e.g. 6" className="font-mono" /></Field>
+              </div>
+            )}
           </div>
           {/* Funded Account Settings */}
           <div className="border-t border-border pt-4">
@@ -504,15 +582,20 @@ function PresetDialog({
                 </Field>
                 <div className="grid grid-cols-2 gap-3">
                   <Field label="Profit target ($)"><Input type="number" step="any" value={profitTarget} onChange={(e) => setProfitTarget(e.target.value)} placeholder="e.g. 500" className="font-mono" /></Field>
-                  <Field label="Max drawdown ($)"><Input type="number" step="any" value={maxDD} onChange={(e) => setMaxDD(e.target.value)} placeholder="e.g. 400" className="font-mono" /></Field>
+                  <Field label="Max DD ($)" hint="Max drawdown: the largest total loss your funded account allows before it's breached.">
+                    <Input type="number" step="any" value={maxDD} onChange={(e) => setMaxDD(e.target.value)} placeholder="e.g. 400" className="font-mono" />
+                  </Field>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <Field label="Daily loss limit ($)"><Input type="number" step="any" value={dailyLossLimit} onChange={(e) => setDailyLossLimit(e.target.value)} placeholder="e.g. 200" className="font-mono" /></Field>
-                  <Field label="Min trading days"><Input type="number" step="1" value={minDays} onChange={(e) => setMinDays(e.target.value)} placeholder="e.g. 5" className="font-mono" /></Field>
+                <Field label="Daily loss limit ($)"><Input type="number" step="any" value={dailyLossLimit} onChange={(e) => setDailyLossLimit(e.target.value)} placeholder="e.g. 200" className="font-mono" /></Field>
+                <div className="border-t border-border pt-3">
+                  <SectionToggle open={moreFundedOpen} onToggle={() => setMoreFundedOpen((v) => !v)} label="More details" sub="Min trading days and challenge deadline" />
+                  {moreFundedOpen && (
+                    <div className="grid grid-cols-2 gap-3 mt-3">
+                      <Field label="Min trading days"><Input type="number" step="1" value={minDays} onChange={(e) => setMinDays(e.target.value)} placeholder="e.g. 5" className="font-mono" /></Field>
+                      <Field label="Challenge deadline"><Input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="font-mono" /></Field>
+                    </div>
+                  )}
                 </div>
-                <Field label="Challenge deadline">
-                  <Input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="font-mono" />
-                </Field>
               </div>
             )}
           </div>
@@ -579,7 +662,10 @@ function PresetDialog({
             </div>
           )}
           {!fundedEnabled && <div className="border-t border-border pt-3">
-            <div className="text-[11px] uppercase tracking-wider text-faint mb-2">Drawdown projection</div>
+            <div className="text-[11px] uppercase tracking-wider text-faint mb-2 flex items-center gap-1.5">
+              Drawdown projection
+              <InfoTip text="Drawdown projection: how much of your account you'd lose if several trades in a row lost." />
+            </div>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between"><span className="text-soft">After 5 losses</span><span className="font-mono text-neg">−{fmtPct(dd5.lostPct)} · {fmtMoney(-dd5.lost, { sign: true })}</span></div>
               <div className="flex justify-between"><span className="text-soft">After 10 losses</span><span className="font-mono text-neg">−{fmtPct(dd10.lostPct)} · {fmtMoney(-dd10.lost, { sign: true })}</span></div>
@@ -632,12 +718,46 @@ function PresetDialog({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <Label className="text-xs uppercase tracking-[0.1em] text-faint">{label}</Label>
+      <Label className="text-xs uppercase tracking-[0.1em] text-faint flex items-center gap-1.5">
+        {label}
+        {hint && <InfoTip text={hint} />}
+      </Label>
       {children}
     </div>
+  );
+}
+
+export function InfoTip({ text }: { text: string }) {
+  return (
+    <TooltipProvider delayDuration={100}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button type="button" aria-label="More info" className="text-faint hover:text-champagne transition-colors">
+            <HelpCircle className="size-3.5" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-[240px] text-xs normal-case tracking-normal">{text}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
+function SectionToggle({ open, onToggle, label, sub }: { open: boolean; onToggle: () => void; label: string; sub?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="w-full flex items-center justify-between text-left group"
+    >
+      <span>
+        <span className="text-[11px] uppercase tracking-wider text-faint group-hover:text-soft transition-colors">{label}</span>
+        {sub && <span className="block text-[11px] text-faint/70 mt-0.5 normal-case">{sub}</span>}
+      </span>
+      <ChevronDown className={cn("size-4 text-faint transition-transform", open && "rotate-180")} />
+    </button>
   );
 }
 function KV({ k, v, small }: { k: string; v: string; small?: boolean }) {

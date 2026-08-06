@@ -696,7 +696,7 @@ function NewTrade() {
               value={
                 plannedRR != null
                   ? `1 : ${plannedRR.toFixed(2)}`
-                  : <span className="text-champagne text-xs">SL & TP Required</span>
+                  : <span className="text-soft text-xs">Add entry, stop loss, and take profit to see planned R:R</span>
               }
               mono={plannedRR != null}
             />
@@ -705,8 +705,8 @@ function NewTrade() {
               value={
                 actualRR != null
                   ? `1 : ${actualRR.toFixed(2)}`
-                  : <span className="text-champagne text-xs">
-                      {stopN == null ? "SL Required" : "Close Required"}
+                  : <span className="text-soft text-xs">
+                      {stopN == null ? "Add a stop loss to calculate" : "Add a close price to calculate"}
                     </span>
               }
               mono={actualRR != null}
