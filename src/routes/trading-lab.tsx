@@ -226,7 +226,7 @@ function AccountDialog({ onSaved, edit }: { onSaved: () => void; edit?: TradingA
 
 function RiskEngineTab() {
   const { presets, refetch } = useRiskPresets();
-  const { accounts, defaultAccount } = useTradingAccounts();
+  const { accounts, defaultAccount, refetch: refetchAccounts } = useTradingAccounts();
   const { trades } = useTrades();
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
@@ -276,12 +276,12 @@ function RiskEngineTab() {
       <div className="flex items-center justify-between">
         <div className="text-sm text-soft">
           {accounts.length === 0
-            ? "Add a trading account first to unlock dollar-based risk."
+            ? "No account yet — you can add one right inside the preset form."
             : `Calculations use ${defaultAccount?.name} (${fmtMoney(balance)})`}
         </div>
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
           <DialogTrigger asChild>
-            <Button className="bg-champagne text-primary-foreground hover:bg-champagne/90 gap-2" disabled={accounts.length === 0}>
+            <Button className="bg-champagne text-primary-foreground hover:bg-champagne/90 gap-2">
               <Plus className="size-4" /> New preset
             </Button>
           </DialogTrigger>
@@ -290,6 +290,7 @@ function RiskEngineTab() {
             edit={editing}
             accounts={accounts}
             defaultAccountId={defaultAccount?.id ?? null}
+            onAccountsChanged={refetchAccounts}
             onSaved={() => { setOpen(false); setEditing(null); refetch(); }}
           />
         </Dialog>
