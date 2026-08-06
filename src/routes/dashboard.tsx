@@ -12,7 +12,7 @@ import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 import { TraderScoreCard } from "@/components/coach/TraderScoreCard";
 import { MistakeAlerts } from "@/components/coach/MistakeAlerts";
 import { computeTraderScore, detectMistakes } from "@/lib/trader-coach";
-import { DailyTipModal } from "@/components/coach/DailyTipModal";
+import { DailyInsightCard } from "@/components/coach/DailyInsightCard";
 import { DisciplineScoreCard } from "@/components/behavioral/DisciplineScoreCard";
 import { CooldownBanner } from "@/components/behavioral/CooldownBanner";
 import { computeDisciplineScore } from "@/lib/behavior-tracking";
@@ -92,7 +92,7 @@ function Dashboard() {
             </div>
           )}
           <CooldownBanner />
-          <DailyTipModal trades={trades} />
+          <DailyInsightCard trades={trades} />
 
           {/* HERO — Vesper Score + one insight + action */}
           <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-8">
