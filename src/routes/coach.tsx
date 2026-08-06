@@ -16,6 +16,7 @@ import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useTradingPlan } from "@/hooks/use-trading-plan";
+import { INSIGHT_STORAGE_KEY } from "@/lib/coach-format";
 
 const PLAN_SYSTEM = `The trader wants help improving their written TRADING PLAN.
 Use their real data above (win rate by pair/session, mistake tags, emotional patterns, risk stats) to propose SPECIFIC, personalised plan rules with real numbers — never generic advice.
@@ -39,11 +40,13 @@ function parseAssistant(content: string): {
   let followups: string[] = [];
   const planText = extractPlan(body);
   if (planText) body = body.replace(/```plan[^\n]*\n[\s\S]*?```/i, "").trim();
-  const fu = body.match(/<followups>([\s\S]*?)<\/followups>/i);
+  // Tolerate a missing/garbled closing tag so raw markup is never rendered.
+  const fu = body.match(/<followups>([\s\S]*?)(?:<\/followups>|$)/i);
   if (fu) {
     followups = fu[1].split("|").map((s) => s.trim()).filter(Boolean).slice(0, 3);
     body = body.replace(fu[0], "").trim();
   }
+  body = body.replace(/<\/?followups>/gi, "").trim();
   let bars: { label: string; value: number }[] | null = null;
   let bodyAfter = "";
   const bm = body.match(/```bars[^\n]*\n([\s\S]*?)```/i);
@@ -150,6 +153,7 @@ function InlineBars({ data, bodyText }: { data: { label: string; value: number }
 export const Route = createFileRoute("/coach")({
   validateSearch: (search: Record<string, unknown>) => ({
     plan: search.plan ? 1 : undefined,
+    insight: search.insight ? 1 : undefined,
   }),
   head: () => ({
     meta: [
@@ -200,6 +204,7 @@ function CoachPage() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const planStartedRef = useRef(false);
+  const insightLoadedRef = useRef(false);
 
   const loadConversations = useCallback(async () => {
     if (!user) return;
@@ -302,6 +307,20 @@ function CoachPage() {
     send(PLAN_STARTER);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search.plan, tradesLoading, user]);
+
+  // Show today's full proactive insight when arriving from the Overview summary card.
+  useEffect(() => {
+    if (!search.insight || insightLoadedRef.current) return;
+    insightLoadedRef.current = true;
+    const stored =
+      typeof window !== "undefined" ? localStorage.getItem(INSIGHT_STORAGE_KEY) : null;
+    if (!stored) return;
+    setMessages([
+      WELCOME,
+      { role: "user", content: "What's my most important insight today?" },
+      { role: "assistant", content: stored },
+    ]);
+  }, [search.insight]);
 
   async function applyPlan(text: string, mode: "replace" | "append") {
     const next =
