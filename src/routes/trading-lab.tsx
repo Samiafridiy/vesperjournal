@@ -662,7 +662,10 @@ function PresetDialog({
             </div>
           )}
           {!fundedEnabled && <div className="border-t border-border pt-3">
-            <div className="text-[11px] uppercase tracking-wider text-faint mb-2">Drawdown projection</div>
+            <div className="text-[11px] uppercase tracking-wider text-faint mb-2 flex items-center gap-1.5">
+              Drawdown projection
+              <InfoTip text="Drawdown projection: how much of your account you'd lose if several trades in a row lost." />
+            </div>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between"><span className="text-soft">After 5 losses</span><span className="font-mono text-neg">−{fmtPct(dd5.lostPct)} · {fmtMoney(-dd5.lost, { sign: true })}</span></div>
               <div className="flex justify-between"><span className="text-soft">After 10 losses</span><span className="font-mono text-neg">−{fmtPct(dd10.lostPct)} · {fmtMoney(-dd10.lost, { sign: true })}</span></div>
