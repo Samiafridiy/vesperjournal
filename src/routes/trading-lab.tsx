@@ -23,6 +23,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useTradingAccounts, useRiskPresets, riskProfileLabel, projectDrawdown, type RiskPreset, type TradingAccount } from "@/hooks/use-risk";
@@ -30,7 +31,7 @@ import { useTrades } from "@/hooks/use-trades";
 import { computeRiskUsedPct } from "@/lib/edge-context";
 import { fmtMoney, fmtPct } from "@/lib/trade-utils";
 import { toast } from "sonner";
-import { Beaker, Plus, Trash2, Star, AlertTriangle, Wallet, ShieldCheck, Trophy } from "lucide-react";
+import { Beaker, Plus, Trash2, Star, AlertTriangle, Wallet, ShieldCheck, Trophy, HelpCircle, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   ACCOUNT_TYPE_LABEL,
