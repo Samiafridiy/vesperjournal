@@ -49,7 +49,7 @@ export function TradingPlanCard() {
       )}
 
       {!loading && (
-        <Link to="/coach" search={{ plan: 1 }} className="mt-4 block shrink-0">
+        <Link to="/coach" search={{ plan: 1, insight: undefined }} className="mt-4 block shrink-0">
           <Button
             variant="outline"
             className="w-full gap-2 h-10 border-champagne/30 text-champagne hover:bg-champagne/10 hover:text-champagne"

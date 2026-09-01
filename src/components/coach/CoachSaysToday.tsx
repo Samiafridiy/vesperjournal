@@ -167,6 +167,7 @@ export function CoachSaysToday({ trades }: { trades: Trade[] }) {
             <div className="text-sm text-soft mt-1 leading-relaxed">{insight.body}</div>
             <Link
               to="/coach"
+              search={{ plan: undefined, insight: undefined }}
               className="inline-flex items-center gap-1.5 text-xs text-champagne hover:underline mt-3"
             >
               <MessageSquare className="size-3.5" /> Continue with Vesper →
