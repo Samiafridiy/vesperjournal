@@ -111,7 +111,7 @@ export function DailyInsightCard({ trades }: { trades: Trade[] }) {
                   <p className="text-sm leading-snug line-clamp-3">{headline}</p>
                   <Link
                     to="/coach"
-                    search={{ insight: 1 }}
+                    search={{ plan: undefined, insight: 1 }}
                     onClick={() => setOpen(false)}
                     className="mt-1.5 inline-flex items-center gap-1 text-xs text-champagne hover:underline"
                   >
