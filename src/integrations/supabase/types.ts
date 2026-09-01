@@ -68,6 +68,69 @@ export type Database = {
         }
         Relationships: []
       }
+      calendar_events: {
+        Row: {
+          actual: string
+          country: string
+          event_date: string
+          event_key: string
+          forecast: string
+          impact: string
+          previous: string
+          released_at: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          actual?: string
+          country?: string
+          event_date: string
+          event_key: string
+          forecast?: string
+          impact?: string
+          previous?: string
+          released_at?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          actual?: string
+          country?: string
+          event_date?: string
+          event_key?: string
+          forecast?: string
+          impact?: string
+          previous?: string
+          released_at?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      calendar_sync_state: {
+        Row: {
+          id: number
+          last_changed_at: string | null
+          last_checked_at: string | null
+          last_status: string
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          last_changed_at?: string | null
+          last_checked_at?: string | null
+          last_status?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          last_changed_at?: string | null
+          last_checked_at?: string | null
+          last_status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coach_conversations: {
         Row: {
           created_at: string
