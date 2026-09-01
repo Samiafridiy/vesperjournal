@@ -29,9 +29,10 @@ import { useAuth } from "@/lib/auth";
 import { useTradingAccounts, useRiskPresets, riskProfileLabel, projectDrawdown, type RiskPreset, type TradingAccount } from "@/hooks/use-risk";
 import { useTrades } from "@/hooks/use-trades";
 import { computeRiskUsedPct } from "@/lib/edge-context";
-import { fmtMoney, fmtPct } from "@/lib/trade-utils";
+import { fmtMoney, fmtPct, type Trade } from "@/lib/trade-utils";
+import { buildRiskObservations } from "@/lib/risk-patterns";
 import { toast } from "sonner";
-import { Beaker, Plus, Trash2, Star, AlertTriangle, Wallet, ShieldCheck, Trophy, HelpCircle, ChevronDown } from "lucide-react";
+import { Beaker, Plus, Trash2, Star, AlertTriangle, Wallet, ShieldCheck, Trophy, HelpCircle, ChevronDown, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   ACCOUNT_TYPE_LABEL,
@@ -374,6 +375,46 @@ function RiskEngineTab() {
           })}
         </div>
       )}
+
+      <RiskPatternsCard trades={trades} preset={defaultPreset ?? null} balance={balance} />
+    </div>
+  );
+}
+
+function RiskPatternsCard({ trades, preset, balance }: { trades: Trade[]; preset: RiskPreset | null; balance: number }) {
+  const observations = useMemo(
+    () => buildRiskObservations(trades, preset, balance),
+    [trades, preset, balance],
+  );
+
+  return (
+    <div className="surface-card p-5">
+      <div className="flex items-center gap-2 mb-1">
+        <Activity className="size-4 text-champagne" />
+        <span className="text-[11px] uppercase tracking-[0.18em] text-soft font-medium">Risk patterns</span>
+      </div>
+      <p className="text-xs text-faint mb-4">What your logged trades say about how you actually size and stop.</p>
+      {observations.length === 0 ? (
+        <p className="text-sm text-soft">
+          Risk pattern insights will appear here once you&rsquo;ve logged more trades.
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-2.5">
+          {observations.map((o) => (
+            <li key={o.id} className="flex items-start gap-2.5 text-sm">
+              <span
+                className={cn(
+                  "size-2 rounded-full mt-1.5 shrink-0",
+                  o.tone === "pos" && "bg-pos",
+                  o.tone === "warn" && "bg-champagne",
+                  o.tone === "neutral" && "bg-soft",
+                )}
+              />
+              <span className="text-soft leading-relaxed">{o.text}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
@@ -550,8 +591,8 @@ function PresetDialog({
             <SectionToggle open={limitsOpen} onToggle={() => setLimitsOpen((v) => !v)} label="Risk limits" sub="Optional caps on how much you can risk per day or week" />
             {limitsOpen && (
               <div className="grid grid-cols-2 gap-3 mt-3">
-                <Field label="Max daily risk %"><Input type="number" step="0.1" value={daily} onChange={(e) => setDaily(e.target.value)} placeholder="e.g. 3" className="font-mono" /></Field>
-                <Field label="Max weekly risk %"><Input type="number" step="0.1" value={weekly} onChange={(e) => setWeekly(e.target.value)} placeholder="e.g. 6" className="font-mono" /></Field>
+                <Field label="Max daily risk %" hint="Max daily risk: the most of your account you allow yourself to lose in a single day before you stop trading."><Input type="number" step="0.1" value={daily} onChange={(e) => setDaily(e.target.value)} placeholder="e.g. 3" className="font-mono" /></Field>
+                <Field label="Max weekly risk %" hint="Max weekly risk: the most of your account you allow yourself to lose across a whole week."><Input type="number" step="0.1" value={weekly} onChange={(e) => setWeekly(e.target.value)} placeholder="e.g. 6" className="font-mono" /></Field>
               </div>
             )}
           </div>
@@ -560,10 +601,15 @@ function PresetDialog({
             <label className="flex items-center justify-between mb-3">
               <span className="flex items-center gap-2 text-sm font-medium">
                 <Trophy className="size-4 text-champagne" />
-                Funded Account Rules
+                This is a funded challenge account
               </span>
               <Switch checked={fundedEnabled} onCheckedChange={setFundedEnabled} />
             </label>
+            {!fundedEnabled && (
+              <p className="text-[11px] text-faint -mt-2 mb-1">
+                Turn this on only for prop-firm challenges or funded accounts with profit targets and drawdown rules.
+              </p>
+            )}
             {fundedEnabled && (
               <div className="flex flex-col gap-3">
                 <Field label="Account type">
@@ -661,7 +707,7 @@ function PresetDialog({
               <div className="text-xl font-mono text-pos">{fmtMoney(riskAmt * Number(rr), { sign: true })}</div>
             </div>
           )}
-          {!fundedEnabled && <div className="border-t border-border pt-3">
+          <div className="border-t border-border pt-3">
             <div className="text-[11px] uppercase tracking-wider text-faint mb-2 flex items-center gap-1.5">
               Drawdown projection
               <InfoTip text="Drawdown projection: how much of your account you'd lose if several trades in a row lost." />
@@ -671,7 +717,10 @@ function PresetDialog({
               <div className="flex justify-between"><span className="text-soft">After 10 losses</span><span className="font-mono text-neg">−{fmtPct(dd10.lostPct)} · {fmtMoney(-dd10.lost, { sign: true })}</span></div>
               <div className="flex justify-between border-t border-border pt-2"><span className="text-soft">Balance after 10 losses</span><span className="font-mono">{fmtMoney(dd10.remaining)}</span></div>
             </div>
-          </div>}
+            <p className="text-[11px] text-faint mt-2">
+              This is what a losing streak at {riskN.toFixed(2)}% per trade would cost your {fmtMoney(balance)} account.
+            </p>
+          </div>
           {fundedEnabled && (() => {
             const startBal = Number(startingBal) || balance;
             const dd = Number(maxDD) || 0;
