@@ -78,7 +78,7 @@ function parseAssistant(content: string): {
     bodyAfter = body.slice(idx + bm[0].length).trim();
     body = body.slice(0, idx).trim();
   }
-  return { body, bodyAfter, bars, followups, planText };
+  return { body, bodyAfter, bars, followups, planText, continuity };
 }
 
 function formatBarValue(v: number, allInts: boolean) {
