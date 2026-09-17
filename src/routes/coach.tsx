@@ -8,7 +8,7 @@ import { askVesper } from "@/lib/coach.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Brain, Send, Sparkles, Plus, Menu, MessageSquare, Trash2, X } from "lucide-react";
+import { Brain, Send, Sparkles, Plus, Menu, MessageSquare, Trash2, X, History } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
@@ -201,7 +201,9 @@ function CoachPage() {
   const { trades, loading: tradesLoading } = useTrades();
   const { user } = useAuth();
   const ask = useServerFn(askVesper);
-  const context = useMemo(() => buildTraderContext(trades), [trades]);
+  const { memoryContext, recordAnalysis } = useCoachMemory(trades);
+  const baseContext = useMemo(() => buildTraderContext(trades), [trades]);
+  const context = memoryContext ? `${baseContext}\n\n${memoryContext}` : baseContext;
   const search = Route.useSearch();
   const { plan: currentPlan, save: savePlan } = useTradingPlan();
 
@@ -301,6 +303,7 @@ function CoachPage() {
       };
       setMessages([...next, reply]);
       if (convId && !res.error) await persistMessage(convId, reply);
+      if (!res.error) recordAnalysis();
       loadConversations();
     } catch {
       setMessages([...next, { role: "assistant", content: "⚠️ Something went wrong." }]);
@@ -432,6 +435,12 @@ function CoachPage() {
                 >
                   {m.role === "assistant" && parsed ? (
                     <div className="prose prose-sm prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                      {parsed.continuity && (
+                        <div className="not-prose mb-2 inline-flex items-center gap-1.5 rounded-full border border-champagne/25 bg-champagne/[0.06] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-champagne">
+                          <History className="size-3" />
+                          {parsed.continuity}
+                        </div>
+                      )}
                       <ReactMarkdown>{parsed.body}</ReactMarkdown>
                       {parsed.bars && (
                         <InlineBars
