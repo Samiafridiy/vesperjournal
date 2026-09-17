@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { Brain, Loader2, X, ArrowRight } from "lucide-react";
+import { Brain, Loader2, X, ArrowRight, History } from "lucide-react";
 import type { Trade } from "@/lib/trade-utils";
 import { buildTraderContext } from "@/lib/coach-context";
 import { askVesper } from "@/lib/coach.functions";
 import { useAuth } from "@/lib/auth";
-import { stripCoachTags, headlineFrom, INSIGHT_STORAGE_KEY } from "@/lib/coach-format";
+import { useCoachMemory } from "@/hooks/use-coach-memory";
+import { stripCoachTags, headlineFrom, continuityFrom, INSIGHT_STORAGE_KEY } from "@/lib/coach-format";
 
 function tipKey(uid: string) {
   const day = new Date().toISOString().slice(0, 10);
@@ -17,6 +18,7 @@ function tipKey(uid: string) {
 export function DailyInsightCard({ trades }: { trades: Trade[] }) {
   const { user } = useAuth();
   const ask = useServerFn(askVesper);
+  const { memoryContext, recordAnalysis } = useCoachMemory(trades);
   const [open, setOpen] = useState(false);
   const [full, setFull] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,7 +32,8 @@ export function DailyInsightCard({ trades }: { trades: Trade[] }) {
     let cancelled = false;
     setOpen(true);
     setLoading(true);
-    const ctx = buildTraderContext(trades.slice(0, 30));
+    const base = buildTraderContext(trades.slice(0, 30));
+    const ctx = memoryContext ? `${base}\n\n${memoryContext}` : base;
     ask({
       data: {
         context: ctx,
@@ -48,6 +51,7 @@ export function DailyInsightCard({ trades }: { trades: Trade[] }) {
         if (cancelled) return;
         const text = res.error ? `⚠️ ${res.error}` : res.reply;
         setFull(text);
+        if (!res.error) recordAnalysis();
         localStorage.setItem(key, "1");
         try {
           localStorage.setItem(INSIGHT_STORAGE_KEY, text);
@@ -74,6 +78,7 @@ export function DailyInsightCard({ trades }: { trades: Trade[] }) {
   }, [open]);
 
   const headline = headlineFrom(stripCoachTags(full));
+  const continuity = continuityFrom(full);
 
   return (
     <AnimatePresence>
@@ -99,8 +104,16 @@ export function DailyInsightCard({ trades }: { trades: Trade[] }) {
               <Brain className="size-3.5 text-champagne" />
             </div>
             <div className="min-w-0">
-              <div className="text-[10px] uppercase tracking-[0.18em] text-soft font-medium mb-1">
-                Vesper's insight
+              <div className="flex items-center gap-2 mb-1">
+                <div className="text-[10px] uppercase tracking-[0.18em] text-soft font-medium">
+                  Vesper's insight
+                </div>
+                {continuity && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-champagne/25 bg-champagne/[0.06] px-2 py-0.5 text-[9px] uppercase tracking-[0.14em] text-champagne">
+                    <History className="size-2.5" />
+                    {continuity}
+                  </span>
+                )}
               </div>
               {loading ? (
                 <div className="flex items-center gap-2 text-sm text-soft">
