@@ -78,6 +78,7 @@ export function DailyInsightCard({ trades }: { trades: Trade[] }) {
   }, [open]);
 
   const headline = headlineFrom(stripCoachTags(full));
+  const continuity = continuityFrom(full);
 
   return (
     <AnimatePresence>
