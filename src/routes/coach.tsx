@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useTradingPlan } from "@/hooks/use-trading-plan";
 import { INSIGHT_STORAGE_KEY } from "@/lib/coach-format";
+import { useCoachMemory } from "@/hooks/use-coach-memory";
 
 const PLAN_SYSTEM = `The trader wants help improving their written TRADING PLAN.
 Use their real data above (win rate by pair/session, mistake tags, emotional patterns, risk stats) to propose SPECIFIC, personalised plan rules with real numbers — never generic advice.
@@ -35,6 +36,7 @@ function parseAssistant(content: string): {
   bars: { label: string; value: number }[] | null;
   followups: string[];
   planText: string | null;
+  continuity: string | null;
 } {
   let body = content;
   let followups: string[] = [];
@@ -47,6 +49,13 @@ function parseAssistant(content: string): {
     body = body.replace(fu[0], "").trim();
   }
   body = body.replace(/<\/?followups>/gi, "").trim();
+  let continuity: string | null = null;
+  const cm = body.match(/<continuity>([\s\S]*?)(?:<\/continuity>|$)/i);
+  if (cm) {
+    continuity = cm[1].trim() || "Following up from your last session";
+    body = body.replace(cm[0], "").trim();
+  }
+  body = body.replace(/<\/?continuity>/gi, "").trim();
   let bars: { label: string; value: number }[] | null = null;
   let bodyAfter = "";
   const bm = body.match(/```bars[^\n]*\n([\s\S]*?)```/i);
