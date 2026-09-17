@@ -155,6 +155,60 @@ export type Database = {
         }
         Relationships: []
       }
+      coach_memory: {
+        Row: {
+          created_at: string
+          first_flagged_at: string
+          first_impact: number
+          first_occurrences: number
+          id: string
+          last_impact: number
+          last_occurrences: number
+          last_shown_at: string | null
+          last_updated_at: string
+          pattern_key: string
+          pattern_label: string
+          status: string
+          times_shown: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          first_flagged_at?: string
+          first_impact?: number
+          first_occurrences?: number
+          id?: string
+          last_impact?: number
+          last_occurrences?: number
+          last_shown_at?: string | null
+          last_updated_at?: string
+          pattern_key: string
+          pattern_label: string
+          status?: string
+          times_shown?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          first_flagged_at?: string
+          first_impact?: number
+          first_occurrences?: number
+          id?: string
+          last_impact?: number
+          last_occurrences?: number
+          last_shown_at?: string | null
+          last_updated_at?: string
+          pattern_key?: string
+          pattern_label?: string
+          status?: string
+          times_shown?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       coach_messages: {
         Row: {
           content: string
