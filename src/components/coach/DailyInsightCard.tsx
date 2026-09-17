@@ -104,8 +104,16 @@ export function DailyInsightCard({ trades }: { trades: Trade[] }) {
               <Brain className="size-3.5 text-champagne" />
             </div>
             <div className="min-w-0">
-              <div className="text-[10px] uppercase tracking-[0.18em] text-soft font-medium mb-1">
-                Vesper's insight
+              <div className="flex items-center gap-2 mb-1">
+                <div className="text-[10px] uppercase tracking-[0.18em] text-soft font-medium">
+                  Vesper's insight
+                </div>
+                {continuity && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-champagne/25 bg-champagne/[0.06] px-2 py-0.5 text-[9px] uppercase tracking-[0.14em] text-champagne">
+                    <History className="size-2.5" />
+                    {continuity}
+                  </span>
+                )}
               </div>
               {loading ? (
                 <div className="flex items-center gap-2 text-sm text-soft">
