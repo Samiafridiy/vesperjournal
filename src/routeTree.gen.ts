@@ -29,6 +29,7 @@ import { Route as ApiMetaapiSyncRouteImport } from './routes/api.metaapi-sync'
 import { Route as ApiEaWebhookRouteImport } from './routes/api.ea-webhook'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as ApiPublicCalendarSyncRouteImport } from './routes/api.public.calendar-sync'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 
 const WeeklyReviewRoute = WeeklyReviewRouteImport.update({
@@ -133,6 +134,11 @@ const Char91DotmcpChar93ListToolsRoute =
     path: '/.mcp/list-tools',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicCalendarSyncRoute = ApiPublicCalendarSyncRouteImport.update({
+  id: '/api/public/calendar-sync',
+  path: '/api/public/calendar-sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/api/metaapi-sync': typeof ApiMetaapiSyncRoute
   '/trade/new': typeof TradeNewRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/api/metaapi-sync': typeof ApiMetaapiSyncRoute
   '/trade/new': typeof TradeNewRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -209,6 +217,7 @@ export interface FileRoutesById {
   '/api/metaapi-sync': typeof ApiMetaapiSyncRoute
   '/trade/new': typeof TradeNewRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -234,6 +243,7 @@ export interface FileRouteTypes {
     | '/api/metaapi-sync'
     | '/trade/new'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/calendar-sync'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
     | '/api/metaapi-sync'
     | '/trade/new'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/calendar-sync'
   id:
     | '__root__'
     | '/'
@@ -280,6 +291,7 @@ export interface FileRouteTypes {
     | '/api/metaapi-sync'
     | '/trade/new'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/calendar-sync'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -304,6 +316,7 @@ export interface RootRouteChildren {
   ApiMetaapiSyncRoute: typeof ApiMetaapiSyncRoute
   TradeNewRoute: typeof TradeNewRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicCalendarSyncRoute: typeof ApiPublicCalendarSyncRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -448,6 +461,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/calendar-sync': {
+      id: '/api/public/calendar-sync'
+      path: '/api/public/calendar-sync'
+      fullPath: '/api/public/calendar-sync'
+      preLoaderRoute: typeof ApiPublicCalendarSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
       path: '/.mcp/invoke-tool/$tool'
@@ -481,6 +501,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiMetaapiSyncRoute: ApiMetaapiSyncRoute,
   TradeNewRoute: TradeNewRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicCalendarSyncRoute: ApiPublicCalendarSyncRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

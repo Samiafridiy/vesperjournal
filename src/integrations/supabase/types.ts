@@ -76,8 +76,13 @@ export type Database = {
           event_key: string
           forecast: string
           impact: string
+          last_seen_at: string
           previous: string
+          previous_original: string | null
+          previous_revised: boolean
           released_at: string | null
+          source: string
+          status: string
           title: string
           updated_at: string
         }
@@ -88,8 +93,13 @@ export type Database = {
           event_key: string
           forecast?: string
           impact?: string
+          last_seen_at?: string
           previous?: string
+          previous_original?: string | null
+          previous_revised?: boolean
           released_at?: string | null
+          source?: string
+          status?: string
           title: string
           updated_at?: string
         }
@@ -100,8 +110,13 @@ export type Database = {
           event_key?: string
           forecast?: string
           impact?: string
+          last_seen_at?: string
           previous?: string
+          previous_original?: string | null
+          previous_revised?: boolean
           released_at?: string | null
+          source?: string
+          status?: string
           title?: string
           updated_at?: string
         }
@@ -243,6 +258,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      market_thesis: {
+        Row: {
+          body: string
+          created_at: string
+          evidence: Json
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          evidence?: Json
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          evidence?: Json
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
