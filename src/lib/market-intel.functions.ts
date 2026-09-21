@@ -204,10 +204,12 @@ export const getNewsFeed = createServerFn({ method: "POST" })
 /*  Economic calendar: server-side sync into the database                     */
 /* -------------------------------------------------------------------------- */
 
-const FF_FEEDS = [
-  "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
-  "https://nfs.faireconomy.media/ff_calendar_nextweek.json",
-];
+const FF_FEEDS = ["https://nfs.faireconomy.media/ff_calendar_thisweek.json"];
+
+/** The source rate-limits aggressive callers (429). Keep a floor between real fetches. */
+const MIN_FETCH_GAP_MS = 60_000;
+let lastFetchAt = 0;
+
 
 function mapImpact(raw: string): StoredEvent["impact"] {
   const s = (raw || "").toLowerCase();
@@ -227,11 +229,18 @@ function eventKey(country: string, title: string, date: string) {
 export async function syncCalendarNow(): Promise<{ changed: number; error: string | null }> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   try {
+    const sinceLast = Date.now() - lastFetchAt;
+    if (sinceLast < MIN_FETCH_GAP_MS) {
+      // Too soon — the stored rows are still the freshest known data.
+      return { changed: 0, error: null };
+    }
+    lastFetchAt = Date.now();
+
     const raws: any[] = [];
     for (const url of FF_FEEDS) {
       try {
         const res = await fetch(url, {
-          headers: { "User-Agent": "Mozilla/5.0 VesperJournal" },
+          headers: { "User-Agent": "Mozilla/5.0 VesperJournal", Accept: "application/json" },
           signal: AbortSignal.timeout(10_000),
         });
         if (!res.ok) continue;
@@ -242,11 +251,13 @@ export async function syncCalendarNow(): Promise<{ changed: number; error: strin
       }
     }
     if (!raws.length) {
+      // Keep whatever rows we already have; only record that the source was unreachable.
       await supabaseAdmin
         .from("calendar_sync_state")
         .upsert({ id: 1, last_checked_at: new Date().toISOString(), last_status: "source_unavailable" });
       return { changed: 0, error: "source_unavailable" };
     }
+
 
     const keys = raws.map((e) => eventKey(e.country, e.title, e.date));
     const { data: existing } = await supabaseAdmin

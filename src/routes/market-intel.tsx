@@ -307,8 +307,34 @@ function MarketIntelPage() {
     });
   }, [tab, macro.length, macroLoading, fetchMacro]);
 
+  // Scenarios always look at the whole week, independent of the calendar range
+  const [weekEvents, setWeekEvents] = useState<StoredEvent[]>([]);
+  useEffect(() => {
+    if (tab !== "scenarios") return;
+    let cancelled = false;
+    fetchCalendar({ data: { range: "week" } }).then((r) => {
+      if (!cancelled) setWeekEvents(r.events ?? []);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [tab, fetchCalendar]);
+
+
+
   // Neutral explanations for headlines, on the Analysis tab
-  const topHeadlines = useMemo(() => news.slice(0, 6), [news]);
+  // Explain the most consequential stories first, not just the newest.
+  const topHeadlines = useMemo(() => {
+    const rank = (i: Impact) => (i === "HIGH" ? 0 : i === "MEDIUM" ? 1 : 2);
+    return [...news]
+      .sort((a, b) => {
+        const r = rank(classifyHeadlineImpact(a.title)) - rank(classifyHeadlineImpact(b.title));
+        if (r !== 0) return r;
+        return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+      })
+      .slice(0, 6);
+  }, [news]);
+
   useEffect(() => {
     if (tab !== "analysis" || !topHeadlines.length) return;
     const todo = topHeadlines.filter((h) => !newsReadings[h.id]);
@@ -509,7 +535,11 @@ function MarketIntelPage() {
           )}
 
           {tab === "scenarios" && (
-            <ScenariosSection events={events} readings={readings} />
+            <ScenariosSection
+              events={weekEvents.length ? weekEvents : events}
+              readings={readings}
+            />
+
           )}
 
           {tab === "thesis" && <ThesisSection />}
@@ -1135,7 +1165,8 @@ function ScenariosSection({
   if (!upcoming.length) {
     return (
       <div className="text-center text-soft text-sm py-10 rounded-xl border border-border bg-card">
-        No high-impact releases left in this range. Switch the calendar range to see more.
+        No high-impact releases left this week.
+
       </div>
     );
   }
