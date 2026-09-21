@@ -1165,7 +1165,8 @@ function ScenariosSection({
   if (!upcoming.length) {
     return (
       <div className="text-center text-soft text-sm py-10 rounded-xl border border-border bg-card">
-        No high-impact releases left in this range. Switch the calendar range to see more.
+        No high-impact releases left this week.
+
       </div>
     );
   }
