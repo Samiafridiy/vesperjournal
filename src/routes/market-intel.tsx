@@ -308,7 +308,18 @@ function MarketIntelPage() {
   }, [tab, macro.length, macroLoading, fetchMacro]);
 
   // Neutral explanations for headlines, on the Analysis tab
-  const topHeadlines = useMemo(() => news.slice(0, 6), [news]);
+  // Explain the most consequential stories first, not just the newest.
+  const topHeadlines = useMemo(() => {
+    const rank = (i: Impact) => (i === "HIGH" ? 0 : i === "MEDIUM" ? 1 : 2);
+    return [...news]
+      .sort((a, b) => {
+        const r = rank(classifyHeadlineImpact(a.title)) - rank(classifyHeadlineImpact(b.title));
+        if (r !== 0) return r;
+        return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+      })
+      .slice(0, 6);
+  }, [news]);
+
   useEffect(() => {
     if (tab !== "analysis" || !topHeadlines.length) return;
     const todo = topHeadlines.filter((h) => !newsReadings[h.id]);
