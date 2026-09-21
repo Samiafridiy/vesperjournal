@@ -307,6 +307,21 @@ function MarketIntelPage() {
     });
   }, [tab, macro.length, macroLoading, fetchMacro]);
 
+  // Scenarios always look at the whole week, independent of the calendar range
+  const [weekEvents, setWeekEvents] = useState<StoredEvent[]>([]);
+  useEffect(() => {
+    if (tab !== "scenarios") return;
+    let cancelled = false;
+    fetchCalendar({ data: { range: "week" } }).then((r) => {
+      if (!cancelled) setWeekEvents(r.events ?? []);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [tab, fetchCalendar]);
+
+
+
   // Neutral explanations for headlines, on the Analysis tab
   // Explain the most consequential stories first, not just the newest.
   const topHeadlines = useMemo(() => {
