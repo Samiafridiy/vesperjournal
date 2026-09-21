@@ -535,7 +535,11 @@ function MarketIntelPage() {
           )}
 
           {tab === "scenarios" && (
-            <ScenariosSection events={events} readings={readings} />
+            <ScenariosSection
+              events={weekEvents.length ? weekEvents : events}
+              readings={readings}
+            />
+
           )}
 
           {tab === "thesis" && <ThesisSection />}
