@@ -204,10 +204,12 @@ export const getNewsFeed = createServerFn({ method: "POST" })
 /*  Economic calendar: server-side sync into the database                     */
 /* -------------------------------------------------------------------------- */
 
-const FF_FEEDS = [
-  "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
-  "https://nfs.faireconomy.media/ff_calendar_nextweek.json",
-];
+const FF_FEEDS = ["https://nfs.faireconomy.media/ff_calendar_thisweek.json"];
+
+/** The source rate-limits aggressive callers (429). Keep a floor between real fetches. */
+const MIN_FETCH_GAP_MS = 60_000;
+let lastFetchAt = 0;
+
 
 function mapImpact(raw: string): StoredEvent["impact"] {
   const s = (raw || "").toLowerCase();
