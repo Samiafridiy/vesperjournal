@@ -245,14 +245,21 @@ function TradesList() {
             </thead>
             <tbody>
               {loading && (
-                <tr><td colSpan={8} className="text-center py-10 text-soft">Loading…</td></tr>
+                <tr><td colSpan={9} className="text-center py-10 text-soft">Loading…</td></tr>
               )}
               {!loading && filtered.length === 0 && (
-                <tr><td colSpan={8} className="text-center py-12 text-soft">No trades match your filters.</td></tr>
+                <tr><td colSpan={9} className="text-center py-12 text-soft">No trades match your filters.</td></tr>
               )}
               {filtered.map((t) => (
                 <tr key={t.id} onClick={() => setSelected(t)}
                   className="border-b border-border last:border-0 hover:bg-surface-2 cursor-pointer transition-colors">
+                  <td className="w-10 px-3 py-3" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={checkedIds.has(t.id)}
+                      onCheckedChange={(v) => toggleChecked(t.id, v === true)}
+                      aria-label={`Select trade ${t.pair}`}
+                    />
+                  </td>
                   <td className="px-5 py-3 text-soft font-mono text-xs">{new Date(t.trade_date).toLocaleDateString()}</td>
                   <td className="px-5 py-3 font-medium">
                     <div className="flex flex-col gap-1.5">
