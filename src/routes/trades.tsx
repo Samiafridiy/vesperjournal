@@ -113,6 +113,38 @@ function TradesList() {
     setSelected(null);
   }
 
+  function toggleChecked(id: string, on: boolean) {
+    setCheckedIds((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
+
+  const visibleChecked = filtered.filter((t) => checkedIds.has(t.id));
+  const allVisibleChecked = filtered.length > 0 && visibleChecked.length === filtered.length;
+
+  function toggleSelectAll(on: boolean) {
+    setCheckedIds(on ? new Set(filtered.map((t) => t.id)) : new Set());
+  }
+
+  async function deleteSelected() {
+    const ids = Array.from(checkedIds);
+    if (ids.length === 0) return;
+    setBulkDeleting(true);
+    const { error } = await supabase.from("trades").delete().in("id", ids);
+    setBulkDeleting(false);
+    setConfirmBulkDelete(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(`${ids.length} trade${ids.length === 1 ? "" : "s"} deleted.`);
+    setCheckedIds(new Set());
+    if (selected && checkedIds.has(selected.id)) setSelected(null);
+  }
+
   return (
     <div className="px-5 md:px-10 py-8 md:py-10 max-w-[1400px] mx-auto">
       <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 border-b border-border pb-6 mb-8">
