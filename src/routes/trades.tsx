@@ -13,6 +13,17 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { PlusCircle, Search, Trash2, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -51,6 +62,9 @@ function TradesList() {
   const [sessionF, setSessionF] = useState<string>(ALL);
   const [resultF, setResultF] = useState<string>(ALL);
   const [selected, setSelected] = useState<Trade | null>(null);
+  const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
+  const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -97,6 +111,38 @@ function TradesList() {
     if (error) toast.error(error.message);
     else toast.success("Trade deleted.");
     setSelected(null);
+  }
+
+  function toggleChecked(id: string, on: boolean) {
+    setCheckedIds((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
+
+  const visibleChecked = filtered.filter((t) => checkedIds.has(t.id));
+  const allVisibleChecked = filtered.length > 0 && visibleChecked.length === filtered.length;
+
+  function toggleSelectAll(on: boolean) {
+    setCheckedIds(on ? new Set(filtered.map((t) => t.id)) : new Set());
+  }
+
+  async function deleteSelected() {
+    const ids = Array.from(checkedIds);
+    if (ids.length === 0) return;
+    setBulkDeleting(true);
+    const { error } = await supabase.from("trades").delete().in("id", ids);
+    setBulkDeleting(false);
+    setConfirmBulkDelete(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(`${ids.length} trade${ids.length === 1 ? "" : "s"} deleted.`);
+    setCheckedIds(new Set());
+    if (selected && checkedIds.has(selected.id)) setSelected(null);
   }
 
   return (
@@ -149,12 +195,44 @@ function TradesList() {
         </Select>
       </div>
 
+      {/* Bulk action bar */}
+      {checkedIds.size > 0 && (
+        <div className="sticky top-0 z-20 mb-3 flex items-center justify-between gap-3 rounded-lg border border-champagne/30 bg-surface px-4 py-2.5">
+          <span className="text-sm font-medium">
+            {checkedIds.size} trade{checkedIds.size === 1 ? "" : "s"} selected
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setCheckedIds(new Set())}
+            >
+              Clear selection
+            </Button>
+            <Button
+              size="sm"
+              className="bg-neg/90 text-primary-foreground hover:bg-neg gap-2"
+              onClick={() => setConfirmBulkDelete(true)}
+            >
+              <Trash2 className="size-4" /> Delete selected
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Table */}
       <div className="surface-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-xs uppercase tracking-wider text-faint border-b border-border">
+                <th className="w-10 px-3 py-3">
+                  <Checkbox
+                    checked={allVisibleChecked}
+                    onCheckedChange={(v) => toggleSelectAll(v === true)}
+                    aria-label="Select all visible trades"
+                  />
+                </th>
                 <th className="text-left font-medium px-5 py-3">Date</th>
                 <th className="text-left font-medium px-5 py-3">Pair</th>
                 <th className="text-left font-medium px-5 py-3">Side</th>
@@ -167,14 +245,21 @@ function TradesList() {
             </thead>
             <tbody>
               {loading && (
-                <tr><td colSpan={8} className="text-center py-10 text-soft">Loading…</td></tr>
+                <tr><td colSpan={9} className="text-center py-10 text-soft">Loading…</td></tr>
               )}
               {!loading && filtered.length === 0 && (
-                <tr><td colSpan={8} className="text-center py-12 text-soft">No trades match your filters.</td></tr>
+                <tr><td colSpan={9} className="text-center py-12 text-soft">No trades match your filters.</td></tr>
               )}
               {filtered.map((t) => (
                 <tr key={t.id} onClick={() => setSelected(t)}
                   className="border-b border-border last:border-0 hover:bg-surface-2 cursor-pointer transition-colors">
+                  <td className="w-10 px-3 py-3" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={checkedIds.has(t.id)}
+                      onCheckedChange={(v) => toggleChecked(t.id, v === true)}
+                      aria-label={`Select trade ${t.pair}`}
+                    />
+                  </td>
                   <td className="px-5 py-3 text-soft font-mono text-xs">{new Date(t.trade_date).toLocaleDateString()}</td>
                   <td className="px-5 py-3 font-medium">
                     <div className="flex flex-col gap-1.5">
@@ -201,6 +286,31 @@ function TradesList() {
           </table>
         </div>
       </div>
+
+      {/* Bulk delete confirmation */}
+      <AlertDialog open={confirmBulkDelete} onOpenChange={setConfirmBulkDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {checkedIds.size} trade{checkedIds.size === 1 ? "" : "s"}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This cannot be undone. The selected trades will be permanently removed from your journal.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                deleteSelected();
+              }}
+              disabled={bulkDeleting}
+              className="bg-neg/90 text-primary-foreground hover:bg-neg"
+            >
+              {bulkDeleting ? "Deleting…" : "Confirm"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Detail drawer */}
       {selected && (
