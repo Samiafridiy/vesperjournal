@@ -195,12 +195,44 @@ function TradesList() {
         </Select>
       </div>
 
+      {/* Bulk action bar */}
+      {checkedIds.size > 0 && (
+        <div className="sticky top-0 z-20 mb-3 flex items-center justify-between gap-3 rounded-lg border border-champagne/30 bg-surface px-4 py-2.5">
+          <span className="text-sm font-medium">
+            {checkedIds.size} trade{checkedIds.size === 1 ? "" : "s"} selected
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setCheckedIds(new Set())}
+            >
+              Clear selection
+            </Button>
+            <Button
+              size="sm"
+              className="bg-neg/90 text-primary-foreground hover:bg-neg gap-2"
+              onClick={() => setConfirmBulkDelete(true)}
+            >
+              <Trash2 className="size-4" /> Delete selected
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Table */}
       <div className="surface-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-xs uppercase tracking-wider text-faint border-b border-border">
+                <th className="w-10 px-3 py-3">
+                  <Checkbox
+                    checked={allVisibleChecked}
+                    onCheckedChange={(v) => toggleSelectAll(v === true)}
+                    aria-label="Select all visible trades"
+                  />
+                </th>
                 <th className="text-left font-medium px-5 py-3">Date</th>
                 <th className="text-left font-medium px-5 py-3">Pair</th>
                 <th className="text-left font-medium px-5 py-3">Side</th>
