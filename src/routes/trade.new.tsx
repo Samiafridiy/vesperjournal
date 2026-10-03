@@ -53,6 +53,7 @@ import {
 } from "@/components/ui/popover";
 import { Link } from "@tanstack/react-router";
 import { PairSelector, pushRecentPair } from "@/components/PairSelector";
+import { VoiceTradeInput } from "@/components/VoiceTradeInput";
 
 export const Route = createFileRoute("/trade/new")({
   validateSearch: z.object({
@@ -108,6 +109,8 @@ function NewTrade() {
   const [followedPlan, setFollowedPlan] = useState<boolean | null>(null);
   const [confidence, setConfidence] = useState<number>(5);
   const [shakeKey, setShakeKey] = useState<Record<string, number>>({});
+  const [voiceFilled, setVoiceFilled] = useState(false);
+  const [voiceMissing, setVoiceMissing] = useState<string[]>([]);
   const [edgeExpanded, setEdgeExpanded] = useState(false);
   const [screenshot, setScreenshot] = useState<File | null>(null);
 
@@ -433,6 +436,46 @@ function NewTrade() {
         </h1>
         <p className="text-soft mt-2">P&L, R:R, and result are auto-calculated.</p>
       </header>
+
+      {!isEdit && (
+        <div className="mb-5 flex flex-col gap-3">
+          <VoiceTradeInput
+            onExtracted={(r) => {
+              if (r.pair) setPair(r.pair);
+              if (r.direction) setDirection(r.direction);
+              setEntry(r.entry != null ? String(r.entry) : "");
+              setStop(r.stop != null ? String(r.stop) : "");
+              setTp(r.takeProfit != null ? String(r.takeProfit) : "");
+              setClose(r.close != null ? String(r.close) : "");
+              if (r.session) setSession(r.session);
+              if (r.emotionBefore) setEmotionBefore(r.emotionBefore);
+              if (r.emotionAfter) setEmotionAfter(r.emotionAfter);
+              if (r.mistakes.length) setMistakes(r.mistakes);
+              if (r.winsWell.length) setWinsWell(r.winsWell);
+              if (r.followedPlan != null) setFollowedPlan(r.followedPlan);
+              if (r.notes) setNotes((n) => (n ? `${n}\n${r.notes}` : r.notes!));
+              const missing = [
+                r.entry == null && "Entry",
+                r.stop == null && "Stop loss",
+                r.takeProfit == null && "Take profit",
+                r.close == null && "Close",
+              ].filter(Boolean) as string[];
+              setVoiceMissing(missing);
+              setVoiceFilled(true);
+            }}
+          />
+          {voiceFilled && (
+            <div className="rounded-md border border-champagne/40 bg-surface-2 p-3 text-sm">
+              <div className="text-champagne font-medium">AI-filled from your voice note — please review.</div>
+              {voiceMissing.length > 0 && (
+                <div className="text-soft mt-1">
+                  Not clearly heard, left blank — fill in manually: <span className="text-warn">{voiceMissing.join(", ")}</span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       <form onSubmit={onSubmit} className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-5">
         <section className="surface-card p-6 md:p-8 flex flex-col gap-6 tl-fade-up" style={{ animationDelay: "0.1s" }}>
