@@ -1,3 +1,4 @@
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
@@ -582,6 +583,7 @@ function toReading(r: any): NeutralReading {
 }
 
 export const explainHeadlines = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z
       .object({ headlines: z.array(z.string().min(1).max(400)).min(1).max(10) })
@@ -658,6 +660,7 @@ export const getCachedCalendarReadings = createServerFn({ method: "POST" })
   });
 
 export const ensureCalendarReadings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => CalInput.parse(input))
   .handler(async ({ data }) => {
     try {
@@ -751,6 +754,7 @@ export const ensureCalendarReadings = createServerFn({ method: "POST" })
 /* -------------------------------------------------------------------------- */
 
 export const critiqueThesis = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z.object({ thesis: z.string().min(10).max(4000) }).parse(input),
   )

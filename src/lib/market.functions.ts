@@ -1,3 +1,4 @@
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
@@ -132,6 +133,7 @@ const AnalyzeInput = z.object({
 });
 
 export const analyzeHeadlines = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => AnalyzeInput.parse(input))
   .handler(async ({ data }) => {
     const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
@@ -366,6 +368,7 @@ const CalendarAnalyzeInput = z.object({
 });
 
 export const analyzeCalendar = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => CalendarAnalyzeInput.parse(input))
   .handler(async ({ data }) => {
     const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
@@ -529,6 +532,7 @@ export const getCachedCalendarAnalysis = createServerFn({ method: "POST" })
  * value changed after release. Persists results so nobody pays for them twice.
  */
 export const ensureCalendarAnalysis = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => CachedInput.parse(input))
   .handler(async ({ data }) => {
     const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
