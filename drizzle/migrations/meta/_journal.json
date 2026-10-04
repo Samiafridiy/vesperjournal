@@ -15,6 +15,13 @@
       "when": 1789811800032,
       "tag": "0001_market_intel_2_calendar_meta_and_thesis",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791108218468,
+      "tag": "0002_migration",
+      "breakpoints": true
     }
   ]
 }

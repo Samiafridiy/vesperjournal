@@ -1,3 +1,4 @@
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
@@ -26,6 +27,7 @@ Rules:
 - If the user has already reflected, acknowledge it inside "insight" before naming the pattern.`;
 
 export const askMentor = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => InputSchema.parse(input))
   .handler(async ({ data }) => {
     const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;

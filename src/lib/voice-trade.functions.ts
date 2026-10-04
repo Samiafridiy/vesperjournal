@@ -1,3 +1,4 @@
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { PAIRS, SESSIONS, EMOTIONS_BEFORE, EMOTIONS_AFTER, MISTAKES, WINS_WELL } from "@/lib/trade-utils";
@@ -44,6 +45,7 @@ function num(v: unknown): number | null {
 }
 
 export const extractTradeFromVoice = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => Input.parse(d))
   .handler(async ({ data }) => {
     const key = process.env.LOVABLE_API_KEY;

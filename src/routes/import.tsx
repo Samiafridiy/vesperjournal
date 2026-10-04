@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { RouteGate } from "@/components/RouteGate";
 import { AppShell } from "@/components/AppShell";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { getEaWebhookToken } from "@/lib/ea-webhook.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -347,10 +349,16 @@ function EaSetup() {
   const { user } = useAuth();
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
+  const fetchToken = useServerFn(getEaWebhookToken);
+  const [token, setToken] = useState<string | null>(null);
+  useEffect(() => {
+    if (!user) return;
+    fetchToken().then((r) => setToken(r.token)).catch(() => setToken(null));
+  }, [user?.id]);
   const webhookUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/api/ea-webhook?uid=${user?.id ?? "YOUR_USER_ID"}`
-      : "";
+    typeof window !== "undefined" && user && token
+      ? `${window.location.origin}/api/ea-webhook?uid=${user.id}&token=${token}`
+      : "Sign in to get your private webhook URL";
 
   function copy() {
     navigator.clipboard.writeText(webhookUrl);
@@ -358,11 +366,11 @@ function EaSetup() {
   }
 
   async function testWebhook() {
-    if (!user) return;
+    if (!user || !token) return;
     setTesting(true);
     setTestResult(null);
     try {
-      const res = await fetch(`/api/ea-webhook?uid=${user.id}&test=1`, { method: "GET" });
+      const res = await fetch(`/api/ea-webhook?uid=${user.id}&token=${token}&test=1`, { method: "GET" });
       const json = await res.json().catch(() => ({}));
       if (res.ok && json.ok) {
         setTestResult({ ok: true, msg: "Connection live ✓ — your EA can now POST trades to this URL." });
