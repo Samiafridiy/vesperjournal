@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
+import { verifyEaToken } from "@/lib/ea-webhook.server";
 import { calcRR, calcResult, calcPnl } from "@/lib/trade-utils";
 
 const CORS = {
@@ -17,7 +18,7 @@ function jsonResponse(body: unknown, init: ResponseInit = {}) {
 
 /**
  * Public webhook for MT4/MT5 Expert Advisors.
- * The user's id is passed as ?uid= so the EA can post without an auth token.
+ * Requires ?uid= plus a per-user signed ?token= issued to the signed-in user.
  * We use the service role key server-side to insert on their behalf.
  */
 export const Route = createFileRoute("/api/ea-webhook")({
@@ -32,9 +33,9 @@ export const Route = createFileRoute("/api/ea-webhook")({
         const uid = url.searchParams.get("uid");
         const test = url.searchParams.get("test");
         if (!uid) return jsonResponse({ ok: false, error: "Missing uid" }, { status: 400 });
+        if (!verifyEaToken(uid, url.searchParams.get("token"))) return jsonResponse({ ok: false, error: "Invalid or missing token" }, { status: 401 });
         return jsonResponse({
           ok: true,
-          uid,
           test: test === "1",
           message: "EA webhook is live. POST trade payloads to this URL.",
           timestamp: new Date().toISOString(),
@@ -46,6 +47,9 @@ export const Route = createFileRoute("/api/ea-webhook")({
         const uid = url.searchParams.get("uid");
         if (!uid) {
           return jsonResponse({ error: "Missing uid query param" }, { status: 400 });
+        }
+        if (!verifyEaToken(uid, url.searchParams.get("token"))) {
+          return jsonResponse({ error: "Invalid or missing token" }, { status: 401 });
         }
 
         let body: any;
