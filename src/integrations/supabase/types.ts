@@ -259,6 +259,96 @@ export type Database = {
           },
         ]
       }
+      labor_forecasts: {
+        Row: {
+          created_at: string
+          expected_ahe_mom: number | null
+          expected_ahe_yoy: number | null
+          expected_nfp: number | null
+          expected_reaction: string
+          expected_unemployment: number | null
+          id: string
+          lesson: string
+          locked_at: string
+          main_scenario: string
+          market_reaction: string
+          reasoning: string
+          target_period: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expected_ahe_mom?: number | null
+          expected_ahe_yoy?: number | null
+          expected_nfp?: number | null
+          expected_reaction?: string
+          expected_unemployment?: number | null
+          id?: string
+          lesson?: string
+          locked_at?: string
+          main_scenario?: string
+          market_reaction?: string
+          reasoning?: string
+          target_period: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expected_ahe_mom?: number | null
+          expected_ahe_yoy?: number | null
+          expected_nfp?: number | null
+          expected_reaction?: string
+          expected_unemployment?: number | null
+          id?: string
+          lesson?: string
+          locked_at?: string
+          main_scenario?: string
+          market_reaction?: string
+          reasoning?: string
+          target_period?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      labor_observations: {
+        Row: {
+          first_seen_at: string
+          initial_value: number
+          period: string
+          preliminary: boolean
+          revisions: Json
+          series_id: string
+          source: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          first_seen_at?: string
+          initial_value: number
+          period: string
+          preliminary?: boolean
+          revisions?: Json
+          series_id: string
+          source?: string
+          updated_at?: string
+          value: number
+        }
+        Update: {
+          first_seen_at?: string
+          initial_value?: number
+          period?: string
+          preliminary?: boolean
+          revisions?: Json
+          series_id?: string
+          source?: string
+          updated_at?: string
+          value?: number
+        }
+        Relationships: []
+      }
       market_thesis: {
         Row: {
           body: string
