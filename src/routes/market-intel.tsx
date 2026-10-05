@@ -15,7 +15,9 @@ import {
   Layers,
   BookOpen,
   Brain,
+  Users,
 } from "lucide-react";
+import { LaborSection } from "@/components/market-intel/LaborSection";
 import { Button } from "@/components/ui/button";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -66,7 +68,7 @@ export const Route = createFileRoute("/market-intel")({
   ),
 });
 
-type TabKey = "news" | "calendar" | "macro" | "analysis" | "scenarios" | "thesis";
+type TabKey = "news" | "calendar" | "macro" | "analysis" | "scenarios" | "labor" | "thesis";
 
 const TABS: { key: TabKey; label: string; icon: typeof Newspaper }[] = [
   { key: "news", label: "Live News", icon: Newspaper },
@@ -74,6 +76,7 @@ const TABS: { key: TabKey; label: string; icon: typeof Newspaper }[] = [
   { key: "macro", label: "Macro", icon: BarChart3 },
   { key: "analysis", label: "Analysis", icon: Brain },
   { key: "scenarios", label: "Scenarios", icon: Layers },
+  { key: "labor", label: "Labor", icon: Users },
   { key: "thesis", label: "Thesis", icon: BookOpen },
 ];
 
@@ -541,6 +544,8 @@ function MarketIntelPage() {
             />
 
           )}
+
+          {tab === "labor" && <LaborSection />}
 
           {tab === "thesis" && <ThesisSection />}
         </motion.div>
