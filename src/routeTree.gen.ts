@@ -9,92 +9,32 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WeeklyReviewRouteImport } from './routes/weekly-review'
-import { Route as TradingLabRouteImport } from './routes/trading-lab'
-import { Route as TradesRouteImport } from './routes/trades'
-import { Route as SignupRouteImport } from './routes/signup'
-import { Route as RuleBookRouteImport } from './routes/rule-book'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as McpRouteImport } from './routes/mcp'
-import { Route as MarketIntelRouteImport } from './routes/market-intel'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as ImportRouteImport } from './routes/import'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as CoachRouteImport } from './routes/coach'
-import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as TradeNewRouteImport } from './routes/trade.new'
-import { Route as ApiMetaapiSyncRouteImport } from './routes/api.metaapi-sync'
-import { Route as ApiEaWebhookRouteImport } from './routes/api.ea-webhook'
-import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
+import { Route as CoachRouteImport } from './routes/coach'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as ImportRouteImport } from './routes/import'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as MarketIntelRouteImport } from './routes/market-intel'
+import { Route as McpRouteImport } from './routes/mcp'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as RuleBookRouteImport } from './routes/rule-book'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as TradesRouteImport } from './routes/trades'
+import { Route as TradingLabRouteImport } from './routes/trading-lab'
+import { Route as WeeklyReviewRouteImport } from './routes/weekly-review'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
-import { Route as ApiPublicCalendarSyncRouteImport } from './routes/api.public.calendar-sync'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as ApiEaWebhookRouteImport } from './routes/api.ea-webhook'
+import { Route as ApiMetaapiSyncRouteImport } from './routes/api.metaapi-sync'
+import { Route as TradeNewRouteImport } from './routes/trade.new'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as ApiPublicCalendarSyncRouteImport } from './routes/api.public.calendar-sync'
 
-const WeeklyReviewRoute = WeeklyReviewRouteImport.update({
-  id: '/weekly-review',
-  path: '/weekly-review',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TradingLabRoute = TradingLabRouteImport.update({
-  id: '/trading-lab',
-  path: '/trading-lab',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TradesRoute = TradesRouteImport.update({
-  id: '/trades',
-  path: '/trades',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RuleBookRoute = RuleBookRouteImport.update({
-  id: '/rule-book',
-  path: '/rule-book',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const McpRoute = McpRouteImport.update({
-  id: '/mcp',
-  path: '/mcp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MarketIntelRoute = MarketIntelRouteImport.update({
-  id: '/market-intel',
-  path: '/market-intel',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ImportRoute = ImportRouteImport.update({
-  id: '/import',
-  path: '/import',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoachRoute = CoachRouteImport.update({
-  id: '/coach',
-  path: '/coach',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnalyticsRoute = AnalyticsRouteImport.update({
@@ -102,14 +42,86 @@ const AnalyticsRoute = AnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const CoachRoute = CoachRouteImport.update({
+  id: '/coach',
+  path: '/coach',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TradeNewRoute = TradeNewRouteImport.update({
-  id: '/trade/new',
-  path: '/trade/new',
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImportRoute = ImportRouteImport.update({
+  id: '/import',
+  path: '/import',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketIntelRoute = MarketIntelRouteImport.update({
+  id: '/market-intel',
+  path: '/market-intel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RuleBookRoute = RuleBookRouteImport.update({
+  id: '/rule-book',
+  path: '/rule-book',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TradesRoute = TradesRouteImport.update({
+  id: '/trades',
+  path: '/trades',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TradingLabRoute = TradingLabRouteImport.update({
+  id: '/trading-lab',
+  path: '/trading-lab',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WeeklyReviewRoute = WeeklyReviewRouteImport.update({
+  id: '/weekly-review',
+  path: '/weekly-review',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiEaWebhookRoute = ApiEaWebhookRouteImport.update({
+  id: '/api/ea-webhook',
+  path: '/api/ea-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiMetaapiSyncRoute = ApiMetaapiSyncRouteImport.update({
@@ -117,26 +129,9 @@ const ApiMetaapiSyncRoute = ApiMetaapiSyncRouteImport.update({
   path: '/api/metaapi-sync',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiEaWebhookRoute = ApiEaWebhookRouteImport.update({
-  id: '/api/ea-webhook',
-  path: '/api/ea-webhook',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const Char91DotwellKnownChar93OauthProtectedResourceRoute =
-  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
-    id: '/.well-known/oauth-protected-resource',
-    path: '/.well-known/oauth-protected-resource',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const Char91DotmcpChar93ListToolsRoute =
-  Char91DotmcpChar93ListToolsRouteImport.update({
-    id: '/.mcp/list-tools',
-    path: '/.mcp/list-tools',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicCalendarSyncRoute = ApiPublicCalendarSyncRouteImport.update({
-  id: '/api/public/calendar-sync',
-  path: '/api/public/calendar-sync',
+const TradeNewRoute = TradeNewRouteImport.update({
+  id: '/trade/new',
+  path: '/trade/new',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
@@ -145,6 +140,11 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicCalendarSyncRoute = ApiPublicCalendarSyncRouteImport.update({
+  id: '/api/public/calendar-sync',
+  path: '/api/public/calendar-sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -321,95 +321,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/weekly-review': {
-      id: '/weekly-review'
-      path: '/weekly-review'
-      fullPath: '/weekly-review'
-      preLoaderRoute: typeof WeeklyReviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/trading-lab': {
-      id: '/trading-lab'
-      path: '/trading-lab'
-      fullPath: '/trading-lab'
-      preLoaderRoute: typeof TradingLabRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/trades': {
-      id: '/trades'
-      path: '/trades'
-      fullPath: '/trades'
-      preLoaderRoute: typeof TradesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/rule-book': {
-      id: '/rule-book'
-      path: '/rule-book'
-      fullPath: '/rule-book'
-      preLoaderRoute: typeof RuleBookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mcp': {
-      id: '/mcp'
-      path: '/mcp'
-      fullPath: '/mcp'
-      preLoaderRoute: typeof McpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/market-intel': {
-      id: '/market-intel'
-      path: '/market-intel'
-      fullPath: '/market-intel'
-      preLoaderRoute: typeof MarketIntelRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/import': {
-      id: '/import'
-      path: '/import'
-      fullPath: '/import'
-      preLoaderRoute: typeof ImportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forgot-password': {
-      id: '/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/coach': {
-      id: '/coach'
-      path: '/coach'
-      fullPath: '/coach'
-      preLoaderRoute: typeof CoachRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/analytics': {
@@ -419,39 +335,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnalyticsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/coach': {
+      id: '/coach'
+      path: '/coach'
+      fullPath: '/coach'
+      preLoaderRoute: typeof CoachRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/trade/new': {
-      id: '/trade/new'
-      path: '/trade/new'
-      fullPath: '/trade/new'
-      preLoaderRoute: typeof TradeNewRouteImport
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/metaapi-sync': {
-      id: '/api/metaapi-sync'
-      path: '/api/metaapi-sync'
-      fullPath: '/api/metaapi-sync'
-      preLoaderRoute: typeof ApiMetaapiSyncRouteImport
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/ea-webhook': {
-      id: '/api/ea-webhook'
-      path: '/api/ea-webhook'
-      fullPath: '/api/ea-webhook'
-      preLoaderRoute: typeof ApiEaWebhookRouteImport
+    '/import': {
+      id: '/import'
+      path: '/import'
+      fullPath: '/import'
+      preLoaderRoute: typeof ImportRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/.well-known/oauth-protected-resource': {
-      id: '/.well-known/oauth-protected-resource'
-      path: '/.well-known/oauth-protected-resource'
-      fullPath: '/.well-known/oauth-protected-resource'
-      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/market-intel': {
+      id: '/market-intel'
+      path: '/market-intel'
+      fullPath: '/market-intel'
+      preLoaderRoute: typeof MarketIntelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rule-book': {
+      id: '/rule-book'
+      path: '/rule-book'
+      fullPath: '/rule-book'
+      preLoaderRoute: typeof RuleBookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trades': {
+      id: '/trades'
+      path: '/trades'
+      fullPath: '/trades'
+      preLoaderRoute: typeof TradesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trading-lab': {
+      id: '/trading-lab'
+      path: '/trading-lab'
+      fullPath: '/trading-lab'
+      preLoaderRoute: typeof TradingLabRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/weekly-review': {
+      id: '/weekly-review'
+      path: '/weekly-review'
+      fullPath: '/weekly-review'
+      preLoaderRoute: typeof WeeklyReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.mcp/list-tools': {
@@ -461,11 +433,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/calendar-sync': {
-      id: '/api/public/calendar-sync'
-      path: '/api/public/calendar-sync'
-      fullPath: '/api/public/calendar-sync'
-      preLoaderRoute: typeof ApiPublicCalendarSyncRouteImport
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ea-webhook': {
+      id: '/api/ea-webhook'
+      path: '/api/ea-webhook'
+      fullPath: '/api/ea-webhook'
+      preLoaderRoute: typeof ApiEaWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/metaapi-sync': {
+      id: '/api/metaapi-sync'
+      path: '/api/metaapi-sync'
+      fullPath: '/api/metaapi-sync'
+      preLoaderRoute: typeof ApiMetaapiSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trade/new': {
+      id: '/trade/new'
+      path: '/trade/new'
+      fullPath: '/trade/new'
+      preLoaderRoute: typeof TradeNewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.mcp/invoke-tool/$tool': {
@@ -473,6 +466,13 @@ declare module '@tanstack/react-router' {
       path: '/.mcp/invoke-tool/$tool'
       fullPath: '/.mcp/invoke-tool/$tool'
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/calendar-sync': {
+      id: '/api/public/calendar-sync'
+      path: '/api/public/calendar-sync'
+      fullPath: '/api/public/calendar-sync'
+      preLoaderRoute: typeof ApiPublicCalendarSyncRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
