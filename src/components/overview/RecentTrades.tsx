@@ -59,7 +59,7 @@ export function RecentTrades({ trades }: { trades: Trade[] }) {
               >
                 <div className="size-8 rounded-md bg-surface-2 border border-border/60 flex items-center justify-center shrink-0">
                   <Activity
-                    className={cn("size-3.5", isBe ? "text-warn" : isPos ? "text-pos" : "text-neg")}
+                    className={cn("size-3.5", isBe ? "text-champagne" : isPos ? "text-pos" : "text-neg")}
                   />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -76,7 +76,7 @@ export function RecentTrades({ trades }: { trades: Trade[] }) {
                 <div
                   className={cn(
                     "font-mono text-sm tabular-nums",
-                    t.pnl == null ? "text-faint" : isBe ? "text-warn" : isPos ? "text-pos" : "text-neg",
+                    t.pnl == null ? "text-faint" : isBe ? "text-champagne" : isPos ? "text-pos" : "text-neg",
                   )}
                 >
                   {t.pnl == null ? "—" : isBe ? "BE · $0.00" : fmtMoney(pnl, { sign: true })}

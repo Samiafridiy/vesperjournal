@@ -521,7 +521,7 @@ function NewTrade() {
                   onClick={() => entry && setClose(entry)}
                   disabled={!entry}
                   title="Fill close price with your entry price"
-                  className="h-11 shrink-0 rounded-md border border-warn/40 bg-warn/10 px-3 text-xs font-medium text-warn hover:bg-warn/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="h-11 shrink-0 rounded-md border border-champagne/40 bg-champagne/10 px-3 text-xs font-medium text-champagne hover:bg-champagne/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   Breakeven
                 </button>

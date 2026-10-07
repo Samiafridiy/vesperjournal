@@ -79,7 +79,7 @@ export function WinLossSplit({ trades }: { trades: Trade[] }) {
                     cx="70"
                     cy="70"
                     r={R}
-                    stroke="var(--warn)"
+                    stroke="var(--champagne)"
                     strokeWidth="14"
                     strokeLinecap="butt"
                     fill="none"
@@ -111,7 +111,7 @@ export function WinLossSplit({ trades }: { trades: Trade[] }) {
           <span className="font-mono tabular-nums">{losses}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="size-2 rounded-full bg-warn" />
+          <span className="size-2 rounded-full bg-champagne" />
           <span className="text-soft">Breakeven</span>
           <span className="font-mono tabular-nums">{bes}</span>
         </div>
