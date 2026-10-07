@@ -184,7 +184,7 @@ export function LaborSection() {
   const fetchFn = useServerFn(getLaborDashboard);
   const [data, setData] = useState<LaborDashboard | null>(null);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<"all" | Indicator["category"]>("all");
+  const [filter, setFilter] = useState<"all" | "hiring" | "firing" | "demand" | "wages">("all");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -198,7 +198,7 @@ export function LaborSection() {
 
   const cats = ["hiring", "firing", "demand", "wages"] as const;
   const labels = { hiring: "Hiring", firing: "Firing / layoffs", demand: "Worker demand", wages: "Wages" };
-  const shown = data.indicators.filter((i) => filter === "all" || i.category === filter);
+  const shown = data.indicators.filter((i) => filter === "all" || i.cats.includes(filter));
 
   return (
     <div className="space-y-5">
