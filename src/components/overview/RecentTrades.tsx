@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Activity } from "lucide-react";
 import type { Trade } from "@/lib/trade-utils";
-import { fmtMoney } from "@/lib/trade-utils";
+import { fmtMoney, calcResult } from "@/lib/trade-utils";
 import { cn } from "@/lib/utils";
 
 export function RecentTrades({ trades }: { trades: Trade[] }) {
@@ -40,6 +40,7 @@ export function RecentTrades({ trades }: { trades: Trade[] }) {
           {recent.map((t) => {
             const pnl = t.pnl ?? 0;
             const isPos = pnl >= 0;
+            const isBe = calcResult(t.pnl) === "breakeven";
             const date = new Date(t.trade_date).toLocaleDateString();
             const dir = (t.direction || "").toUpperCase();
             return (
@@ -49,6 +50,8 @@ export function RecentTrades({ trades }: { trades: Trade[] }) {
                   "flex items-center gap-3 py-2.5 px-2 -mx-2 rounded-md border border-transparent hover-glow",
                   t.pnl == null
                     ? "hover-glow-champagne"
+                    : isBe
+                    ? "hover-glow-champagne"
                     : isPos
                     ? "hover-glow-pos"
                     : "hover-glow-neg",
@@ -56,7 +59,7 @@ export function RecentTrades({ trades }: { trades: Trade[] }) {
               >
                 <div className="size-8 rounded-md bg-surface-2 border border-border/60 flex items-center justify-center shrink-0">
                   <Activity
-                    className={cn("size-3.5", isPos ? "text-pos" : "text-neg")}
+                    className={cn("size-3.5", isBe ? "text-warn" : isPos ? "text-pos" : "text-neg")}
                   />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -73,10 +76,10 @@ export function RecentTrades({ trades }: { trades: Trade[] }) {
                 <div
                   className={cn(
                     "font-mono text-sm tabular-nums",
-                    t.pnl == null ? "text-faint" : isPos ? "text-pos" : "text-neg",
+                    t.pnl == null ? "text-faint" : isBe ? "text-warn" : isPos ? "text-pos" : "text-neg",
                   )}
                 >
-                  {t.pnl == null ? "—" : fmtMoney(pnl, { sign: true })}
+                  {t.pnl == null ? "—" : isBe ? "BE · $0.00" : fmtMoney(pnl, { sign: true })}
                 </div>
               </div>
             );

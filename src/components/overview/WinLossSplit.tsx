@@ -1,23 +1,25 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import type { Trade } from "@/lib/trade-utils";
+import { calcResult, type Trade } from "@/lib/trade-utils";
 import { cn } from "@/lib/utils";
 import { EmptyHint } from "@/components/EmptyHint";
 
 export function WinLossSplit({ trades }: { trades: Trade[] }) {
-  const { wins, losses, winRate } = useMemo(() => {
+  const { wins, losses, bes, winRate } = useMemo(() => {
     const closed = trades.filter((t) => t.pnl != null);
-    const w = closed.filter((t) => (t.pnl ?? 0) > 0).length;
-    const l = closed.filter((t) => (t.pnl ?? 0) < 0).length;
-    const total = w + l;
-    return { wins: w, losses: l, winRate: total ? w / total : 0 };
+    const w = closed.filter((t) => calcResult(t.pnl) === "win").length;
+    const l = closed.filter((t) => calcResult(t.pnl) === "loss").length;
+    const b = closed.filter((t) => calcResult(t.pnl) === "breakeven").length;
+    const decided = w + l;
+    return { wins: w, losses: l, bes: b, winRate: decided ? w / decided : 0 };
   }, [trades]);
 
-  const total = wins + losses;
+  const total = wins + losses + bes;
   const R = 56;
   const C = 2 * Math.PI * R;
   const winLen = total ? (wins / total) * C : 0;
   const lossLen = total ? (losses / total) * C : 0;
+  const beLen = total ? (bes / total) * C : 0;
 
   return (
     <div
@@ -72,6 +74,20 @@ export function WinLossSplit({ trades }: { trades: Trade[] }) {
                   animate={{ strokeDasharray: `${lossLen} ${C - lossLen}`, strokeDashoffset: -winLen }}
                   transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
                 />
+                {bes > 0 && (
+                  <motion.circle
+                    cx="70"
+                    cy="70"
+                    r={R}
+                    stroke="var(--warn)"
+                    strokeWidth="14"
+                    strokeLinecap="butt"
+                    fill="none"
+                    initial={{ strokeDasharray: `0 ${C}`, strokeDashoffset: -(winLen + lossLen) }}
+                    animate={{ strokeDasharray: `${beLen} ${C - beLen}`, strokeDashoffset: -(winLen + lossLen) }}
+                    transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                  />
+                )}
               </>
             )}
           </svg>
@@ -83,7 +99,7 @@ export function WinLossSplit({ trades }: { trades: Trade[] }) {
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-center gap-6 mt-4 text-sm">
+      <div className="flex items-center justify-center gap-x-5 gap-y-2 flex-wrap mt-4 text-sm">
         <div className="flex items-center gap-2">
           <span className="size-2 rounded-full bg-pos" />
           <span className="text-soft">Wins</span>
@@ -93,6 +109,11 @@ export function WinLossSplit({ trades }: { trades: Trade[] }) {
           <span className="size-2 rounded-full bg-neg" />
           <span className="text-soft">Losses</span>
           <span className="font-mono tabular-nums">{losses}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="size-2 rounded-full bg-warn" />
+          <span className="text-soft">Breakeven</span>
+          <span className="font-mono tabular-nums">{bes}</span>
         </div>
       </div>
       </>
