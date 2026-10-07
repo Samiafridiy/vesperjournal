@@ -261,6 +261,7 @@ export type Database = {
       }
       labor_forecasts: {
         Row: {
+          confidence: string | null
           created_at: string
           expected_ahe_mom: number | null
           expected_ahe_yoy: number | null
@@ -272,12 +273,15 @@ export type Database = {
           locked_at: string
           main_scenario: string
           market_reaction: string
+          range_high: number | null
+          range_low: number | null
           reasoning: string
           target_period: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          confidence?: string | null
           created_at?: string
           expected_ahe_mom?: number | null
           expected_ahe_yoy?: number | null
@@ -289,12 +293,15 @@ export type Database = {
           locked_at?: string
           main_scenario?: string
           market_reaction?: string
+          range_high?: number | null
+          range_low?: number | null
           reasoning?: string
           target_period: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          confidence?: string | null
           created_at?: string
           expected_ahe_mom?: number | null
           expected_ahe_yoy?: number | null
@@ -306,6 +313,8 @@ export type Database = {
           locked_at?: string
           main_scenario?: string
           market_reaction?: string
+          range_high?: number | null
+          range_low?: number | null
           reasoning?: string
           target_period?: string
           updated_at?: string
