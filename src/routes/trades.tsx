@@ -277,8 +277,8 @@ function TradesList() {
                   <td className="px-5 py-3 text-right font-mono text-soft">{t.close_price ?? "—"}</td>
                   <td className="px-5 py-3 text-right font-mono text-soft">{t.rr?.toFixed(2) ?? "—"}</td>
                   <td className={cn("px-5 py-3 text-right font-mono font-medium",
-                    (t.pnl ?? 0) > 0 ? "text-pos" : (t.pnl ?? 0) < 0 ? "text-neg" : "text-soft")}>
-                    {fmtMoney(t.pnl, { sign: true })}
+                    t.pnl == null ? "text-soft" : (t.pnl ?? 0) > 0.0001 ? "text-pos" : (t.pnl ?? 0) < -0.0001 ? "text-neg" : "text-champagne")}>
+                    {t.pnl != null && Math.abs(t.pnl) <= 0.0001 ? "BE · $0.00" : fmtMoney(t.pnl, { sign: true })}
                   </td>
                 </tr>
               ))}
