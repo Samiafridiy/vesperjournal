@@ -514,7 +514,18 @@ function NewTrade() {
             </FormField>
 
             <FormField label="Close price">
-              <Input type="number" step="any" value={close} onChange={(e) => setClose(e.target.value)} placeholder="Leave blank if open" className="bg-surface-2 border-border h-11 font-mono" />
+              <div className="flex gap-2">
+                <Input type="number" step="any" value={close} onChange={(e) => setClose(e.target.value)} placeholder="Leave blank if open" className="bg-surface-2 border-border h-11 font-mono flex-1 min-w-0" />
+                <button
+                  type="button"
+                  onClick={() => entry && setClose(entry)}
+                  disabled={!entry}
+                  title="Fill close price with your entry price"
+                  className="h-11 shrink-0 rounded-md border border-warn/40 bg-warn/10 px-3 text-xs font-medium text-warn hover:bg-warn/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  Breakeven
+                </button>
+              </div>
             </FormField>
             <FormField label="Date & time">
               <Input
