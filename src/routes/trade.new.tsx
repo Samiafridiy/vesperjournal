@@ -1,3 +1,4 @@
+import { ScreenshotEditor, loadTradeScreenshots, saveTradeScreenshots, type ScreenshotSlot } from "@/components/TradeScreenshots";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { RouteGate } from "@/components/RouteGate";
 import { AppShell } from "@/components/AppShell";
@@ -112,7 +113,7 @@ function NewTrade() {
   const [voiceFilled, setVoiceFilled] = useState(false);
   const [voiceMissing, setVoiceMissing] = useState<string[]>([]);
   const [edgeExpanded, setEdgeExpanded] = useState(false);
-  const [screenshot, setScreenshot] = useState<File | null>(null);
+  const [shots, setShots] = useState<ScreenshotSlot[]>([]);
 
   // Pre-trade intervention state
   const [dailyLimit, setDailyLimitState] = useState<number>(3);
@@ -175,6 +176,7 @@ function NewTrade() {
       setFollowedPlan(ext.followed_plan ?? null);
       if (ext.confidence != null) setConfidence(ext.confidence);
       setExistingScreenshot(data.screenshot_url ?? null);
+      setShots(await loadTradeScreenshots(data.id, data.screenshot_url ?? null));
       if (data.risk_preset_id) setPresetId(data.risk_preset_id);
       setLoadingTrade(false);
     })();
@@ -321,20 +323,7 @@ function NewTrade() {
       excludeTradeId: isEdit ? editId : undefined,
     });
 
-    let screenshot_url: string | null = existingScreenshot;
-    if (screenshot) {
-      const ext = screenshot.name.split(".").pop() ?? "png";
-      const path = `${user.id}/${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("screenshots").upload(path, screenshot);
-      if (upErr) {
-        toast.error("Screenshot upload failed: " + upErr.message);
-      } else {
-        // Store only the storage object path. Short-lived signed URLs are
-        // generated on-demand when the screenshot is displayed, so a leak of
-        // the trades table never exposes long-lived public URLs.
-        screenshot_url = path;
-      }
-    }
+    const screenshot_url: string | null = existingScreenshot;
 
     const payload = {
       pair,
@@ -363,9 +352,19 @@ function NewTrade() {
       behavior_flags: behaviorFlags,
     };
 
-    const { error } = isEdit && editId
-      ? await supabase.from("trades").update(payload).eq("id", editId)
-      : await supabase.from("trades").insert({ ...payload, user_id: user.id });
+    const { data: savedRow, error } = isEdit && editId
+      ? await supabase.from("trades").update(payload).eq("id", editId).select("id").single()
+      : await supabase.from("trades").insert({ ...payload, user_id: user.id }).select("id").single();
+    if (!error && savedRow) {
+      try {
+        const first = await saveTradeScreenshots(user.id, savedRow.id, shots);
+        if (first !== existingScreenshot) {
+          await supabase.from("trades").update({ screenshot_url: first }).eq("id", savedRow.id);
+        }
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Screenshot upload failed.");
+      }
+    }
 
     setSubmitting(false);
     if (error) {
@@ -549,16 +548,12 @@ function NewTrade() {
             <FormField label="Strategy tag">
               <Input value={strategy} onChange={(e) => setStrategy(e.target.value)} placeholder="e.g. Breakout, ICT, Liquidity sweep" className="bg-surface-2 border-border h-11" />
             </FormField>
-            <FormField label="Screenshot">
-              <label className="flex items-center gap-3 h-11 px-3 rounded-md border border-dashed border-border bg-surface-2 cursor-pointer hover:bg-accent text-sm text-soft">
-                <Upload className="size-4" />
-                <span className="truncate">
-                  {screenshot?.name ?? (existingScreenshot ? "Replace screenshot" : "Upload chart screenshot")}
-                </span>
-                <input type="file" accept="image/*" className="hidden" onChange={(e) => setScreenshot(e.target.files?.[0] ?? null)} />
-              </label>
-            </FormField>
+
           </div>
+
+          <FormField label={`Screenshots (up to 4, with timeframe and notes)`}>
+            <ScreenshotEditor slots={shots} onChange={setShots} />
+          </FormField>
 
           <FormField label="Notes">
             <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="What did you see? What was the setup?" className="bg-surface-2 border-border resize-none" />
