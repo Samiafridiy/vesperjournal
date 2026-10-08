@@ -36,6 +36,13 @@
       "when": 1791366414123,
       "tag": "0004_labor_forecast_range_confidence",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791470001608,
+      "tag": "0005_trade_screenshots_and_ai_reviews",
+      "breakpoints": true
     }
   ]
 }
