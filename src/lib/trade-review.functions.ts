@@ -1,6 +1,8 @@
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 
 export const DAILY_REVIEW_CAP = 10;
 
@@ -56,9 +58,18 @@ async function sha(s: string) {
 export const reviewTrade = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => Input.parse(d))
-  .handler(async ({ data, context }): Promise<ReviewResponse> => {
-    const sb = context.supabase;
-    const userId = context.userId;
+  .handler(async ({ data, context }): Promise<ReviewResponse> =>
+    performTradeReview(context.supabase, context.userId, data.tradeId, data.run));
+
+/** Shared review logic, also used by the AI Coach. RLS on `sb` enforces ownership. */
+export async function performTradeReview(
+  sb: SupabaseClient<Database>,
+  userId: string,
+  tradeId: string,
+  run: boolean,
+): Promise<ReviewResponse> {
+  const data = { tradeId, run };
+  {
     const base = { review: null, createdAt: null, stale: false, hasScreenshots: false, usedToday: 0, cap: DAILY_REVIEW_CAP };
 
     // Ownership is enforced by RLS: another user's trade returns no row.
@@ -193,4 +204,5 @@ export const reviewTrade = createServerFn({ method: "POST" })
       console.error("reviewTrade", e);
       return { ...cached, error: "The review couldn't be completed. Please try again later." };
     }
-  });
+  }
+}
