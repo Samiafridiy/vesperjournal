@@ -31,6 +31,8 @@ import { cn } from "@/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
 import { autoTagsFor, type AutoTag } from "@/lib/auto-tags";
 import { z } from "zod";
+import { ScreenshotGallery, useTradeScreenshots } from "@/components/TradeScreenshots";
+import { TradeAiReview } from "@/components/TradeAiReview";
 
 export const Route = createFileRoute("/trades")({
   validateSearch: z.object({
@@ -66,6 +68,7 @@ function TradesList() {
   const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null);
+  const { slots: shotSlots } = useTradeScreenshots(selected?.id, selected?.screenshot_url);
 
   useEffect(() => {
     let cancelled = false;
@@ -359,11 +362,15 @@ function TradesList() {
               </div>
             )}
 
-            {selected.screenshot_url && screenshotUrl && (
+            {shotSlots.length > 0 ? (
+              <ScreenshotGallery slots={shotSlots} />
+            ) : selected.screenshot_url && screenshotUrl ? (
               <a href={screenshotUrl} target="_blank" rel="noreferrer" className="block mb-5">
                 <img src={screenshotUrl} alt="Trade screenshot" className="rounded-lg border border-border w-full" />
               </a>
-            )}
+            ) : null}
+
+            <TradeAiReview tradeId={selected.id} hasScreenshots={shotSlots.length > 0 || !!selected.screenshot_url} />
 
             <div className="flex gap-2">
               <Button
