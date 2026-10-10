@@ -31,6 +31,13 @@ export type Indicator = {
   stats: Stats;
   nextRelease: string | null;
   latest?: { actual: string; forecast: string; previous: string; revisedPrevious: string | null; date: string; vsExpect: "above" | "below" | "inline" | "n/a" };
+  /** Freshness of the newest stored observation versus the publication schedule. */
+  status: "Current" | "Stale" | "Unavailable";
+  statusReason: string;
+  /** Preliminary / Revised / Final for the newest observation. */
+  obsState: "Preliminary" | "Revised" | "Final" | null;
+  sourceUrl: string;
+  latestPeriod: string | null;
 };
 export type Conflict = { title: string; indicators: string; measures: string; reasons: string; certainty: string };
 export type Signal = "Supports stronger NFP" | "Supports weaker NFP" | "Neutral" | "Mixed" | "Insufficient evidence";
@@ -38,7 +45,7 @@ export type Evidence = { group: string; indicator: string; signal: Signal; detai
 export type Scenario = {
   key: "high" | "neutral" | "low"; label: string; range: string; definition: string;
   supporting: string[]; contradicting: string[]; strength: Strength; why: string;
-  keyIndicators: string[]; confirm: string; invalidate: string;
+  keyIndicators: string[]; confirm: string; invalidate: string; unknowns: string[];
 };
 export type RevisionRow = { period: string; initial: number | null; rev1: number | null; rev2: number | null; latest: number | null; total: number | null; source: string };
 export type CalendarRow = { title: string; date: string; actual: string; forecast: string; previous: string; previous_revised: boolean; previous_original: string | null; status: string };
@@ -55,7 +62,8 @@ export type LaborDashboard = {
   freshness: "Current" | "Partially updated" | "Stale";
   trackingSince: string | null;
   indicators: Indicator[];
-  categories: Record<"hiring" | "firing" | "demand" | "wages", { condition: Condition; text: string; forEv: string[]; againstEv: string[] }>;
+  categories: Record<"hiring" | "firing" | "demand" | "wages", { condition: Condition; text: string; forEv: string[]; againstEv: string[]; change3: string; change6: string; limitations: string[]; confidence: "Low" | "Medium" | "High" }>;
+  forecastsNote: string;
   overall: { label: "Strengthening" | "Stable" | "Cooling" | "Weakening" | "Mixed" | "Insufficient data"; strength: "Weak" | "Moderate" | "Strong"; supporting: number; contradicting: number; text: string };
   picture: string;
   conflicts: Conflict[];
@@ -288,16 +296,43 @@ export const getLaborDashboard = createServerFn({ method: "POST" })
       { key: "mfg_hrs", name: "Manufacturing weekly hours", unit: "h", pts: S("MFG_HRS"), source: "BLS (CES)", cats: ["hours"], timing: "Coincident", kind: "Actual observation", lag: LAG_CES, next: nfpNext },
       { key: "mfg_ot", name: "Manufacturing overtime hours", unit: "h", pts: S("MFG_OT"), source: "BLS (CES)", cats: ["hours"], timing: "Coincident", kind: "Actual observation", lag: LAG_CES, next: nfpNext },
     ];
-    const indicators: Indicator[] = defs.map((d) => ({
-      key: d.key, name: d.name, unit: d.unit, source: d.source, cats: d.cats, timing: d.timing, kind: d.kind, lag: d.lag, note: d.note,
-      available: d.pts.length > 0, points: d.pts.slice(-36), stats: stats(d.pts, d.unit), nextRelease: d.next ?? null, latest: d.latest,
-    }));
+    const URLS: Record<string, string> = {
+      ces: "https://www.bls.gov/ces/", cps: "https://www.bls.gov/cps/", jolts: "https://www.bls.gov/jlt/", dol: "https://www.dol.gov/ui/data.pdf",
+      adp: "https://adpemploymentreport.com/", chall: "https://www.challengergray.com/blog/category/job-cuts/", nfib: "https://www.nfib.com/surveys/small-business-economic-trends/",
+      ism: "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-report-on-business/", eci: "https://www.bls.gov/eci/",
+    };
+    const srcUrl = (d: Def) => /JOLTS/.test(d.source) ? URLS.jolts : /CPS/.test(d.source) || ["u6", "lfpr", "epop", "lf", "emp", "unemp", "ft", "pt", "pter"].includes(d.key) ? URLS.cps
+      : /Labor/.test(d.source) || d.key.startsWith("claims") || d.key.startsWith("cont") ? URLS.dol : d.key === "adp" ? URLS.adp : d.key === "chall" ? URLS.chall
+      : d.key === "nfib" ? URLS.nfib : d.key === "ism_emp" ? URLS.ism : d.key === "eci" ? URLS.eci : URLS.ces;
+    // Max age (days) of the newest observation before it counts as stale, given each release schedule.
+    // Monthly BLS periods are "YYYY-MM" (reference month); calendar-sourced periods are release dates "YYYY-MM-DD".
+    const maxAge = (d: Def) => /JOLTS/.test(d.source) ? 105 : d.key.startsWith("claims") ? 12 : ["adp", "chall"].includes(d.key) ? 40 : 72;
+    const indicators: Indicator[] = defs.map((d) => {
+      const last = d.pts[d.pts.length - 1];
+      let status: Indicator["status"] = "Unavailable";
+      let statusReason = d.note && /not (yet )?(connected|available)/i.test(d.note) ? d.note : "No recent data available — this source is not connected or returned no observations.";
+      if (last) {
+        const start = last.period.length === 7 ? `${last.period}-01T00:00:00Z` : `${last.period.slice(0, 10)}T00:00:00Z`;
+        const days = Math.floor((Date.now() - new Date(start).getTime()) / 86400e3);
+        const lim = maxAge(d);
+        status = days <= lim ? "Current" : "Stale";
+        statusReason = status === "Current"
+          ? `Newest observation ${last.period.length === 7 ? `describes ${monthName(last.period)}` : `released ${last.period}`}, within the normal publication lag.`
+          : `Newest stored observation ${last.period.length === 7 ? `describes ${monthName(last.period)}` : `is from ${last.period}`} — ${days} days old, older than this release schedule allows. A newer release may exist but has not been retrieved (source delay, outage, or sync failure). Do not treat it as current.`;
+      }
+      const obsState: Indicator["obsState"] = !last ? null : last.preliminary ? "Preliminary" : last.revisions.length || last.initial !== last.value ? "Revised" : "Final";
+      return {
+        key: d.key, name: d.name, unit: d.unit, source: d.source, cats: d.cats, timing: d.timing, kind: d.kind, lag: d.lag, note: d.note,
+        available: d.pts.length > 0, points: d.pts.slice(-36), stats: stats(d.pts, d.unit), nextRelease: d.next ?? null, latest: d.latest,
+        status, statusReason, obsState, sourceUrl: srcUrl(d), latestPeriod: last?.period ?? null,
+      };
+    });
     const I = (k: string) => indicators.find((i) => i.key === k)!;
 
     /* ---------- Pillars ---------- */
     const nfp = S("NFP_CHG"), priv = S("PRIV_CHG"), hil = S("HIL"), jol = S("JOL"), ldl = S("LDL"), qul = S("QUL"), unrate = S("UNRATE"), aheY = S("AHE_YOY"), awh = S("AWH");
     const tr = (k: string, n: 3 | 6 = 3) => (n === 3 ? I(k).stats.t3 : I(k).stats.t6);
-    const blank = () => ({ condition: "Unavailable" as Condition, text: "Data unavailable — source not currently accessible.", forEv: [] as string[], againstEv: [] as string[] });
+    const blank = () => ({ condition: "Unavailable" as Condition, text: "No recent data available — not enough verified observations to assess this category.", forEv: [] as string[], againstEv: [] as string[], change3: "—", change6: "—", limitations: [] as string[], confidence: "Low" as "Low" | "Medium" | "High" });
     const cats: LaborDashboard["categories"] = { hiring: blank(), firing: blank(), demand: blank(), wages: blank() };
 
     if (nfp.length >= 6) {
@@ -308,7 +343,7 @@ export const getLaborDashboard = createServerFn({ method: "POST" })
       if (ht) (ht === "up" ? f : ht === "down" ? a : []).push(`JOLTS hires ${dWord(ht)}`);
       if (at) (at === "up" ? f : at === "down" ? a : []).push(`ADP ${dWord(at)} (context only)`);
       const cond: Condition = f.length && a.length ? "Mixed" : f.length >= 1 && pt === "up" ? "Strengthening" : a.length >= 1 && pt === "down" ? "Weakening" : "Stable";
-      cats.hiring = { condition: cond, text: `BLS payrolls averaged ${fmtK(r3)} over the last 3 months vs ${fmtK(p3)} in the 3 months before.${ht ? ` JOLTS hires: ${dWord(ht)}.` : ""}`, forEv: f, againstEv: a };
+      cats.hiring = { condition: cond, text: `BLS payrolls averaged ${fmtK(r3)} over the last 3 months vs ${fmtK(p3)} in the 3 months before.${ht ? ` JOLTS hires: ${dWord(ht)}.` : ""}`, forEv: f, againstEv: a, change3: "", change6: "", limitations: [], confidence: "Low" };
     }
     {
       const ct = I("claims4").stats.t3 ?? tr("claims"), lt = tr("ldl"), ut = tr("unrate");
@@ -319,7 +354,7 @@ export const getLaborDashboard = createServerFn({ method: "POST" })
       if (ct || lt || ut) {
         const cond: Condition = ups.length >= 2 && !downs.length ? "Weakening" : downs.length >= 2 && !ups.length ? "Strengthening" : ups.length && downs.length ? "Mixed" : "Stable";
         const last = unrate[unrate.length - 1];
-        cats.firing = { condition: cond, text: `Layoffs & discharges: ${dWord(lt)}; unemployment rate: ${dWord(ut)}${last ? ` (latest ${last.value}%)` : ""}; weekly claims: ${dWord(ct)}. Rising layoff measures can indicate weakening conditions.`, forEv: downs, againstEv: ups };
+        cats.firing = { condition: cond, text: `Layoffs & discharges: ${dWord(lt)}; unemployment rate: ${dWord(ut)}${last ? ` (latest ${last.value}%)` : ""}; weekly claims: ${dWord(ct)}. Rising layoff measures can indicate weakening conditions.`, forEv: downs, againstEv: ups, change3: "", change6: "", limitations: [], confidence: "Low" };
       }
     }
     {
@@ -329,13 +364,39 @@ export const getLaborDashboard = createServerFn({ method: "POST" })
         for (const [n, t] of [["Openings", jt], ["Hires", ht], ["Quits", qt]] as const) if (t) (t === "up" ? f : t === "down" ? a : []).push(`${n} ${dWord(t)}`);
         const cond: Condition = f.length && a.length ? "Mixed" : f.length >= 2 ? "Strengthening" : a.length >= 2 ? "Weakening" : "Stable";
         const lo = jol[jol.length - 1], lh = hil[hil.length - 1];
-        cats.demand = { condition: cond, text: `Openings ${lo ? `${(lo.value / 1000).toFixed(2)}M` : "n/a"} (${dWord(jt)}); hires ${lh ? `${(lh.value / 1000).toFixed(2)}M` : "n/a"} (${dWord(ht)}). Openings ≠ hires: openings are positions employers are trying to fill; hires are people actually hired.`, forEv: f, againstEv: a };
+        cats.demand = { condition: cond, text: `Openings ${lo ? `${(lo.value / 1000).toFixed(2)}M` : "n/a"} (${dWord(jt)}); hires ${lh ? `${(lh.value / 1000).toFixed(2)}M` : "n/a"} (${dWord(ht)}). Openings ≠ hires: openings are positions employers are trying to fill; hires are people actually hired.`, forEv: f, againstEv: a, change3: "", change6: "", limitations: [], confidence: "Low" };
       }
     }
     if (aheY.length >= 6) {
       const t = tr("ahe_yoy"), l = aheY[aheY.length - 1];
       const phr = t === "up" ? "accelerating" : t === "down" ? (l.value >= 3.5 ? "remains elevated but is cooling" : "cooling") : "steady";
-      cats.wages = { condition: t === "up" ? "Strengthening" : t === "down" ? "Weakening" : "Stable", text: `Average hourly earnings are ${l.value}% higher than a year ago (${monthName(l.period)}); yearly wage growth is ${phr}. Not classified as good or bad by itself.`, forEv: t === "up" ? ["AHE YoY accelerating"] : [], againstEv: t === "down" ? ["AHE YoY cooling"] : [] };
+      cats.wages = { condition: t === "up" ? "Strengthening" : t === "down" ? "Weakening" : "Stable", text: `Average hourly earnings are ${l.value}% higher than a year ago (${monthName(l.period)}); yearly wage growth is ${phr}. Not classified as good or bad by itself.`, forEv: t === "up" ? ["AHE YoY accelerating"] : [], againstEv: t === "down" ? ["AHE YoY cooling"] : [], change3: "", change6: "", limitations: [], confidence: "Low" };
+    }
+
+    /* ---------- Transparency: change, limitations, confidence per category ---------- */
+    const members: Record<keyof LaborDashboard["categories"], { keys: string[]; primary: string; label: string }> = {
+      hiring: { keys: ["nfp", "priv", "gov", "adp", "hil", "hir", "ism_emp", "nfib"], primary: "nfp", label: "Payrolls" },
+      firing: { keys: ["claims", "claims4", "cont", "ldl", "ldr", "chall", "unrate"], primary: "unrate", label: "Unemployment rate" },
+      demand: { keys: ["jol", "jor", "hil", "hir"], primary: "jol", label: "Job openings" },
+      wages: { keys: ["ahe_mom", "ahe_yoy", "awe", "awh", "mfg_hrs", "mfg_ot", "eci"], primary: "ahe_yoy", label: "Hourly earnings y/y" },
+    };
+    const fmtU = (v: number, u: Unit) => (u === "%" ? `${v.toFixed(2)}%` : u === "h" ? `${v.toFixed(1)}h` : u === "$" ? `$${v.toFixed(2)}` : `${Math.round(v).toLocaleString()}K`);
+    for (const [ck, m] of Object.entries(members) as [keyof typeof members, (typeof members)["hiring"]][]) {
+      const c = cats[ck];
+      const list = m.keys.map(I);
+      const cur = list.filter((x) => x.status === "Current");
+      c.limitations = [
+        ...list.filter((x) => x.status === "Stale").map((x) => `${x.name}: stale (newest ${x.latestPeriod})`),
+        ...list.filter((x) => x.status === "Unavailable").map((x) => `${x.name}: no data connected`),
+      ];
+      const p = I(m.primary), pts = p.points;
+      const ch = (k: number) => (pts.length > k ? `${m.label}: ${fmtU(pts[pts.length - 1].value, p.unit)} (${pts[pts.length - 1].period}) vs ${fmtU(pts[pts.length - 1 - k].value, p.unit)} (${pts[pts.length - 1 - k].period})` : "Not enough history");
+      c.change3 = ch(3); c.change6 = ch(6);
+      c.confidence = cur.length >= 4 && !c.limitations.some((l) => l.includes("stale")) ? "High" : cur.length >= 2 ? "Medium" : "Low";
+      if (c.condition !== "Unavailable" && cur.length < 2) {
+        c.condition = "Unavailable";
+        c.text = `Not enough current data to assess this category (${cur.length} current indicator${cur.length === 1 ? "" : "s"}). Older observations are shown in the charts but not used as a current reading.`;
+      }
     }
 
     /* ---------- Overall ---------- */
@@ -500,12 +561,20 @@ export const getLaborDashboard = createServerFn({ method: "POST" })
       k === "high" ? `Above ~${fmtK(consensusNfp + band)}` : k === "low" ? `Below ~${fmtK(consensusNfp - band)}` : `${fmtK(consensusNfp - band)} to ${fmtK(consensusNfp + band)} (around consensus ${fmtK(consensusNfp)})`;
     const scenarios: Scenario[] = [
       { key: "high", label: "HIGH NFP", range: rng("high"), definition: "Payrolls print clearly above consensus.", supporting: strongerEv, contradicting: weakerEv, strength: sH.s, why: sH.why,
-        keyIndicators: ["Payroll 3-mo trend", "Claims 4-wk avg", "JOLTS hires", "Sector breadth"], confirm: "Broad-based sector gains, upward revisions to prior months.", invalidate: "Rising claims into the release or a soft ADP/hires picture that persists." },
+        keyIndicators: ["Payroll 3-mo trend", "Claims 4-wk avg", "JOLTS hires", "Sector breadth"], confirm: "Broad-based sector gains, upward revisions to prior months.", invalidate: "Rising claims into the release or a soft ADP/hires picture that persists.", unknowns: [] },
       { key: "neutral", label: "NEUTRAL NFP", range: rng("neutral"), definition: "Payrolls land close to consensus.", supporting: neutralEv, contradicting: [...strongerEv, ...weakerEv].slice(0, 4), strength: sN.s, why: sN.why,
-        keyIndicators: ["Consensus", "Payroll 3-mo average", "Revisions"], confirm: "Indicators remain balanced or conflicting into the release.", invalidate: "A clear one-sided shift in claims or ADP close to the release." },
+        keyIndicators: ["Consensus", "Payroll 3-mo average", "Revisions"], confirm: "Indicators remain balanced or conflicting into the release.", invalidate: "A clear one-sided shift in claims or ADP close to the release.", unknowns: [] },
       { key: "low", label: "LOW NFP", range: rng("low"), definition: "Payrolls print clearly below consensus.", supporting: weakerEv, contradicting: strongerEv, strength: sL.s, why: sL.why,
-        keyIndicators: ["Payroll 3-mo trend", "Claims 4-wk avg", "Hours worked", "Revisions"], confirm: "Rising claims, falling hours, narrowing sector breadth, downward revisions.", invalidate: "Claims falling and hires/openings stabilising." },
+        keyIndicators: ["Payroll 3-mo trend", "Claims 4-wk avg", "Hours worked", "Revisions"], confirm: "Rising claims, falling hours, narrowing sector breadth, downward revisions.", invalidate: "Claims falling and hires/openings stabilising.", unknowns: [] },
     ];
+    const unknowns = [
+      ...(consensusNfp == null ? ["The economist consensus for this release has not been published yet."] : []),
+      ...indicators.filter((i) => ["adp", "claims", "hil", "jol"].includes(i.key) && i.status !== "Current").map((i) => `${i.name} is ${i.status.toLowerCase()} — its latest reading is not known.`),
+      "Seasonal adjustment and response rates can move the first print; revisions are common.",
+      "Government payrolls and strikes/weather effects are hard to anticipate from these indicators.",
+    ];
+    scenarios.forEach((s) => (s.unknowns = unknowns));
+    if (H + L === 0 && consensusNfp != null) scenarios.forEach((s) => (s.range = "Not enough verified evidence to support a range."));
     if (H === 0 && L === 0) scenarios.forEach((s) => (s.why = "Evidence is mixed or unavailable."));
 
     /* Consensus panel */
@@ -573,6 +642,7 @@ export const getLaborDashboard = createServerFn({ method: "POST" })
     const picture = overall.text;
 
     return {
+      forecastsNote: "Consensus figures come from the ForexFactory economic calendar (a compilation of economist surveys). Individual economist forecasts, their reasoning, and how the consensus moved over time are not connected to Vesper yet — see linked reporting for those.",
       syncedAt, sourceStatus, freshness, trackingSince, indicators, categories: cats, overall, picture, conflicts,
       nextNfp, board, scenarios, consensusNfp, consensus, revisions, revisionDirection, sectors, review, transmission, upcoming, calendar,
     };
